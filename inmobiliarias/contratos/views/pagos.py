@@ -99,7 +99,7 @@ class VerPagosServiciosView(APIView):
     def get(self, request, arrendatario_id):
         # Obtener los contratos del arrendatario
         contratos = contrato_local_vivienda.objects.filter(
-            userArrendatario_id=arrendatario_id
+            arrendatario_id_original=arrendatario_id
         )
 
         # Si no hay contratos, retornar un mensaje adecuado
