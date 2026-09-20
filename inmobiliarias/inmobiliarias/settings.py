@@ -121,7 +121,7 @@ AUTH_USER_MODEL = 'usuarios.User'
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False  # nunca True junto con CORS_ALLOW_CREDENTIALS
 CORS_ALLOW_CREDENTIALS = True
 
 #MEDIA_URL = '/inmobiliarias/media/'
@@ -136,7 +136,6 @@ CORS_ALLOWED_ORIGINS = [
     "https://d2xzv6q1daxyi1.cloudfront.net",
     "https://qmanda360.com",
     "http://localhost:5173",
-    "http://192.168.1.37:5173"
     
 ]
 
@@ -183,6 +182,7 @@ CSRF_COOKIE_NAME = 'inmobiliarias_csrftoken'
 
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_HSTS_SECONDS = 3600  # subir a 31536000 (1 año) cuando confirmes que todo va bien por HTTPS
 
 
 LOGIN_REDIRECT_URL = 'home'  # Redirige después del inicio de sesión
@@ -201,12 +201,12 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': 'DEBUG',
+        'level': 'WARNING',  # en DEBUG las librerías (boto3, etc.) loguean detalles de más
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True,
         },
         'django.security.csrf': {  # <--- Logger específico para CSRF
