@@ -71,7 +71,8 @@ jobs:
 
   deploy:
     needs: test
-    if: github.event_name != 'pull_request'
+    # Se omite (no falla) mientras AWS_ROLE_ARN no este configurada en GitHub.
+    if: github.event_name != 'pull_request' && vars.AWS_ROLE_ARN != ''
     runs-on: ubuntu-latest
     steps:
       - name: Credenciales de AWS (OIDC)
