@@ -174,7 +174,7 @@ def user_create_view(request):
                             barrioCorrespondencia=barrioCorrespondencia,
                             ciudadCorrespondencia=ciudadCorrespondencia,
                             direccion=direccion,
-                            estadoCivil=estadoCivil, 
+                            estadoCivil=data.get("estadoCivil"),
                             barrio=barrio,
                             ciudad=ciudad,
                             celular=celular,
