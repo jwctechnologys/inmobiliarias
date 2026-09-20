@@ -18,6 +18,11 @@ dist-ssr/
 .env.*
 !.env.example
 
+# Llaves y certificados: nunca al repo
+*.pem
+*.key
+*.ppk
+
 # Archivos subidos por usuarios (los medios viven en S3)
 inmobiliarias/media/
 
