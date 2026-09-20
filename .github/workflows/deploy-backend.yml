@@ -1,0 +1,119 @@
+# Backend (Django) -> EC2, por AWS Systems Manager (sin SSH ni claves guardadas en GitHub).
+#
+# - Pull request a main : corre las pruebas (no despliega).
+# - Push a main         : corre las pruebas y, si pasan, despliega en la EC2.
+#
+# Configuracion unica: ver inmobiliarias/deploy/PRIMER_DESPLIEGUE.md
+# Variables (GitHub > Settings > Secrets and variables > Actions > Variables):
+#   AWS_ROLE_ARN     rol de IAM que GitHub asume por OIDC
+#   AWS_REGION       us-east-2
+#   EC2_INSTANCE_ID  id de la instancia (i-...)
+name: Deploy backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "inmobiliarias/**"
+      - ".github/workflows/deploy-backend.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "inmobiliarias/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # necesario para autenticarse en AWS con OIDC
+
+# Un despliegue a la vez, y nunca se cancela uno a medias.
+concurrency:
+  group: deploy-backend
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: inmobiliarias
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      # Valores solo para las pruebas: no son secretos reales.
+      DJANGO_SECRET_KEY: ci-solo-para-pruebas-no-es-un-secreto-0123456789abcdef
+      DB_NAME: postgres
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: localhost
+      DB_PORT: "5432"
+      ALLOWED_HOSTS: localhost
+      USE_S3: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: inmobiliarias/requirements.txt
+      - run: pip install -r requirements.txt
+      - run: python manage.py check
+      - name: Modelos y migraciones deben coincidir
+        run: python manage.py makemigrations --check --dry-run
+      - run: python manage.py test
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Credenciales de AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Desplegar en la EC2 por SSM
+        env:
+          INSTANCE: ${{ vars.EC2_INSTANCE_ID }}
+        run: |
+          set -euo pipefail
+          # Deja el repo del servidor en ESTE commit (no en "lo ultimo de main") y ejecuta deploy.sh.
+          REMOTE="cd /home/ec2-user/qmanda360/repo_inmobiliarias \
+            && export PREV_COMMIT=\$(git rev-parse HEAD) \
+            && git fetch -q origin main \
+            && git reset -q --hard ${GITHUB_SHA} \
+            && bash inmobiliarias/deploy/deploy.sh"
+          PARAMS=$(jq -n --arg c "sudo -u ec2-user -H bash -c '${REMOTE}'" '{commands: [$c]}')
+
+          CMD_ID=$(aws ssm send-command \
+            --instance-ids "$INSTANCE" \
+            --document-name AWS-RunShellScript \
+            --comment "deploy inmobiliarias ${GITHUB_SHA::7}" \
+            --timeout-seconds 900 \
+            --parameters "$PARAMS" \
+            --query Command.CommandId --output text)
+          echo "Comando SSM: $CMD_ID"
+
+          # Esperar el resultado (maximo ~15 min).
+          STATUS=InProgress
+          for _ in $(seq 1 90); do
+            sleep 10
+            STATUS=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id "$INSTANCE" \
+              --query Status --output text 2>/dev/null || echo Pending)
+            case "$STATUS" in Pending|InProgress|Delayed) continue ;; *) break ;; esac
+          done
+
+          echo "::group::Salida del servidor"
+          aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id "$INSTANCE" \
+            --query '{Estado:Status,Salida:StandardOutputContent,Errores:StandardErrorContent}' --output yaml
+          echo "::endgroup::"
+
+          [ "$STATUS" = "Success" ] || { echo "El despliegue termino con estado: $STATUS"; exit 1; }
