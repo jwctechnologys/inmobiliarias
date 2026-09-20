@@ -83,20 +83,63 @@ WSGI_APPLICATION = "inmobiliarias.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')  # None en EC2 con rol de IAM: boto3 usa el rol
-AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+# ------------------------------------------------------------
+# Archivos subidos (Django 5.1+ usa STORAGES; DEFAULT_FILE_STORAGE ya no existe)
+#
+# Sin claves en el codigo: en EC2 boto3 usa el rol de IAM de la instancia.
+# Dos zonas dentro del mismo bucket:
+#   publico/  fotos y videos de las casas   -> URL directa (la politica del bucket solo abre este prefijo)
+#   privado/  documentos personales         -> URL firmada que se genera en cada respuesta
+# USE_S3=0 guarda todo en disco (desarrollo y pruebas).
+# ------------------------------------------------------------
+USE_S3 = os.getenv('USE_S3', '1') == '1'
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME_INMOBILIARIA', 'inmobiliaria-media')
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'us-east-2')
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-AWS_DEFAULT_ACL = 'public-read'
-AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400',
-}
 
-# Configuración de almacenamiento para medios
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
-AWS_LOCATION = 'inmobiliaria'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+if USE_S3:
+    _S3 = 'storages.backends.s3.S3Storage'
+    _S3_COMUN = {
+        'bucket_name': AWS_STORAGE_BUCKET_NAME,
+        'region_name': AWS_S3_REGION_NAME,
+        # Endpoint regional (bucket.s3.<region>.amazonaws.com): el global redirige o falla en la firma
+        'endpoint_url': f'https://s3.{AWS_S3_REGION_NAME}.amazonaws.com',
+        'addressing_style': 'virtual',
+        'default_acl': None,      # sin ACL por objeto: el acceso lo decide la politica del bucket
+        'file_overwrite': False,   # dos archivos con el mismo nombre no se pisan
+    }
+    STORAGES = {
+        'default': {
+            'BACKEND': _S3,
+            'OPTIONS': {
+                **_S3_COMUN,
+                'location': 'publico',
+                'querystring_auth': False,
+                'custom_domain': f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com',
+                'object_parameters': {'CacheControl': 'max-age=86400'},
+            },
+        },
+        'private_media': {
+            'BACKEND': _S3,
+            'OPTIONS': {
+                **_S3_COMUN,
+                'location': 'privado',
+                'querystring_auth': True,
+                'querystring_expire': 3600,
+            },
+        },
+        'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+    }
+else:
+    _FS = 'django.core.files.storage.FileSystemStorage'
+    STORAGES = {
+        'default': {'BACKEND': _FS},
+        'private_media': {'BACKEND': _FS, 'OPTIONS': {
+            'location': str(MEDIA_ROOT / 'privado'), 'base_url': '/media/privado/'}},
+        'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+    }
 
 
 DATABASES = {
@@ -112,7 +155,6 @@ DATABASES = {
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATIC_URL = '/inmobiliarias/static/'
-MEDIA_ROOT = BASE_DIR  /"media"
 
 AUTH_USER_MODEL = 'usuarios.User'
 # Static files (CSS, JavaScript, Images)

@@ -50,3 +50,37 @@ Al desplegar, **reemplazar** las carpetas de las apps (no copiar encima): `inici
 - `migrate` desde cero sobre una base vacia (SQLite) y `manage.py test`.
 - Comparacion de las rutas de la API antes/despues (95 rutas identicas: ruta, nombre y vista).
 - 130 peticiones (GET y POST vacio) contra el codigo anterior y el nuevo: mismas respuestas.
+
+## Archivos subidos (S3)
+
+Un solo bucket con dos zonas (configuradas en `STORAGES`, en `inmobiliarias/settings.py`):
+
+| Zona | Contenido | Acceso |
+|---|---|---|
+| `publico/` | fotos y videos de las casas (`inmuebles`) | URL directa |
+| `privado/` | cedulas, nominas, certificados, contratos/otrosi en PDF, recibos, novedades | URL firmada, generada en cada respuesta de la API (vale 1 hora) |
+
+Los campos privados usan `storage=private_media_storage` (`inmobiliarias/storage.py`). Los tests
+(`inmobiliarias/tests.py`) fallan si un documento queda en la zona publica o al reves.
+`USE_S3=0` guarda todo en disco. Las credenciales nunca van en el codigo: en EC2 se usa el rol de IAM.
+
+### Configuracion del bucket (una sola vez, en la consola de AWS)
+
+1. **Propiedad de objetos:** "Propietario del bucket aplicado" (ACL desactivadas; es el valor por defecto).
+2. **Bloqueo de acceso publico:** dejar activados *BlockPublicAcls* e *IgnorePublicAcls* y desactivar
+   *BlockPublicPolicy* y *RestrictPublicBuckets* (asi la politica de abajo puede abrir solo `publico/`).
+3. **Politica del bucket** (abre unicamente la zona publica; `privado/` sigue cerrado):
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [{
+       "Sid": "LecturaPublicaFotosYVideos",
+       "Effect": "Allow",
+       "Principal": "*",
+       "Action": "s3:GetObject",
+       "Resource": "arn:aws:s3:::inmobiliaria-media/publico/*"
+     }]
+   }
+   ```
+4. El rol de IAM de la EC2 necesita `s3:ListBucket`, `s3:GetObject`, `s3:PutObject` y `s3:DeleteObject`
+   sobre el bucket (`s3:PutObjectAcl` ya no hace falta).

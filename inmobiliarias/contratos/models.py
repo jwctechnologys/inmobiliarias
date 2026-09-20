@@ -1,5 +1,9 @@
-from django.db import models
 from datetime import date
+
+from django.db import models
+
+from inmobiliarias.storage import private_media_storage
+
 # Create your models here.
 
 
@@ -127,8 +131,8 @@ class contrato_local_vivienda(models.Model):
     # =========================================================
     estaFirmado = models.BooleanField(default=False)
     estaFirmadoArrendatario = models.BooleanField(default=False)
-    pdf_firmado = models.FileField(upload_to='contratos_firmados/', null=True, blank=True)
-    pdf_inventario = models.FileField(upload_to='contratos/inventarios/', null=True, blank=True)
+    pdf_firmado = models.FileField(upload_to='contratos_firmados/', storage=private_media_storage, null=True, blank=True)
+    pdf_inventario = models.FileField(upload_to='contratos/inventarios/', storage=private_media_storage, null=True, blank=True)
     numOtrosi = models.IntegerField(default=0)
     otrosiGenerado = models.BooleanField(default=False)
     fechafinOtrosi = models.DateField(null=True, blank=True)
@@ -183,7 +187,7 @@ class otroSi(models.Model):
     aceptaOtroSiArrendatario=models.BooleanField(default=False) #arrendador
     vistaImpresion=models.BooleanField(default=False) 
     numOtrosi=models.IntegerField(default=0)
-    pdf_firmado = models.FileField(upload_to='otrosi_firmados/', null=True, blank=True)
+    pdf_firmado = models.FileField(upload_to='otrosi_firmados/', storage=private_media_storage, null=True, blank=True)
 
 class FechaPago(models.Model):
     contrato = models.ForeignKey(contrato_local_vivienda, on_delete=models.CASCADE, related_name="fechas_pago")
@@ -217,21 +221,21 @@ class reporteNovedades(models.Model):
 
 class imagenReporteNovedades(models.Model):
     reporteNovedad = models.ForeignKey(reporteNovedades, on_delete=models.CASCADE, related_name="imagenes")
-    imagen = models.ImageField(upload_to="media/")
+    imagen = models.ImageField(upload_to="media/", storage=private_media_storage)
 
 class videoReporteNovedades(models.Model):
     reporteNovedad = models.ForeignKey(reporteNovedades, on_delete=models.CASCADE, related_name="videos")
-    video_archivo = models.FileField(upload_to="media/")
+    video_archivo = models.FileField(upload_to="media/", storage=private_media_storage)
 
 
 class ReportePagoRecibos(models.Model):
     reportePagoReciboContrato = models.ForeignKey(
         contrato_local_vivienda, on_delete=models.CASCADE, related_name="pagos_recibos"
     )
-    imagenReciboLuz = models.ImageField(upload_to="recibos/")
-    imagenReciboAgua = models.ImageField(upload_to="recibos/")
-    imagenReciboGas = models.ImageField(upload_to="recibos/")
-    imagenReciboBioagricola = models.ImageField(upload_to="recibos/")
+    imagenReciboLuz = models.ImageField(upload_to="recibos/", storage=private_media_storage)
+    imagenReciboAgua = models.ImageField(upload_to="recibos/", storage=private_media_storage)
+    imagenReciboGas = models.ImageField(upload_to="recibos/", storage=private_media_storage)
+    imagenReciboBioagricola = models.ImageField(upload_to="recibos/", storage=private_media_storage)
 
 class ReporteInconformidad(models.Model):
     reporteinconformidad = models.ForeignKey(contrato_local_vivienda, on_delete=models.CASCADE)
@@ -243,4 +247,4 @@ class ContratoOtroSi(models.Model):
     Contrato = models.ForeignKey(contrato_local_vivienda, on_delete=models.CASCADE)
     firmaElectronicaArrendador = models.BooleanField(default=False) #arrendador
     firmaElectronicaArrendatario=models.BooleanField(default=False)
-    otroSi_firmado = models.FileField(upload_to='otroSi_firmados/', null=True, blank=True)
+    otroSi_firmado = models.FileField(upload_to='otroSi_firmados/', storage=private_media_storage, null=True, blank=True)

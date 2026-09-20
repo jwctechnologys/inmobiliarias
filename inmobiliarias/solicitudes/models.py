@@ -1,5 +1,6 @@
 from django.db import models
 
+from inmobiliarias.storage import private_media_storage
 from inmuebles.models import arrendar
 from usuarios.models import arrendatario
 
@@ -26,24 +27,24 @@ class Solicitud(models.Model):
     mascotas = models.BooleanField(default = False)
     numMascotas= models.IntegerField(blank=True,null=True)
     tipoMascotas= models.CharField(blank=True,null=True)
-    cedulaArrendatario = models.FileField(upload_to='media/cedulas/', null=True, blank=True)
-    cedulaCodeudor = models.FileField(upload_to='media/cedulas/', null=True, blank=True)
-    cedulasHabitantes = models.FileField(upload_to='media/cedulas/habitantes/', null=True, blank=True)
+    cedulaArrendatario = models.FileField(upload_to='media/cedulas/', storage=private_media_storage, null=True, blank=True)
+    cedulaCodeudor = models.FileField(upload_to='media/cedulas/', storage=private_media_storage, null=True, blank=True)
+    cedulasHabitantes = models.FileField(upload_to='media/cedulas/habitantes/', storage=private_media_storage, null=True, blank=True)
     aceptaTratamientodeDatos = models.BooleanField(default = False)
     # Documentos laborales
-    certificado_laboral_arrendatario = models.FileField(upload_to='media/laborales/', null=True, blank=True)
-    certificado_laboral_codeudor = models.FileField(upload_to='media/laborales/', null=True, blank=True)
+    certificado_laboral_arrendatario = models.FileField(upload_to='media/laborales/', storage=private_media_storage, null=True, blank=True)
+    certificado_laboral_codeudor = models.FileField(upload_to='media/laborales/', storage=private_media_storage, null=True, blank=True)
     
-    desprendible_nomina_arrendatario = models.FileField(upload_to='media/nominas/', null=True, blank=True)
-    desprendible_nomina_codeudor = models.FileField(upload_to='media/nominas/', null=True, blank=True)
+    desprendible_nomina_arrendatario = models.FileField(upload_to='media/nominas/', storage=private_media_storage, null=True, blank=True)
+    desprendible_nomina_codeudor = models.FileField(upload_to='media/nominas/', storage=private_media_storage, null=True, blank=True)
     
     # Documentos financieros
-    declaracion_renta_arrendatario = models.FileField(upload_to='media/renta/', null=True, blank=True)
-    declaracion_renta_codeudor = models.FileField(upload_to='media/renta/', null=True, blank=True)
+    declaracion_renta_arrendatario = models.FileField(upload_to='media/renta/', storage=private_media_storage, null=True, blank=True)
+    declaracion_renta_codeudor = models.FileField(upload_to='media/renta/', storage=private_media_storage, null=True, blank=True)
     
     # Documentos comerciales (para independientes)
-    camara_comercio_arrendatario = models.FileField(upload_to='media/comercio/', null=True, blank=True)
-    camara_comercio_codeudor = models.FileField(upload_to='media/comercio/', null=True, blank=True)
+    camara_comercio_arrendatario = models.FileField(upload_to='media/comercio/', storage=private_media_storage, null=True, blank=True)
+    camara_comercio_codeudor = models.FileField(upload_to='media/comercio/', storage=private_media_storage, null=True, blank=True)
 
     class Meta:
         unique_together = ('casa', 'usuario')  # Prevenir solicitudes duplicadas para la misma casa
