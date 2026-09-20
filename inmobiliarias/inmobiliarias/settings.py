@@ -35,13 +35,14 @@ INSTALLED_APPS = [
 
 ]
 
-EXTERNAL_APPS =[
-    
-    "usuarios",
-    "inicio",
-    "contratos",
-
-    
+EXTERNAL_APPS = [
+    # El orden sigue las dependencias: cada app solo depende de las anteriores.
+    "usuarios",       # User y perfiles de rol (AUTH_USER_MODEL)
+    "arrendatarios",  # ficha del arrendatario: ingresos, coarrendatarios, dependientes, referencias
+    "inmuebles",      # casas para arrendar, fotos y videos
+    "solicitudes",    # solicitudes de arriendo sobre un inmueble
+    "contratos",      # contratos, otrosi, pagos, novedades e inconformidades
+    "calificaciones", # calificaciones de arrendatarios y proveedores
 ]
 
 INSTALLED_APPS += EXTERNAL_APPS

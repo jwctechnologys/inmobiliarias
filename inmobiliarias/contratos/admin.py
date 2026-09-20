@@ -1,6 +1,18 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import *
+
+from .models import (
+    Clausula,
+    FechaPago,
+    ReporteInconformidad,
+    ReportePagoRecibos,
+    contrato_local_vivienda,
+    imagenReporteNovedades,
+    otroSi,
+    reporteNovedades,
+    videoReporteNovedades,
+)
+
 
 # Register your models here.
 @admin.register(contrato_local_vivienda)

@@ -1,7 +1,5 @@
 from django.db import models
-from usuarios.models import *
-from inicio.models import *
-from datetime import date, timedelta
+from datetime import date
 # Create your models here.
 
 
