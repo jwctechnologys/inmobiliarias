@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+a {
+    color: #007bff; /* Color para los enlaces */
+    text-decoration: none; /* Eliminar subrayado */
+  }
+  
+  a:hover {
+    text-decoration: underline; /* Subrayado al pasar el ratón */
+  }
+  nav {
+    padding: 10px;
+  }
+  
+  ul {
+    list-style-type: none; /* Eliminar puntos de lista */
+    padding: 0;
+  }
+  
+  li {
+    margin-bottom: 10px; /* Espacio entre los elementos de la lista */
+  }
+  div {
+    padding: 20px; /* Espaciado alrededor del contenido */
+  }

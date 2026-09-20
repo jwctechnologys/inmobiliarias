@@ -1,0 +1,30 @@
+venv\Scripts\activate
+
+administrador
+inquilino
+propietario
+proveedores
+invitados
+
+calificar proveedores e inquilinos, por parte del propietario
+Portatil william:
+c:\WilliamP\inmobiliario\Scripts\activate
+cd documents/github/inmobiliarias/inmobiliarias
+cd documents/github/inmobiliarias/inmobiliaria-vite
+
+Portatil trabajo:
+C:\pruebas\probar\Scripts\activate
+cd C:\inmobiliarias\inmobiliarias
+
+Pc Camila:
+
+d:\WilliamP\inmobiliario\Scripts\activate
+cd d:WilliamP/inmobiliarias
+
+para saber que hacen los usuarios y en que momento
+pip install django-simple-history
+ agregar a settings 'simple_history',
+ 'simple_history.middleware.HistoryRequestMiddleware',
+
+
+ export PYTHONPATH=/documents/github/inmobiliarias/inmobiliarias:$PYTHONPATH

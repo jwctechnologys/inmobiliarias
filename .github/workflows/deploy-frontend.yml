@@ -1,0 +1,81 @@
+# Frontend (Vite) -> S3 + CloudFront
+#
+# - Pull request a main : solo compila, para verificar que no se rompe nada.
+# - Push a main         : compila y publica en S3.
+#
+# Configuracion unica (GitHub > Settings > Secrets and variables > Actions > Variables):
+#   AWS_ROLE_ARN    ARN del rol de IAM que GitHub puede asumir (OIDC, sin claves)
+#   AWS_REGION      region del bucket, ej. us-east-2
+#   S3_BUCKET       nombre del bucket del frontend
+#   VITE_BASE_URL   URL de la API Django (queda visible en el navegador: sin secretos)
+#   CLOUDFRONT_ID   (opcional) id de la distribucion, para invalidar la cache
+name: Deploy frontend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "inmobiliaria-vite/**"
+      - ".github/workflows/deploy-frontend.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "inmobiliaria-vite/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # necesario para autenticarse en AWS con OIDC
+
+concurrency:
+  group: deploy-frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: inmobiliaria-vite
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: inmobiliaria-vite/package-lock.json
+
+      - run: npm ci
+
+      - run: npm run build
+        env:
+          VITE_BASE_URL: ${{ vars.VITE_BASE_URL }}
+
+      # --- A partir de aqui solo en push a main (no en pull requests) ---
+      - name: Credenciales de AWS (OIDC)
+        if: github.event_name != 'pull_request'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      # Sin --delete a proposito: si el bucket guarda algo mas que el frontend,
+      # un sync con --delete lo borraria. Los archivos viejos con hash son inofensivos.
+      - name: Subir assets (cache larga, llevan hash en el nombre)
+        if: github.event_name != 'pull_request'
+        run: >
+          aws s3 sync dist/ "s3://${{ vars.S3_BUCKET }}"
+          --exclude index.html
+          --cache-control "public,max-age=31536000,immutable"
+
+      - name: Subir index.html (sin cache, para que los cambios se vean al instante)
+        if: github.event_name != 'pull_request'
+        run: >
+          aws s3 cp dist/index.html "s3://${{ vars.S3_BUCKET }}/index.html"
+          --cache-control "no-cache"
+
+      - name: Invalidar cache de CloudFront
+        if: github.event_name != 'pull_request' && vars.CLOUDFRONT_ID != ''
+        run: aws cloudfront create-invalidation --distribution-id "${{ vars.CLOUDFRONT_ID }}" --paths "/*"

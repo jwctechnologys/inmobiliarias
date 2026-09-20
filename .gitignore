@@ -1,0 +1,28 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+staticfiles/
+
+# Base de datos local
+db.sqlite3
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+
+# Secretos: nunca subir. Usa .env.example como plantilla.
+.env
+.env.*
+!.env.example
+
+# Archivos subidos por usuarios (los medios viven en S3)
+inmobiliarias/media/
+
+# Editor / sistema operativo
+.vscode/
+.idea/
+.DS_Store
+*.log

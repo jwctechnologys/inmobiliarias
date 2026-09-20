@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{page}}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="{% static "js/jquery-1.11.1.js" %}"></script>
+    <script src="{% static "js/rango-jquery.js" %}"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav {
+            background-color: #333;
+            text-align: center;
+        }
+
+        ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        li {
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+        a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            display: block;
+            transition: background-color 0.3s;
+        }
+
+        a:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="/">Inicio</a></li>
+            <li><a href="/ventas/">Ventas</a></li>
+            <li><a href="/arriendos/">Arriendos</a></li>
+            <li><a href="/registro/">Registrar casas</a></li>
+            <li><a href="/formatos/">Formatos</a></li>
+            {% if request.user.is_authenticated%}
+                <li><a href="/cerrarSesion/">Cerrar Sesion</a></li>
+                <li><a href="#">{{request.user}}</a></li>
+            {% else %}
+                <li><a href="/inicioSesion/">Iniciar Sesion</a></li>
+                <li><a href="/registrarse/">Registrarse</a></li>
+            {% endif%}
+            
+        </ul>
+    </nav>
+    {% block start%}
+ 
+    {% endblock%}
+</body>
+</html>

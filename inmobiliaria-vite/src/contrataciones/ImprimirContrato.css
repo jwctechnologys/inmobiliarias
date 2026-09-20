@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+body {
+  font-family: Arial, sans-serif;
+  /* Define Arial como fuente */
+  margin: 0;
+  /* Elimina márgenes predeterminados del body */
+}
+
+/* Estilos para la clase .contrato */
+.contrato {
+  margin: 0cm 1cm 0cm;
+  /* Márgenes: 3cm arriba, 2cm izquierda/derecha, 4cm abajo */
+  padding: 0;
+  /* Elimina cualquier padding */
+}
+
+.header {
+  display: flex;
+  /* Habilita flexbox */
+  justify-content: center;
+  /* Centra horizontalmente */
+  align-items: center;
+  /* Centra verticalmente, si es necesario */
+  margin-bottom: 20px;
+  /* Espaciado inferior, ajusta según sea necesario */
+}
+
+main {
+  text-align: justify;
+  /* Justifica el texto dentro del elemento main */
+  line-height: 1.5;
+  /* Opcional: espaciado entre líneas */
+}
+
+h4 {
+  text-align: center;
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+
+
+/* Muestra el título y la firma solo en la primera página */
+.pagina-contrato.pagina-1 .firma,
+.pagina-contrato.pagina-1 h4 {
+  display: block;
+  /* Muestra el elemento solo en la primera página */
+}
+
+.column-container {
+  display: flex;
+  /* Utiliza flexbox para crear columnas */
+  justify-content: space-between;
+  /* Espaciado entre las columnas */
+}
+
+.column {
+  width: 45%;
+  /* Ajusta el ancho de las columnas */
+  padding: 10px;
+  /* Espaciado interno para las columnas */
+  box-sizing: border-box;
+  /* Incluye el padding en el ancho total */
+}
+

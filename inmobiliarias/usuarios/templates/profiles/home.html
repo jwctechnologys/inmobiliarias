@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Página de Inicio</title>
+</head>
+<body>
+    <h1>Bienvenido, {% if user.is_authenticated %}{{ user.username }}{% else %}Invitado{% endif %}!</h1>
+
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Cerrar Sesión</button>
+    </form>
+    {% else %}
+    <a href="{% url 'login' %}">Iniciar Sesión</a>
+    {% endif %}
+</body>
+</html>

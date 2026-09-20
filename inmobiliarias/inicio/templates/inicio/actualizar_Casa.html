@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block start %}
+
+<div class="container mt-5">
+    
+    <form class="col-6 mx-auto card p-3 shadow-lg" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <h2>Actualizar casa</h2>
+        <hr>
+        <div class="mb-3">
+            <label for="exampleInputPassword1" class="form-label">direccion</label>
+            <input name="direccion" value="{{casa.direccion}}" type="text" class="form-control" id="exampleInputPassword1">
+        </div>
+        <div class="mb-3">
+            <label for="exampleInputPassword1" class="form-label">estado</label>
+            <input name="estado" value="{{casa.estado}}" required type="text" class="form-control" id="exampleInputPassword1">
+        </div>
+        <div class="mb-3">
+            <label for="exampleInputPassword1" class="form-label">propietario</label>
+            <input name="propietario" value="{{casa.propietario}}" required type="text"  class="form-control" id="exampleInputPassword1">
+        </div>  
+
+        <div class="mb-3">
+            <label for="exampleInputPassword1" class="form-label">Imagenes</label>
+            <input name="fotoCasa" value="{{casa.direccion}}" type="file" class="form-control" id="exampleInputPassword1">
+          </div>
+        <button type="submit" class="btn btn-success">Actualizar esta casa</button>
+      </form>
+      
+
+
+</div>
+
+{% endblock %}

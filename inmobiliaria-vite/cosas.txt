@@ -1,0 +1,27 @@
+
+
+import './App.css';
+import InicioInmobiliaria from './appprincipal/estudio/InicioInmobiliaria';
+
+import Register from './appprincipal/Register';
+import Edicioncasas from './pagadministracion/Edicioncasas';
+import Listarcasas from './pagadministracion/Listarcasas';
+
+
+export default function App() {
+
+  return (
+    <div className='App'>
+
+
+      <Register />
+      {/*<InicioInmobiliaria />*/}
+      <>
+        {/*<Edicioncasas />*/}
+      </>
+
+      <>     {/*<Listarcasas />*/}</>
+
+    </div>
+  );
+}
