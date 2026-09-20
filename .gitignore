@@ -31,3 +31,6 @@ inmobiliarias/media/
 .idea/
 .DS_Store
 *.log
+
+# Socket de gunicorn (lo crea el servicio dentro de la carpeta del proyecto)
+*.sock
