@@ -30,20 +30,6 @@ rollback() {
 }
 trap rollback ERR
 
-# Responde algo distinto de un error del servidor? (200-499 = Django atendio la peticion)
-health_check() {
-  local host code
-  host="$(grep -E '^ALLOWED_HOSTS=' "$APP/.env" | head -1 | cut -d= -f2- | tr -d '"' | cut -d, -f1)"
-  for _ in 1 2 3 4 5 6 7 8 9 10; do
-    code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 --unix-socket "$SOCKET" \
-            -H "Host: ${host:-localhost}" http://localhost/api/csrf/ || true)"
-    if [[ "$code" =~ ^[234][0-9][0-9]$ ]]; then echo "Respuesta: HTTP $code"; return 0; fi
-    sleep 2
-  done
-  echo "Sin respuesta valida del socket (ultimo codigo: ${code:-ninguno})"
-  return 1
-}
-
 cd "$APP"
 log "Commit a desplegar: $(git -C "$REPO" rev-parse --short HEAD) (anterior: ${PREV_COMMIT:0:7})"
 
@@ -60,6 +46,6 @@ log "Reiniciando $SERVICE"
 sudo systemctl restart "$SERVICE"
 
 log "Comprobacion de salud"
-health_check
+APP="$APP" SOCKET="$SOCKET" bash "$APP/deploy/salud.sh"
 
 log "Despliegue correcto"

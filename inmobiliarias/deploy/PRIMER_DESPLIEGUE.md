@@ -88,11 +88,32 @@ mv ~/qmanda360/inmobiliarias ~/qmanda360/inmobiliarias_old
 ln -s ~/qmanda360/repo_inmobiliarias/inmobiliarias ~/qmanda360/inmobiliarias
 sudo systemctl start inmobiliarias
 ```
-Y en `/etc/systemd/system/inmobiliarias.service` anadir `--timeout 120 \` a las opciones de gunicorn
-(por defecto corta a los 30 s y las subidas de video/PDF pueden tardar mas):
+Actualizar tambien el servicio de systemd con `--timeout 120` (por defecto gunicorn corta a los 30 s y las subidas de
+video/PDF pueden tardar mas). **Reescribir el archivo entero, con el comando de gunicorn en UNA sola linea**: editar a
+mano las barras `\` de continuacion es lo que mas falla (una barra suelta o un espacio detras y gunicorn sale con
+codigo 2):
 ```bash
-sudo systemctl daemon-reload && sudo systemctl restart inmobiliarias
+sudo tee /etc/systemd/system/inmobiliarias.service > /dev/null <<'EOF'
+[Unit]
+Description=Servicio Gunicorn para inmobiliarias
+After=network.target
+
+[Service]
+User=ec2-user
+Group=nginx
+WorkingDirectory=/home/ec2-user/qmanda360/inmobiliarias
+Environment="PATH=/home/ec2-user/qmanda360/venv/bin"
+
+ExecStart=/home/ec2-user/qmanda360/venv/bin/gunicorn --workers 3 --timeout 120 --bind unix:/home/ec2-user/qmanda360/inmobiliarias/inmobiliarias.sock --access-logfile - --error-logfile - --capture-output inmobiliarias.wsgi:application
+
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo systemctl daemon-reload && sudo systemctl reset-failed inmobiliarias; sudo systemctl restart inmobiliarias
 ```
+Comprobar que responde (sirve tambien en cualquier momento): `bash ~/qmanda360/inmobiliarias/deploy/salud.sh`
 
 **Volver atras si algo sale mal** (la carpeta y la base de datos viejas siguen intactas):
 ```bash
@@ -138,6 +159,9 @@ sudo systemctl start inmobiliarias
 `AWS_REGION` (`us-east-2`) y `EC2_INSTANCE_ID` (`i-...`).
 
 ## 5. Despues
+- Revisar la app a mano cuando quieras: `bash ~/qmanda360/inmobiliarias/deploy/salud.sh` (responde OK o FALLA).
+  Atajo: `echo "alias salud='bash ~/qmanda360/inmobiliarias/deploy/salud.sh'" >> ~/.bashrc`; en una sesion nueva
+  basta escribir `salud`.
 - Los pull requests solo corren las pruebas; el despliegue ocurre unicamente al hacer merge a `main`.
 - Cuando la app nueva lleve una semana estable: sacar un snapshot final de la instancia de RDS vieja,
   eliminarla y borrar `~/qmanda360/inmobiliarias_old`.
