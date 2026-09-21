@@ -17,14 +17,23 @@ todo funcione, eliminar la de inmobiliarias (solo tenia datos de prueba).
 En la EC2, instalar el cliente y conectar como usuario administrador de esa instancia:
 ```bash
 sudo dnf install -y postgresql16        # o postgresql15
-psql "host=ENDPOINT_DE_RDS dbname=postgres user=USUARIO_ADMIN sslmode=require"
+curl -o ~/global-bundle.pem https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem   # certificado oficial de RDS
+psql "host=ENDPOINT_DE_RDS port=5432 dbname=postgres user=USUARIO_ADMIN sslmode=verify-full sslrootcert=$HOME/global-bundle.pem"
 ```
-Generar antes una contrasena nueva (`openssl rand -base64 24 | tr -d '/+='`) y usarla abajo:
+Generar una contrasena nueva (larga, solo letras y numeros, que no hayas usado en otro sitio; guardala en un
+gestor de contrasenas porque tambien va en el `.env`):
+```bash
+openssl rand -base64 24 | tr -d '/+='
+```
+Ya dentro de psql, dejar el rol sin contrasena y ponerla con `\password`: la pide sin mostrarla y no queda en texto
+claro en el historial de psql (`~/.psql_history`), como pasaria con `CREATE ROLE ... PASSWORD '...'`.
 ```sql
-CREATE ROLE inmobiliarias_app LOGIN PASSWORD 'CONTRASENA_NUEVA';
+CREATE ROLE inmobiliarias_app LOGIN;
+\password inmobiliarias_app
 GRANT inmobiliarias_app TO USUARIO_ADMIN;            -- RDS lo exige para poder crear la base a su nombre
 CREATE DATABASE inmobiliarias OWNER inmobiliarias_app;
 REVOKE ALL ON DATABASE inmobiliarias FROM PUBLIC;    -- solo su dueno puede entrar
+\l inmobiliarias                                     -- comprobar: el dueno debe ser inmobiliarias_app
 ```
 Cada app queda con su propio usuario y no puede leer la base de la otra.
 
