@@ -80,6 +80,29 @@ jobs:
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
+          retry-max-attempts: 3 # por defecto son 12 reintentos (casi 2 min) aunque el error sea de configuracion
+
+      # Si AWS rechaza el rol, muestra con que identidad se presento GitHub (sin imprimir el token).
+      # Compara "sub" con la condicion de la politica de confianza del rol en IAM.
+      - name: Diagnostico OIDC (solo si falla la autenticacion)
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          import base64, json, os, urllib.request
+          req = urllib.request.Request(
+              os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"] + "&audience=sts.amazonaws.com",
+              headers={"Authorization": "bearer " + os.environ["ACTIONS_ID_TOKEN_REQUEST_TOKEN"]},
+          )
+          token = json.load(urllib.request.urlopen(req))["value"]
+          payload = token.split(".")[1]
+          payload += "=" * (-len(payload) % 4)
+          claims = json.loads(base64.urlsafe_b64decode(payload))
+          claves = ("sub", "aud", "iss", "repository", "repository_owner", "ref", "event_name")
+          print(json.dumps({k: claims.get(k) for k in claves}, indent=2))
+          print("Rol solicitado:", os.environ.get("ROLE_ARN"))
+          PY
+        env:
+          ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
 
       - name: Desplegar en la EC2 por SSM
         env:
