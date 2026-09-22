@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getCsrfToken } from '../../utils/csrf';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_URL } from '../../config';
 
 const CrearContratos = () => {
     const [solicitudesAceptadas, setSolicitudesAceptadas] = useState([]);
@@ -24,7 +25,7 @@ const CrearContratos = () => {
 
     const cargarSolicitudesAceptadas = () => {
         setCargando(true);
-        fetch(`${import.meta.env.VITE_BASE_URL}/api/obtener-aceptadas/`)
+        fetch(`${API_URL}/api/obtener-aceptadas/`)
             .then((response) => response.json())
             .then((data) => {
                 setSolicitudesAceptadas(data);

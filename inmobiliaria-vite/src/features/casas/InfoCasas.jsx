@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from "react-router-dom";
 import { getCsrfToken } from "../../utils/csrf";
+import { API_URL } from '../../config';
 
 const InfoCasas = () => {
     const [casas, setCasas] = useState(null);
@@ -34,7 +35,7 @@ const InfoCasas = () => {
 
         try {
             const response = await fetch(
-                `${import.meta.env.VITE_BASE_URL}/api/solicitudes/verificar/?casa=${casaId}&usuario=${user.id}`
+                `${API_URL}/api/solicitudes/verificar/?casa=${casaId}&usuario=${user.id}`
             );
 
             if (response.ok) {
@@ -62,17 +63,17 @@ const InfoCasas = () => {
             setLoading(true);
             try {
                 // Cargar videos
-                const videosResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/videos/?arrendar=${casaId}`);
+                const videosResponse = await fetch(`${API_URL}/api/videos/?arrendar=${casaId}`);
                 const videosData = await videosResponse.json();
                 setVideos(videosData);
 
                 // Cargar imágenes
-                const imagenesResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/imagenes/?arrendar=${casaId}`);
+                const imagenesResponse = await fetch(`${API_URL}/api/imagenes/?arrendar=${casaId}`);
                 const imagenesData = await imagenesResponse.json();
                 setImagenes(imagenesData);
 
                 // Cargar información de la casa
-                const casaResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/casas/${casaId}`);
+                const casaResponse = await fetch(`${API_URL}/api/casas/${casaId}`);
                 const casaData = await casaResponse.json();
 
                 // Verifica si la casa está disponible
@@ -189,7 +190,7 @@ const InfoCasas = () => {
         try {
             // Verificar nuevamente en el servidor para asegurarnos
             const checkResponse = await fetch(
-                `${import.meta.env.VITE_BASE_URL}/api/solicitudes/verificar/?casa=${casaId}&usuario=${user.id}`,
+                `${API_URL}/api/solicitudes/verificar/?casa=${casaId}&usuario=${user.id}`,
                 {
                     method: 'GET',
                     headers: {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getCsrfToken } from '../../utils/csrf';
 import { useParams, useNavigate } from "react-router-dom";
+import { API_URL } from '../../config';
 
 const ActualizarCasas = () => {
     const navigate = useNavigate();
@@ -76,7 +77,7 @@ const ActualizarCasas = () => {
 
     useEffect(() => {
         if (userRole === 'administrador') {
-            fetch(`${import.meta.env.VITE_BASE_URL}/api/usuarios_por_grupo/propietario/`)
+            fetch(`${API_URL}/api/usuarios_por_grupo/propietario/`)
                 .then((response) => response.json())
                 .then((data) => setPropietarios(data))
                 .catch((error) => console.error('Error al cargar propietarios:', error));
@@ -94,7 +95,7 @@ const ActualizarCasas = () => {
     useEffect(() => {
         const fetchCasa = async () => {
             try {
-                const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/casas/?arrendar=${casaId}`);
+                const response = await fetch(`${API_URL}/api/casas/?arrendar=${casaId}`);
                 const data = await response.json();
                 const casaData = data[0];
                 setCasas(data);
@@ -202,7 +203,7 @@ const ActualizarCasas = () => {
         }
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/casas/${casaId}/`, {
+            const response = await fetch(`${API_URL}/api/casas/${casaId}/`, {
                 method: 'PATCH',
                 headers: { 'X-CSRFToken': csrfToken },
                 body: form,

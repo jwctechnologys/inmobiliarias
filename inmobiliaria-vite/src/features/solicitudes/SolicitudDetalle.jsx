@@ -1,6 +1,7 @@
 // SolicitudDetalle.jsx - Versión con formato original (líneas vacías)
 import React, { useState } from 'react';
 import DocumentViewer from './DocumentViewer';
+import { API_URL } from '../../config';
 
 const SolicitudDetalle = ({ solicitud, casaInfo, onClose }) => {
     const [documentoSeleccionado, setDocumentoSeleccionado] = useState(null);
@@ -86,7 +87,7 @@ const SolicitudDetalle = ({ solicitud, casaInfo, onClose }) => {
         // 3. Si la URL es relativa (empieza con /), agregar el dominio completo
         if (cleanUrl.startsWith('/')) {
             // Usar la URL base de tu backend
-            const baseUrl = 'https://qmanda360.com'; // o usa import.meta.env.VITE_BASE_URL
+            const baseUrl = 'https://qmanda360.com'; // o usa API_URL
             cleanUrl = `${baseUrl}${cleanUrl}`;
         }
 

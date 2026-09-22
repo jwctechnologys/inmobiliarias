@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../../../config';
 
 
 async function Cargarcasas() {
-    const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/arriendo/`);
+    const response = await fetch(`${API_URL}/api/arriendo/`);
     const casas = await response.json();
     return casas;
 }

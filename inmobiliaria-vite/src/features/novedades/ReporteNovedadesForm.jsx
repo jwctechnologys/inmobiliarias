@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getCsrfToken } from '../../utils/csrf';
 import { Link } from "react-router-dom";
+import { API_URL } from '../../config';
 
 function ReporteNovedadesForm() {
   const [formData, setFormData] = useState({
@@ -23,7 +24,7 @@ function ReporteNovedadesForm() {
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user')) || {};  // O donde tengas guardado el id del arrendatario
   
-    fetch(`${import.meta.env.VITE_BASE_URL}/api/contratos-arrendatario/${userData.id}/`)  // Incluir el ID en la URL
+    fetch(`${API_URL}/api/contratos-arrendatario/${userData.id}/`)  // Incluir el ID en la URL
       .then((response) => response.json())
       .then((data) => {
         setContratos(data);
@@ -90,7 +91,7 @@ function ReporteNovedadesForm() {
     console.log('Datos enviados:', formData);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/reportes-novedades/`, {
+      const response = await fetch(`${API_URL}/api/reportes-novedades/`, {
         method: 'POST',
         headers: {
           'X-CSRFToken': csrfToken, // Agregar CSRF si es necesario

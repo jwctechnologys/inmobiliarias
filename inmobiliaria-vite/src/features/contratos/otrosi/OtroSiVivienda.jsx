@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { getCsrfToken } from '../../../utils/csrf';
 import '../ImprimirContrato.css'; // Importar el CSS de impresión
+import { API_URL } from '../../../config';
 
 function OtroSiVivienda() {
   const { id } = useParams(); // Obtener el ID de la URL
@@ -33,7 +34,7 @@ function OtroSiVivienda() {
 
   useEffect(() => {
     const contratoId = Number(id); // Convertir id a número
-    fetch(`${import.meta.env.VITE_BASE_URL}/api/contratos/activos/`)
+    fetch(`${API_URL}/api/contratos/activos/`)
       .then((response) => response.json())
       .then((data) => {
         const filteredContratos = data.filter((contrato) => contrato.id === contratoId);
@@ -42,7 +43,7 @@ function OtroSiVivienda() {
 
       })
       .catch((error) => console.error("Error al cargar contratos:", error));
-    fetch(`${import.meta.env.VITE_BASE_URL}/api/otroSi/`)
+    fetch(`${API_URL}/api/otroSi/`)
       .then((response) => response.json())
       .then((data) => {
         const filteredContratoOtrosi = data.filter(
@@ -96,7 +97,7 @@ const canonmensualOtros=canonMensualOtrosii || contratos[0]?.canonmensual;
       // Actualizar en el backend si hay cambios
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_BASE_URL}/api/otroSi/${idOtrosi}/`, // URL del endpoint
+          `${API_URL}/api/otroSi/${idOtrosi}/`, // URL del endpoint
           {
             method: "PATCH",
             headers: {

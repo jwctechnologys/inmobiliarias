@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getCsrfToken } from '../utils/csrf';
+import { API_URL } from '../config';
 
 const AuthContext = createContext();
 
@@ -53,7 +54,7 @@ export function AuthProvider({ children }) {
       //console.log("TOKEN LOGIN:", csrfToken);
 
       const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/api/login/`,
+        `${API_URL}/api/login/`,
         {
           method: 'POST',
           credentials: 'include',
@@ -116,7 +117,7 @@ export function AuthProvider({ children }) {
       console.log("TOKEN LOGOUT:", csrfToken);
       console.log("LONGITUD:", csrfToken?.length);
       const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/api/logout/`,
+        `${API_URL}/api/logout/`,
         {
           method: 'POST',
           credentials: 'include',

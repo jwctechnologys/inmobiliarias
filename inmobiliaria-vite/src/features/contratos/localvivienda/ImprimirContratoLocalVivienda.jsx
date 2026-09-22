@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getCsrfToken } from '../../../utils/csrf';
 import '../ImprimirContrato.css'; // Importar el CSS de impresión
+import { API_URL } from '../../../config';
 
 function formatearFechaConPalabras(fechaString) {
   const meses = [
@@ -96,7 +97,7 @@ const ImprimirContratoLocalVivienda = () => {
   useEffect(() => {
     const fetchContrato = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/Contrato_Local_viviendaViewSet/${id}/`);
+        const response = await fetch(`${API_URL}/api/Contrato_Local_viviendaViewSet/${id}/`);
         const data = await response.json();
         console.log("la carga", data)
         setContrato(data);
@@ -112,7 +113,7 @@ const ImprimirContratoLocalVivienda = () => {
   // Función para manejar la firma del contrato
   const handleAceptarContrato = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/contratos/${id}/update/`, {
+      const response = await fetch(`${API_URL}/api/contratos/${id}/update/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -133,7 +134,7 @@ const ImprimirContratoLocalVivienda = () => {
 
   const handleAceptarContratoArrendatario = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/contratos/${id}/update/`, {
+      const response = await fetch(`${API_URL}/api/contratos/${id}/update/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -142,7 +143,7 @@ const ImprimirContratoLocalVivienda = () => {
       });
 
       if (response.ok) {
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/casas/${casaId}/`, {
+        const response = await fetch(`${API_URL}/api/casas/${casaId}/`, {
           method: 'PATCH',
           headers: {
             'X-CSRFToken': csrfToken,
@@ -201,7 +202,7 @@ const ImprimirContratoLocalVivienda = () => {
     formDataToSend.append('contratoId', id);  // ID del contrato
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/uploadContrato-pdf/`, {
+      const response = await fetch(`${API_URL}/api/uploadContrato-pdf/`, {
         method: 'POST',
         headers: {
           'X-CSRFToken': csrfToken, // Asegúrate de incluir el token CSRF si es necesario
@@ -319,7 +320,7 @@ const ImprimirContratoLocalVivienda = () => {
     };
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/reporte-inconformidad/`, {
+      const response = await fetch(`${API_URL}/api/reporte-inconformidad/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json', // Indica que el contenido es JSON

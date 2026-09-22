@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getCsrfToken } from '../../utils/csrf';
+import { API_URL } from '../../config';
 
 const ReporteNovedadesHabilitado = () => {
   const [reportes, setReportes] = useState([]);
@@ -41,7 +42,7 @@ const ReporteNovedadesHabilitado = () => {
     // Función para cargar los reportes desde el backend
     const fetchReportes = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/verreportes-novedades/`, {
+        const response = await fetch(`${API_URL}/api/verreportes-novedades/`, {
           method: 'GET',
           credentials: 'include', // Si es necesario para la autenticación
         });
@@ -72,7 +73,7 @@ const ReporteNovedadesHabilitado = () => {
       estaResuelto: estaResuelto, // Solo enviar este campo para actualizar
     };
 
-    fetch(`${import.meta.env.VITE_BASE_URL}/api/enviar_reporte/${reporteId}/`, {
+    fetch(`${API_URL}/api/enviar_reporte/${reporteId}/`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -166,7 +167,7 @@ const ReporteNovedadesHabilitado = () => {
                   <td>
                     {reporte.imagenes && reporte.imagenes.length > 0 ? (
                       <img
-                        src={`${import.meta.env.VITE_BASE_URL}/${reporte.imagenes[0].imagen}`}
+                        src={`${API_URL}/${reporte.imagenes[0].imagen}`}
                         alt="Imagen principal"
                         style={{ width: "100px", height: "100px", cursor: "pointer" }}
                         onClick={() => openModal("image", reporte.imagenes, 0)}
@@ -262,7 +263,7 @@ const ReporteNovedadesHabilitado = () => {
           </button>
           {contentType === "image" && (
             <img
-              src={`${import.meta.env.VITE_BASE_URL}/${modalContent[currentIndex].imagen}`}
+              src={`${API_URL}/${modalContent[currentIndex].imagen}`}
               alt="Imagen ampliada"
               style={{ maxWidth: "90%", maxHeight: "90%" }}
             />
@@ -276,7 +277,7 @@ const ReporteNovedadesHabilitado = () => {
               style={{ backgroundColor: "black" }}
             >
               <source
-                src={`${import.meta.env.VITE_BASE_URL}/${modalContent[currentIndex].video_archivo}`}
+                src={`${API_URL}/${modalContent[currentIndex].video_archivo}`}
                 type="video/mp4"
               />
               Tu navegador no soporta la etiqueta de video.

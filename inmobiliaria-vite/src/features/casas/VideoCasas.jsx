@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getCsrfToken } from "../../utils/csrf";
+import { API_URL } from '../../config';
 
 function VideoCasas() {
   const { casaId } = useParams();
@@ -36,7 +37,7 @@ function VideoCasas() {
     setLoading(true);
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/api/videos/?arrendar=${casaId}`
+        `${API_URL}/api/videos/?arrendar=${casaId}`
       );
       const data = await response.json();
       setVideos(data);
@@ -92,7 +93,7 @@ function VideoCasas() {
     formData.append("descripcion", description);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/videos/`, {
+      const response = await fetch(`${API_URL}/api/videos/`, {
         method: "POST",
         headers: {
           "X-CSRFToken": csrfToken,
@@ -125,7 +126,7 @@ function VideoCasas() {
 
     setDeleteId(id);
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/videos/${id}/`, {
+      const response = await fetch(`${API_URL}/api/videos/${id}/`, {
         method: "DELETE",
         headers: {
           "X-CSRFToken": csrfToken,

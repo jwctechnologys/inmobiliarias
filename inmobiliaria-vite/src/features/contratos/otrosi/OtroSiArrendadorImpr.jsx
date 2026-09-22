@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getCsrfToken } from '../../../utils/csrf';
 import '../ImprimirContrato.css'; // Importar el CSS de impresión
+import { API_URL } from '../../../config';
 
 function calcularDiferenciaMeses(fechaInicio, fechaFin) {
   const inicio = new Date(fechaInicio);
@@ -126,11 +127,11 @@ const OtroSiArrendadorImpr = () => {
     const fetchContrato = async () => {
       const contratoId = Number(id);
       try {
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/Contrato_Local_viviendaViewSet/${id}/`);
+        const response = await fetch(`${API_URL}/api/Contrato_Local_viviendaViewSet/${id}/`);
         const data = await response.json();
         console.log("la carga", data);
         setContrato(data);
-        const responsedos = await fetch(`${import.meta.env.VITE_BASE_URL}/api/otroSi/`);
+        const responsedos = await fetch(`${API_URL}/api/otroSi/`);
         const datados = await responsedos.json();
         const filteredContratoOtrosi = datados.filter(
           (otroSi) =>
@@ -180,7 +181,7 @@ const OtroSiArrendadorImpr = () => {
     formDataToSend.append('contratoId', contratoId);  // ID del contrato
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/uploadContratoOtrosi-pdf/`, {
+      const response = await fetch(`${API_URL}/api/uploadContratoOtrosi-pdf/`, {
         method: 'POST',
         headers: {
           'X-CSRFToken': csrfToken, // Asegúrate de incluir el token CSRF si es necesario

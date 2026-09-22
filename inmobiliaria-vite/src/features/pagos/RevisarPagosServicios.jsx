@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { API_URL } from '../../config';
 
 const RevisarPagosServicios = () => {
   const [arrendatarios, setArrendatarios] = useState([]);
@@ -8,7 +9,7 @@ const RevisarPagosServicios = () => {
 
   // Cargar los arrendatarios desde el backend
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_BASE_URL}/api/arrendatarios/`, {
+    fetch(`${API_URL}/api/arrendatarios/`, {
       method: "GET",
     })
       .then((response) => {
@@ -32,7 +33,7 @@ const RevisarPagosServicios = () => {
     console.log("Arrendatario seleccionado:", arrendatarioId);
     setLoading(true);
 
-    fetch(`${import.meta.env.VITE_BASE_URL}/api/ver-pagos-servicios/${arrendatarioId}/`, {
+    fetch(`${API_URL}/api/ver-pagos-servicios/${arrendatarioId}/`, {
       method: "GET",
     })
       .then((response) => {
@@ -116,21 +117,21 @@ const RevisarPagosServicios = () => {
                   <td>{pago.reportePagoReciboContrato}</td>
                   <td>
                     <img
-                      src={`${import.meta.env.VITE_BASE_URL}/${pago.imagenReciboLuz}`}
+                      src={`${API_URL}/${pago.imagenReciboLuz}`}
                       alt="Imagen principal"
                       style={{ width: '100px', height: '100px' }}
                     />
                   </td>
                   <td>
                     <img
-                      src={`${import.meta.env.VITE_BASE_URL}/${pago.imagenReciboAgua}`}
+                      src={`${API_URL}/${pago.imagenReciboAgua}`}
                       alt="Imagen principal"
                       style={{ width: '100px', height: '100px' }}
                     />
                   </td>
                   <td>
                     <img
-                      src={`${import.meta.env.VITE_BASE_URL}/${pago.imagenReciboGas}`}
+                      src={`${API_URL}/${pago.imagenReciboGas}`}
                       alt="Imagen principal"
                       style={{ width: '100px', height: '100px' }}
                     />
@@ -138,7 +139,7 @@ const RevisarPagosServicios = () => {
                   </td>
                   <td>
                     <img
-                      src={`${import.meta.env.VITE_BASE_URL}/${pago.imagenReciboBioagricola}`}
+                      src={`${API_URL}/${pago.imagenReciboBioagricola}`}
                       alt="Imagen principal"
                       style={{ width: '100px', height: '100px' }}
                     />

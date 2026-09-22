@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getCsrfToken } from "../../utils/csrf";
 import { useParams, useNavigate } from "react-router-dom";
+import { API_URL } from '../../config';
 
 function ImagenesCasas() {
   const { casaId } = useParams();
@@ -35,7 +36,7 @@ function ImagenesCasas() {
     setLoading(true);
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/api/imagenes/?arrendar=${casaId}`
+        `${API_URL}/api/imagenes/?arrendar=${casaId}`
       );
       const data = await response.json();
       setImagenes(data);
@@ -86,7 +87,7 @@ function ImagenesCasas() {
     formData.append("descripcion", description);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/imagenes/`, {
+      const response = await fetch(`${API_URL}/api/imagenes/`, {
         method: "POST",
         headers: {
           "X-CSRFToken": csrfToken,
@@ -119,7 +120,7 @@ function ImagenesCasas() {
 
     setDeleteId(id);
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/imagenes/${id}/`, {
+      const response = await fetch(`${API_URL}/api/imagenes/${id}/`, {
         method: "DELETE",
         headers: {
           "X-CSRFToken": csrfToken,

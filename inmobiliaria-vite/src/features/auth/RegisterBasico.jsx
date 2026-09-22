@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { getCsrfToken } from '../../utils/csrf';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_URL } from '../../config';
 
 const RegisterBasico = () => {
     const [username, setUsername] = useState('');
@@ -188,7 +189,7 @@ const RegisterBasico = () => {
         console.log('Datos enviados al servidor:', payload);
         
         try {
-            const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/create/`, {
+            const response = await fetch(`${API_URL}/api/create/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getCsrfToken } from "../../utils/csrf";
 import SolicitudDetalle from './SolicitudDetalle';
+import { API_URL } from '../../config';
 
 function VerSolicitudes() {
     const { user } = useAuth();
@@ -46,7 +47,7 @@ function VerSolicitudes() {
             console.log(`Obteniendo detalles de solicitud ID: ${solicitudId}`);
 
             const response = await fetch(
-                `${import.meta.env.VITE_BASE_URL}/api/solicitud-publica/${solicitudId}/`,
+                `${API_URL}/api/solicitud-publica/${solicitudId}/`,
                 {
                     credentials: 'include',
                     headers: {
@@ -270,7 +271,7 @@ function VerSolicitudes() {
             let data;
 
             if (role === 'arrendatario') {
-                url = `${import.meta.env.VITE_BASE_URL}/api/mis-solicitudes/?usuario_id=${userData?.id}`;
+                url = `${API_URL}/api/mis-solicitudes/?usuario_id=${userData?.id}`;
                 if (estadoFiltro) {
                     url += `&estado=${estadoFiltro}`;
                 }
@@ -294,7 +295,7 @@ function VerSolicitudes() {
                 });
             }
             else if (role === 'administrador' || role === 'propietario') {
-                url = `${import.meta.env.VITE_BASE_URL}/api/solicitudes/`;
+                url = `${API_URL}/api/solicitudes/`;
                 const params = new URLSearchParams();
                 if (estadoFiltro) {
                     params.append('estado', estadoFiltro);
@@ -377,7 +378,7 @@ function VerSolicitudes() {
             }
 
             const response = await fetch(
-                `${import.meta.env.VITE_BASE_URL}/api/solicitudes/${selectedSolicitud.id}/cambiar_estado/`,
+                `${API_URL}/api/solicitudes/${selectedSolicitud.id}/cambiar_estado/`,
                 {
                     method: 'PUT',
                     credentials: 'include',
@@ -424,7 +425,7 @@ function VerSolicitudes() {
             }
 
             const response = await fetch(
-                `${import.meta.env.VITE_BASE_URL}/api/solicitudes/${solicitudToCancel.id}/cambiar_estado/`,
+                `${API_URL}/api/solicitudes/${solicitudToCancel.id}/cambiar_estado/`,
                 {
                     method: 'PUT',
                     credentials: 'include',

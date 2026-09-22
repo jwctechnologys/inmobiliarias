@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getCsrfToken } from '../../../utils/csrf';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { API_URL } from '../../../config';
       
 const EditarContratoLocalVivienda = () => {
 const { id } = useParams();
@@ -43,7 +44,7 @@ const [formData, setFormData] = useState({
   // Puedes usar 'id' para cargar los datos del contrato
   useEffect(() => {
     // Llamada a la API para obtener los detalles del contrato
-    fetch(`${import.meta.env.VITE_BASE_URL}/api/Contrato_Local_viviendaViewSet/${id}/`)
+    fetch(`${API_URL}/api/Contrato_Local_viviendaViewSet/${id}/`)
       .then((response) => response.json())
       .then((data) => {
         console.log('Datos que llegan:', data);
@@ -90,7 +91,7 @@ const [formData, setFormData] = useState({
   };
   useEffect(() => {
     // Cargar administradores
-    fetch(`${import.meta.env.VITE_BASE_URL}/api/usuarios_por_grupo/administrador/`)
+    fetch(`${API_URL}/api/usuarios_por_grupo/administrador/`)
       .then((response) => response.json())
       .then((data) => {
         //console.log('Datos de ADMINISTRADORES:', data);
@@ -99,7 +100,7 @@ const [formData, setFormData] = useState({
       .catch((error) => console.error('Error al cargar administradores:', error));
 
     // Cargar arrendatarios
-    fetch(`${import.meta.env.VITE_BASE_URL}/api/usuarios_por_grupo/arrendatario/`)
+    fetch(`${API_URL}/api/usuarios_por_grupo/arrendatario/`)
       .then((response) => response.json())
       .then((data) => {
           //console.log('Datos de arrendatarios:', data); // Agrega esto
@@ -108,7 +109,7 @@ const [formData, setFormData] = useState({
       .catch((error) => console.error('Error al cargar arrendatarios:', error));
 
       // Cargar inmuebles
-    fetch(`${import.meta.env.VITE_BASE_URL}/api/inmuebles/`)
+    fetch(`${API_URL}/api/inmuebles/`)
       .then((response) => response.json())
       .then((data) => {
         //console.log('Datos de inmueble:', data);
@@ -142,7 +143,7 @@ const handleUserArrendatarioChange = (id) => {
   }));
 
   // Cargar coarrendatarios relacionados
-  fetch(`${import.meta.env.VITE_BASE_URL}/api/coarrendatario/?arrendatario_id=${id}`)
+  fetch(`${API_URL}/api/coarrendatario/?arrendatario_id=${id}`)
       .then((response) => response.json())
       .then((data) => {
           //console.log('Coarrendatarios relacionados:', data);
@@ -438,7 +439,7 @@ const handleActualizarContrato = async () => {
   console.log('Datos enviados:', dataToSubmit);
 
   try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/contratos/${id}/update/`, {
+      const response = await fetch(`${API_URL}/api/contratos/${id}/update/`, {
           method: 'PATCH',
           headers: {
               'Content-Type': 'application/json',
@@ -474,7 +475,7 @@ const uploadPDF = async (contratoId) => {
   formDataToSend.append('contratoId', contratoId);  // ID del contrato
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/upload-pdf/`, {
+    const response = await fetch(`${API_URL}/api/upload-pdf/`, {
       method: 'POST',
       headers: {
         'X-CSRFToken': csrfToken, // Asegúrate de incluir el token CSRF si es necesario

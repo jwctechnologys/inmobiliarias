@@ -1,6 +1,7 @@
 // Home.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_URL } from '../../config';
 
 function Home() {
   const [casas, setCasas] = useState([]);
@@ -9,7 +10,7 @@ function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_BASE_URL}/api/casas/`)
+    fetch(`${API_URL}/api/casas/`)
       .then((response) => {
         if (!response.ok) {
           throw new Error('Error al cargar las propiedades');

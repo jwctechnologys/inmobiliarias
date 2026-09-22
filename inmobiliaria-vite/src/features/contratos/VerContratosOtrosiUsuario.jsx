@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getCsrfToken } from '../../utils/csrf'; // Ajusta la ruta según tu estructura
+import { API_URL } from '../../config';
 
 const VerContratosOtrosiUsuario = () => {
   const [contratosOtrosi, setContratosOtrosi] = useState([]);
@@ -27,7 +28,7 @@ const VerContratosOtrosiUsuario = () => {
         const csrfToken = await getCsrfToken();
         
         const response = await fetch(
-          `${import.meta.env.VITE_BASE_URL}/api/contra_arrendatarios_otrosi_firmado/${user.id}/`,
+          `${API_URL}/api/contra_arrendatarios_otrosi_firmado/${user.id}/`,
           {
             method: 'GET',
             credentials: 'include', // Importante para enviar cookies

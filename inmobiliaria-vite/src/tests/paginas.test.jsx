@@ -1,8 +1,18 @@
+import { Component } from 'react';
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, render } from '@testing-library/react';
+import { cleanup, render, waitFor } from '@testing-library/react';
 import { writeFileSync } from 'node:fs';
 import App from '../App';
 import { RUTAS } from './rutas';
+
+// Atrapa los errores de render de la pantalla (tambien los de pantallas de carga diferida, que ocurren
+// cuando termina de descargarse) para poder informar cual fue.
+class Limite extends Component {
+  state = { error: null };
+  static getDerivedStateFromError(error) { return { error }; }
+  componentDidCatch(error) { this.props.alCapturar(error); }
+  render() { return this.state.error ? <div data-error-de-pantalla /> : this.props.children; }
+}
 
 // Comprueba que CADA pantalla se puede montar (imports, hooks y JSX correctos) con una sesion de
 // administrador y un servidor simulado. No prueba la logica de negocio: sirve para detectar que un
@@ -91,11 +101,13 @@ const ERROR_DE_DATOS = /Cannot read properties of undefined/;
 describe('todas las pantallas se pueden montar', () => {
   it.each(RUTAS)('%s', async (ruta) => {
     window.history.pushState({}, '', ruta);
+    let capturado = null;
     try {
-      const { container } = render(<App />);
-      await act(async () => {
-        await new Promise((resolver) => setTimeout(resolver, 30)); // deja terminar efectos y carga diferida
-      });
+      const { container } = render(<Limite alCapturar={(e) => { capturado = e; }}><App /></Limite>);
+      // Espera a que la pantalla termine de descargarse (carga diferida) y a que se asienten sus efectos.
+      await waitFor(() => expect(container.querySelector('[data-cargando-pagina]')).toBeNull(), { timeout: 20000 });
+      await new Promise((resolver) => setTimeout(resolver, 30));
+      if (capturado) throw capturado;
       expect(container.innerHTML.length).toBeGreaterThan(0);
       resultados[ruta] = `ok -> ${window.location.pathname}`;
     } catch (error) {

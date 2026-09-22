@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { getCsrfToken } from '../../utils/csrf';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_URL } from '../../config';
 
 const RegisterCoarrendatario = () => {
     const [arrendatarios, setArrendatarios] = useState([]);
@@ -74,7 +75,7 @@ const RegisterCoarrendatario = () => {
 
     useEffect(() => {
         if (userRole === 'administrador') {
-            fetch(`${import.meta.env.VITE_BASE_URL}/api/arrendatarios/`)
+            fetch(`${API_URL}/api/arrendatarios/`)
                 .then((response) => response.json())
                 .then((data) => setArrendatarios(data))
                 .catch((error) => console.error('Error al cargar arrendatarios:', error));
@@ -121,7 +122,7 @@ const RegisterCoarrendatario = () => {
         console.log("JSON enviado:", requestBody);
         
         try {
-            const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/coarrendatarios/create/`, {
+            const response = await fetch(`${API_URL}/api/coarrendatarios/create/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

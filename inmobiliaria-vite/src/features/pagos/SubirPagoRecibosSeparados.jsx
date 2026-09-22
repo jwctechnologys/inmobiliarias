@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getCsrfToken } from '../../utils/csrf';
+import { API_URL } from '../../config';
 
 const SubirPagoRecibosSeparados = () => {
   const [contratos, setContratos] = useState([]);
@@ -11,7 +12,7 @@ const SubirPagoRecibosSeparados = () => {
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user')) || {};
 
-    fetch(`${import.meta.env.VITE_BASE_URL}/api/contratos-arrendatario/${userData.id}/`)
+    fetch(`${API_URL}/api/contratos-arrendatario/${userData.id}/`)
       .then((response) => response.json())
       .then((data) => setContratos(data))
       .catch((error) => console.error('Error al cargar contratos:', error));
@@ -33,7 +34,7 @@ const SubirPagoRecibosSeparados = () => {
     try {
       const csrfToken = await getCsrfToken();
 
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/reporte-pago-recibos/`, {
+      const response = await fetch(`${API_URL}/api/reporte-pago-recibos/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,

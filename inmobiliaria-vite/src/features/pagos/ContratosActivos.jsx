@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getCsrfToken } from '../../utils/csrf';
 import { useNavigate } from "react-router-dom";
+import { API_URL } from '../../config';
 
 function ContratosActivos() {
     const [contratos, setContratos] = useState([]);
@@ -30,7 +31,7 @@ function ContratosActivos() {
 
 
     useEffect(() => {
-        fetch(`${import.meta.env.VITE_BASE_URL}/api/contratos/activos/`)
+        fetch(`${API_URL}/api/contratos/activos/`)
             .then((response) => response.json())
             .then((data) => {
                 setContratos(data);
@@ -38,7 +39,7 @@ function ContratosActivos() {
 
             })
             .catch((error) => console.error("Error al cargar contratos:", error));
-        fetch(`${import.meta.env.VITE_BASE_URL}/api/otroSi/`)
+        fetch(`${API_URL}/api/otroSi/`)
             .then((response) => response.json())
             .then((data) => {
                 const filteredContratoOtrosi = data.filter(
@@ -62,7 +63,7 @@ function ContratosActivos() {
         fechaFin.setMonth(fechaFin.getMonth() + 6); // +6 meses
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/otroSi/`, {
+            const response = await fetch(`${API_URL}/api/otroSi/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -78,7 +79,7 @@ function ContratosActivos() {
 
             if (response.ok) {
                 try {
-                    const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/contratos/${contratoId}/update/`, {
+                    const response = await fetch(`${API_URL}/api/contratos/${contratoId}/update/`, {
                         method: 'PATCH',
                         headers: {
                             'Content-Type': 'application/json',
@@ -118,7 +119,7 @@ function ContratosActivos() {
 
         try {
             const response = await fetch(
-                `${import.meta.env.VITE_BASE_URL}/api/contratos/${id}/fecha-pago/`,
+                `${API_URL}/api/contratos/${id}/fecha-pago/`,
                 {
                     method: "POST",
                     headers: {
@@ -152,7 +153,7 @@ function ContratosActivos() {
     };
     const eliminarContrato = async (id) => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/contratos/${id}/update/`, {
+            const response = await fetch(`${API_URL}/api/contratos/${id}/update/`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

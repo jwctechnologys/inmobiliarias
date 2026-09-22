@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getCsrfToken } from '../../utils/csrf';
+import { API_URL } from '../../config';
 
 const RevisarContratos = () => {
     const [contratos, setContratos] = useState([]);
@@ -39,7 +40,7 @@ const RevisarContratos = () => {
 
                 // 1. Cargar contratos con inconformidades
                 const responseInconformes = await fetch(
-                    `${import.meta.env.VITE_BASE_URL}/api/contratos-inconformes/`,
+                    `${API_URL}/api/contratos-inconformes/`,
                     options
                 );
                 
@@ -54,7 +55,7 @@ const RevisarContratos = () => {
 
                 // 2. Cargar todos los contratos activos
                 const responseActivos = await fetch(
-                    `${import.meta.env.VITE_BASE_URL}/api/contratos/activos/`,
+                    `${API_URL}/api/contratos/activos/`,
                     options
                 );
                 
@@ -127,7 +128,7 @@ const RevisarContratos = () => {
 
         try {
             const response = await fetch(
-                `${import.meta.env.VITE_BASE_URL}/api/reporte-inconformidad/${inconformidadId}/`,
+                `${API_URL}/api/reporte-inconformidad/${inconformidadId}/`,
                 {
                     method: 'PATCH',
                     headers: {

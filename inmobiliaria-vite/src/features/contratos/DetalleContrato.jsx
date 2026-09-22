@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_URL } from '../../config';
 
 function DetalleContrato() {
   const { id } = useParams();
@@ -10,7 +11,7 @@ function DetalleContrato() {
 
   useEffect(() => {
     // Cargar el detalle del contrato
-    fetch(`${import.meta.env.VITE_BASE_URL}/api/contratos/${id}/`)
+    fetch(`${API_URL}/api/contratos/${id}/`)
       .then((response) => response.json())
       .then((data) => {
         setDetalle(data);
@@ -24,7 +25,7 @@ function DetalleContrato() {
     if (detalle && detalle.arrendatarioId) {
       const arrId = Number(detalle.arrendatarioId);
   
-      fetch(`${import.meta.env.VITE_BASE_URL}/api/contra_arrendatarios_otrosi_firmado/${arrId}`)
+      fetch(`${API_URL}/api/contra_arrendatarios_otrosi_firmado/${arrId}`)
         .then((response) => {
           if (!response.ok) {
             // Manejar errores de respuesta no exitosa

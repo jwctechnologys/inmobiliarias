@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getCsrfToken } from '../../utils/csrf';
+import { API_URL } from '../../config';
 
 const ReporteNovedadesArrendatario = () => {
   const [reportes, setReportes] = useState([]);
@@ -50,8 +51,8 @@ const ReporteNovedadesArrendatario = () => {
 
         // Construir la URL con el parámetro arrendatario_id
         const url = arrendatarioId
-          ? `${import.meta.env.VITE_BASE_URL}/api/verreportes-novedades/?arrendatario_id=${arrendatarioId}`
-          : `${import.meta.env.VITE_BASE_URL}/api/verreportes-novedades/`;
+          ? `${API_URL}/api/verreportes-novedades/?arrendatario_id=${arrendatarioId}`
+          : `${API_URL}/api/verreportes-novedades/`;
 
         const response = await fetch(url, {
           method: 'GET',
@@ -85,7 +86,7 @@ const ReporteNovedadesArrendatario = () => {
       estaResueltoArrendatario: estaResueltoArrendatario, // Solo enviar este campo para actualizar
     };
   
-    fetch(`${import.meta.env.VITE_BASE_URL}/api/enviar_reporte/${reporteId}/`, {
+    fetch(`${API_URL}/api/enviar_reporte/${reporteId}/`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -178,7 +179,7 @@ const ReporteNovedadesArrendatario = () => {
                 <td>
                   {reporte.imagenes && reporte.imagenes.length > 0 ? (
                     <img
-                      src={`${import.meta.env.VITE_BASE_URL}/${reporte.imagenes[0].imagen}`}
+                      src={`${API_URL}/${reporte.imagenes[0].imagen}`}
                       alt="Imagen principal"
                       style={{ width: "100px", height: "100px", cursor: "pointer" }}
                       onClick={() => openModal("image", reporte.imagenes, 0)}
@@ -274,7 +275,7 @@ const ReporteNovedadesArrendatario = () => {
           </button>
           {contentType === "image" && (
             <img
-              src={`${import.meta.env.VITE_BASE_URL}/${modalContent[currentIndex].imagen}`}
+              src={`${API_URL}/${modalContent[currentIndex].imagen}`}
               alt="Imagen ampliada"
               style={{ maxWidth: "90%", maxHeight: "90%" }}
             />
@@ -288,7 +289,7 @@ const ReporteNovedadesArrendatario = () => {
               style={{ backgroundColor: "black" }}
             >
               <source
-                src={`${import.meta.env.VITE_BASE_URL}/${modalContent[currentIndex].video_archivo}`}
+                src={`${API_URL}/${modalContent[currentIndex].video_archivo}`}
                 type="video/mp4"
               />
               Tu navegador no soporta la etiqueta de video.

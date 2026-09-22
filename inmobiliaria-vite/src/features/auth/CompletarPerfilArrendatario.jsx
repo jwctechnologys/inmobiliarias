@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { getCsrfToken } from '../../utils/csrf';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../../config';
 
 const CompletarPerfilArrendatario = () => {
     const navigate = useNavigate();
@@ -130,7 +131,7 @@ const CompletarPerfilArrendatario = () => {
         console.log('Payload completo:', payload);
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/completar-perfil/`, {
+            const response = await fetch(`${API_URL}/api/completar-perfil/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

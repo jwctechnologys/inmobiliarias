@@ -15,6 +15,7 @@ import ReferenciasSection from './components/ReferenciasSection';
 import DocumentosSection from './components/DocumentosSection';
 import AutorizacionSection from './components/AutorizacionSection';
 import VistaPrevia from './components/VistaPrevia';
+import { API_URL } from '../../config';
 
 const FormularioSolicitud = () => {
     const navigate = useNavigate();
@@ -144,7 +145,7 @@ const FormularioSolicitud = () => {
             const cleanData = { ...data };
             delete cleanData.id;
 
-            const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/coarrendatarios/${id}/`, {
+            const response = await fetch(`${API_URL}/api/coarrendatarios/${id}/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -197,7 +198,7 @@ const FormularioSolicitud = () => {
             setGuardandoElemento(true);
             const user = JSON.parse(localStorage.getItem('user'));
 
-            const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/dependiente/${id}/`, {
+            const response = await fetch(`${API_URL}/api/dependiente/${id}/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -241,7 +242,7 @@ const FormularioSolicitud = () => {
             setGuardandoElemento(true);
             const user = JSON.parse(localStorage.getItem('user'));
 
-            const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/referencias/${id}/`, {
+            const response = await fetch(`${API_URL}/api/referencias/${id}/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -285,7 +286,7 @@ const FormularioSolicitud = () => {
             setGuardandoElemento(true);
             const user = JSON.parse(localStorage.getItem('user'));
 
-            const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/declaraciones-ingresos/${id}/`, {
+            const response = await fetch(`${API_URL}/api/declaraciones-ingresos/${id}/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -332,14 +333,14 @@ const FormularioSolicitud = () => {
                 const token = await getCsrfToken();
                 setCsrfToken(token);
 
-                const casaResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/casas/${casaId}`);
+                const casaResponse = await fetch(`${API_URL}/api/casas/${casaId}`);
                 const casaData = await casaResponse.json();
                 setCasaInfo(casaData);
 
                 const user = JSON.parse(localStorage.getItem('user'));
                 //console.log("user", user);
                 if (user && user.id) {
-                    const perfilResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/usuarios_por_grupo/arrendatario/${user.id}/`, {
+                    const perfilResponse = await fetch(`${API_URL}/api/usuarios_por_grupo/arrendatario/${user.id}/`, {
                         headers: {
                             'Authorization': `Bearer ${user.token}`,
                         },
@@ -376,16 +377,16 @@ const FormularioSolicitud = () => {
     const cargarDatosExistentes = async (arrendatarioId, token) => {
         try {
             const [coarrendatariosRes, dependientesRes, referenciasRes, declaracionesRes] = await Promise.all([
-                fetch(`${import.meta.env.VITE_BASE_URL}/api/coarrendatario/?arrendatario_id=${arrendatarioId}`, {
+                fetch(`${API_URL}/api/coarrendatario/?arrendatario_id=${arrendatarioId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }),
-                fetch(`${import.meta.env.VITE_BASE_URL}/api/dependientes/?arrendatarioID=${arrendatarioId}`, {
+                fetch(`${API_URL}/api/dependientes/?arrendatarioID=${arrendatarioId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }),
-                fetch(`${import.meta.env.VITE_BASE_URL}/api/referencias/?arrendatarioID=${arrendatarioId}`, {
+                fetch(`${API_URL}/api/referencias/?arrendatarioID=${arrendatarioId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }),
-                fetch(`${import.meta.env.VITE_BASE_URL}/api/declaraciones-ingresos/?arrendatario_id=${arrendatarioId}`, {
+                fetch(`${API_URL}/api/declaraciones-ingresos/?arrendatario_id=${arrendatarioId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
             ]);
@@ -823,7 +824,7 @@ const FormularioSolicitud = () => {
 
                     //console.log('userId a usar (user_id del User):', userId);
 
-                    const updateResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/user_profile_update/`, {
+                    const updateResponse = await fetch(`${API_URL}/api/user_profile_update/`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
@@ -903,7 +904,7 @@ const FormularioSolicitud = () => {
                     // Actualizar declaración
                     try {
                         const updateDeclResponse = await fetch(
-                            `${import.meta.env.VITE_BASE_URL}/api/declaraciones-ingresos/${declaracionIngresosId}/`,
+                            `${API_URL}/api/declaraciones-ingresos/${declaracionIngresosId}/`,
                             {
                                 method: 'PUT',
                                 headers: {
@@ -958,7 +959,7 @@ const FormularioSolicitud = () => {
                         parentezco: formData.coarrendatario.parentezco || 'otro'
                     };
 
-                    const coarrendatarioResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/coarrendatarios/create/`, {
+                    const coarrendatarioResponse = await fetch(`${API_URL}/api/coarrendatarios/create/`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1001,7 +1002,7 @@ const FormularioSolicitud = () => {
                             arrendatario: perfilArrendatario.id
                         };
 
-                        const dependienteResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/dependientes/create/`, {
+                        const dependienteResponse = await fetch(`${API_URL}/api/dependientes/create/`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -1041,7 +1042,7 @@ const FormularioSolicitud = () => {
                             arrendatario: perfilArrendatario.id
                         };
 
-                        const referenciaResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/referencias/create/`, {
+                        const referenciaResponse = await fetch(`${API_URL}/api/referencias/create/`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -1144,7 +1145,7 @@ const FormularioSolicitud = () => {
             }
 
             // ==================== ENVIAR SOLICITUD ====================
-            const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/solicitud-completa/`, {
+            const response = await fetch(`${API_URL}/api/solicitud-completa/`, {
                 method: 'POST',
                 body: formDataToSend,
                 headers: {
@@ -1333,7 +1334,7 @@ const FormularioSolicitud = () => {
                                 // Obtener CSRF token
                                 let csrfToken = '';
                                 try {
-                                    const csrfResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/csrf/`, {
+                                    const csrfResponse = await fetch(`${API_URL}/api/csrf/`, {
                                         credentials: 'include'
                                     });
                                     const csrfData = await csrfResponse.json();
@@ -1352,7 +1353,7 @@ const FormularioSolicitud = () => {
                                 //console.log('💾 Enviando payload:', payload);
 
                                 try {
-                                    const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/user_profile_update/`, {
+                                    const response = await fetch(`${API_URL}/api/user_profile_update/`, {
                                         method: 'PUT',
                                         headers: {
                                             'Content-Type': 'application/json',

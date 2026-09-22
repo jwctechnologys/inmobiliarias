@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import { API_URL } from '../../config';
 
 const RegistrarCasa = () => {
     const [casas, setCasas] = useState([]);
@@ -13,7 +14,7 @@ const RegistrarCasa = () => {
         if (user) {
             // Si el usuario es un administrador
             if (user.groups && user.groups[0] === 'administrador') {
-                fetch(`${import.meta.env.VITE_BASE_URL}/api/casas/`)
+                fetch(`${API_URL}/api/casas/`)
                     .then((response) => response.json())
                     .then((data) => {
                         setCasas(data);
@@ -23,7 +24,7 @@ const RegistrarCasa = () => {
             }
             // Si el usuario es un propietario
             else if (user.groups && user.groups[0] === 'propietario') {
-                fetch(`${import.meta.env.VITE_BASE_URL}/api/casas/`)
+                fetch(`${API_URL}/api/casas/`)
                     .then((response) => response.json())
                     .then((data) => {
                         // Filtrar las casas que pertenecen al propietario

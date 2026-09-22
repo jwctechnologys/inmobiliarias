@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getCsrfToken } from '../../utils/csrf'; // Ajusta la ruta
+import { API_URL } from '../../config';
 
 const VerContratosUsuario = () => {
   const [contratos, setContratos] = useState([]);
@@ -31,7 +32,7 @@ const VerContratosUsuario = () => {
 
         // Fetch contratos principales
         const contratosResponse = await fetch(
-          `${import.meta.env.VITE_BASE_URL}/api/contratosActivosArrendatario/?arrendatario_id=${user.id}`,
+          `${API_URL}/api/contratosActivosArrendatario/?arrendatario_id=${user.id}`,
           {
             method: 'GET',
             credentials: 'include',
@@ -51,7 +52,7 @@ const VerContratosUsuario = () => {
 
         // Fetch contratos otrosi
         const otrosiResponse = await fetch(
-          `${import.meta.env.VITE_BASE_URL}/api/contra_arrendatarios_otrosi/${user.id}/`,
+          `${API_URL}/api/contra_arrendatarios_otrosi/${user.id}/`,
           {
             method: 'GET',
             credentials: 'include',

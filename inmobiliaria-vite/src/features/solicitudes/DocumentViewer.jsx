@@ -1,5 +1,6 @@
 // DocumentViewer.jsx - Versión corregida con URL completa
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../../config';
 
 const DocumentViewer = ({ documento, nombre, onClose }) => {
     const [loading, setLoading] = useState(true);
@@ -15,7 +16,7 @@ const DocumentViewer = ({ documento, nombre, onClose }) => {
             // Si la URL es relativa (empieza con 'media/' o '/media/')
             if (url.startsWith('media/') || url.startsWith('/media/')) {
                 // Asegurarse de que no tenga doble slash
-                const baseUrl = import.meta.env.VITE_BASE_URL || '';
+                const baseUrl = API_URL || '';
                 const cleanUrl = url.startsWith('/') ? url : `/${url}`;
                 url = `${baseUrl}${cleanUrl}`;
             }

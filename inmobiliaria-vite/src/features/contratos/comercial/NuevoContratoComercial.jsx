@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getCsrfToken } from '../../../utils/csrf';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { API_URL } from '../../../config';
 
 const NuevoContratoComercial = () => {
   const location = useLocation();
@@ -430,10 +431,10 @@ const NuevoContratoComercial = () => {
       setCargando(true);
       try {
         const [adminRes, propRes, arrRes, inmRes] = await Promise.all([
-          fetch(`${import.meta.env.VITE_BASE_URL}/api/usuarios_por_grupo/administrador/`),
-          fetch(`${import.meta.env.VITE_BASE_URL}/api/usuarios_por_grupo/propietario/`),
-          fetch(`${import.meta.env.VITE_BASE_URL}/api/usuarios_por_grupo/arrendatario/`),
-          fetch(`${import.meta.env.VITE_BASE_URL}/api/inmuebles/`)
+          fetch(`${API_URL}/api/usuarios_por_grupo/administrador/`),
+          fetch(`${API_URL}/api/usuarios_por_grupo/propietario/`),
+          fetch(`${API_URL}/api/usuarios_por_grupo/arrendatario/`),
+          fetch(`${API_URL}/api/inmuebles/`)
         ]);
 
         const adminData = await adminRes.json();
@@ -475,7 +476,7 @@ const NuevoContratoComercial = () => {
         // CARGAR DATOS DE LA SOLICITUD
         // ============================================================
         if (solicitudData && solicitudData.solicitudId) {
-          const solicitudRes = await fetch(`${import.meta.env.VITE_BASE_URL}/api/solicitud-publica/${solicitudData.solicitudId}/`);
+          const solicitudRes = await fetch(`${API_URL}/api/solicitud-publica/${solicitudData.solicitudId}/`);
 
           if (!solicitudRes.ok) {
             throw new Error(`Error ${solicitudRes.status}: No se pudo obtener la solicitud`);
@@ -841,7 +842,7 @@ const NuevoContratoComercial = () => {
     console.log('📝 Datos a enviar (con copias inmutables):', dataToSubmit);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/Contrato_Local_viviendaViewSet/`, {
+      const response = await fetch(`${API_URL}/api/Contrato_Local_viviendaViewSet/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -880,7 +881,7 @@ const NuevoContratoComercial = () => {
     formDataToSend.append('contratoId', contratoId);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/upload-pdf/`, {
+      const response = await fetch(`${API_URL}/api/upload-pdf/`, {
         method: 'POST',
         headers: { 'X-CSRFToken': csrfToken },
         body: formDataToSend,

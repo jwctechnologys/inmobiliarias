@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getCsrfToken } from '../../../utils/csrf';
 import '../ImprimirContrato.css';
+import { API_URL } from '../../../config';
 
 const calcularDuracionEnMeses = (fechaInicio, fechaFin) => {
   if (!fechaInicio || !fechaFin) return 0;
@@ -159,7 +160,7 @@ const ImprimirContratoVivienda = () => {
     const fetchContrato = async () => {
       try {
         setCargando(true);
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/Contrato_Local_viviendaViewSet/${id}/`);
+        const response = await fetch(`${API_URL}/api/Contrato_Local_viviendaViewSet/${id}/`);
         const data = await response.json();
         console.log("📄 Contrato cargado:", data);
         setContrato(data);
@@ -178,7 +179,7 @@ const ImprimirContratoVivienda = () => {
   // Función para manejar la firma del contrato (Administrador)
   const handleAceptarContrato = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/contratos/${id}/update/`, {
+      const response = await fetch(`${API_URL}/api/contratos/${id}/update/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -203,7 +204,7 @@ const ImprimirContratoVivienda = () => {
   // Función para manejar la firma del contrato (Arrendatario)
   const handleAceptarContratoArrendatario = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/contratos/${id}/update/`, {
+      const response = await fetch(`${API_URL}/api/contratos/${id}/update/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -242,7 +243,7 @@ const ImprimirContratoVivienda = () => {
     formDataToSend.append('contratoId', id);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/uploadContrato-pdf/`, {
+      const response = await fetch(`${API_URL}/api/uploadContrato-pdf/`, {
         method: 'POST',
         headers: {
           'X-CSRFToken': csrfToken,
@@ -305,7 +306,7 @@ const ImprimirContratoVivienda = () => {
     };
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/reporte-inconformidad/`, {
+      const response = await fetch(`${API_URL}/api/reporte-inconformidad/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

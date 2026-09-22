@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { API_URL } from '../../config';
 
 const RegistrarCasa = () => {
   const [casas, setCasas] = useState([]);
@@ -29,7 +30,7 @@ const RegistrarCasa = () => {
         return;
       }
 
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/casas/`);
+      const response = await fetch(`${API_URL}/api/casas/`);
       
       if (!response.ok) {
         throw new Error(`Error al cargar casas: ${response.status}`);
@@ -73,7 +74,7 @@ const RegistrarCasa = () => {
   const handleDeleteCasa = async (casaId) => {
     if (window.confirm('¿Está seguro de eliminar esta casa?')) {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/casas/${casaId}/`, {
+        const response = await fetch(`${API_URL}/api/casas/${casaId}/`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',

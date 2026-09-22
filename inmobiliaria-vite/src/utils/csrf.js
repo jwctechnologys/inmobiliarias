@@ -1,7 +1,8 @@
+import { API_URL } from '../config';
 export const getCsrfToken = async () => {
 
     const response = await fetch(
-      `${import.meta.env.VITE_BASE_URL}/api/csrf/`,
+      `${API_URL}/api/csrf/`,
       {
         method: "GET",
         credentials: "include"

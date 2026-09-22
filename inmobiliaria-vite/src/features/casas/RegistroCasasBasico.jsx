@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import { getCsrfToken } from '../../utils/csrf';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../../config';
 
 // Componentes memoizados para evitar re-renders
 const InputField = memo(({ label, name, type = 'text', required = false, value, onChange }) => (
@@ -146,7 +147,7 @@ const RegistroCasasBasico = () => {
 
     useEffect(() => {
         if (userRole === 'administrador') {
-            fetch(`${import.meta.env.VITE_BASE_URL}/api/usuarios_por_grupo/propietario/`)
+            fetch(`${API_URL}/api/usuarios_por_grupo/propietario/`)
                 .then((response) => response.json())
                 .then((data) => setPropietarios(data))
                 .catch((error) => console.error('Error al cargar propietarios:', error));
@@ -210,7 +211,7 @@ const RegistroCasasBasico = () => {
         }
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/crear_casa/`, {
+            const response = await fetch(`${API_URL}/api/crear_casa/`, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': csrfToken,

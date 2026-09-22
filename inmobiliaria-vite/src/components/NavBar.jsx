@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getCsrfToken } from "../utils/csrf";
+import { API_URL } from '../config';
 
 function NavBar() {
   const { isLoggedIn, user, handleLogout } = useAuth();
@@ -217,7 +218,7 @@ function NavBar() {
       const csrfToken = await getCsrfToken();
       if (!csrfToken) return;
 
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/solicitudes/aceptadas/no-atendidas/`, {
+      const response = await fetch(`${API_URL}/api/solicitudes/aceptadas/no-atendidas/`, {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -259,7 +260,7 @@ function NavBar() {
 
         if (role === 'administrador') {
           try {
-            const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/solicitudes-pendientes/`, {
+            const response = await fetch(`${API_URL}/api/solicitudes-pendientes/`, {
               headers: { 'Authorization': `Token ${localStorage.getItem('token')}` },
               credentials: 'include',
             });
@@ -275,7 +276,7 @@ function NavBar() {
 
         if (role === 'arrendatario' && id) {
           try {
-            const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/solicitudes/arrendatario/${id}/pendientes/`, {
+            const response = await fetch(`${API_URL}/api/solicitudes/arrendatario/${id}/pendientes/`, {
               headers: { 'Authorization': `Token ${localStorage.getItem('token')}` },
               credentials: 'include',
             });
@@ -288,7 +289,7 @@ function NavBar() {
           }
 
           try {
-            const contratosResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/contratosActivosArrendatario/?arrendatario_id=${id}`, {
+            const contratosResponse = await fetch(`${API_URL}/api/contratosActivosArrendatario/?arrendatario_id=${id}`, {
               headers: { 'Authorization': `Token ${localStorage.getItem('token')}` },
               credentials: 'include',
             });
@@ -301,7 +302,7 @@ function NavBar() {
           }
 
           try {
-            const otrosiResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/contratos_arrendatarios_otrosi/${id}`, {
+            const otrosiResponse = await fetch(`${API_URL}/api/contratos_arrendatarios_otrosi/${id}`, {
               headers: { 'Authorization': `Token ${localStorage.getItem('token')}` },
               credentials: 'include',
             });
@@ -316,7 +317,7 @@ function NavBar() {
 
         if (role === 'administrador') {
           try {
-            const inconformesResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/contratos-inconformes/`, {
+            const inconformesResponse = await fetch(`${API_URL}/api/contratos-inconformes/`, {
               headers: { 'Authorization': `Token ${localStorage.getItem('token')}` },
               credentials: 'include',
             });
@@ -329,7 +330,7 @@ function NavBar() {
           }
 
           try {
-            const otrosiActivosResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/contratos-activos-otrosi/`, {
+            const otrosiActivosResponse = await fetch(`${API_URL}/api/contratos-activos-otrosi/`, {
               headers: { 'Authorization': `Token ${localStorage.getItem('token')}` },
               credentials: 'include',
             });

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_URL } from '../../../config';
 
 function VerContratoComercial() {
   const [contratos, setContratos] = useState([]);
@@ -8,7 +9,7 @@ function VerContratoComercial() {
   // Cargar contratos desde el servidor
   useEffect(() => {
     // Si quieres filtrar por tipoContrato, puedes agregar el parámetro en la URL
-    fetch(`${import.meta.env.VITE_BASE_URL}/api/Contrato_Local_viviendaViewSet/?tipoContrato=local comercial`)
+    fetch(`${API_URL}/api/Contrato_Local_viviendaViewSet/?tipoContrato=local comercial`)
       .then((response) => response.json())
       .then((data) => {
         console.log('Datos de contratos filtrados:', data);

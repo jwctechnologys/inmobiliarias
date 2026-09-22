@@ -1,13 +1,14 @@
 // VerUsuarios.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../../config';
 
 const VerUsuarios = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [grupo, setGrupo] = useState('arrendatario');
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(null);
-  const baseUrl = import.meta.env.VITE_BASE_URL;
+  const baseUrl = API_URL;
   const navigate = useNavigate();
 
   useEffect(() => {

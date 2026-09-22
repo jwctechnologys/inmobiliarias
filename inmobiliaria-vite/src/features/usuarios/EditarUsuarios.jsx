@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getCsrfToken } from '../../utils/csrf';
+import { API_URL } from '../../config';
 
 const EditarUsuario = () => {
     const { id } = useParams();
@@ -92,7 +93,7 @@ const EditarUsuario = () => {
         parentezco: "",
     });
     
-    const baseUrl = import.meta.env.VITE_BASE_URL;
+    const baseUrl = API_URL;
     const navigate = useNavigate();
 
     const handlecoarrendatarioChange = (selectedId) => {
@@ -284,7 +285,7 @@ const EditarUsuario = () => {
         };
 
         console.log("JSON enviado:", requestBody);
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/coarrendatarios/${requestBody.coarrendatarioId}/`, {
+        const response = await fetch(`${API_URL}/api/coarrendatarios/${requestBody.coarrendatarioId}/`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -321,7 +322,7 @@ const EditarUsuario = () => {
         };
 
         console.log("JSON enviado:", requestBody);
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/dependiente/${requestBody.dependienteId}/`, {
+        const response = await fetch(`${API_URL}/api/dependiente/${requestBody.dependienteId}/`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -356,7 +357,7 @@ const EditarUsuario = () => {
         };
 
         console.log("JSON enviado:", requestBody);
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/referencias/${requestBody.referenciaId}/`, {
+        const response = await fetch(`${API_URL}/api/referencias/${requestBody.referenciaId}/`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -421,7 +422,7 @@ const EditarUsuario = () => {
             });
 
         if (groups === 'arrendatario') {
-            fetch(`${import.meta.env.VITE_BASE_URL}/api/coarrendatario/?arrendatario_id=${id}`)
+            fetch(`${API_URL}/api/coarrendatario/?arrendatario_id=${id}`)
                 .then((response) => response.json())
                 .then((data) => {
                     console.log('Coarrendatarios relacionados:', data);
@@ -429,7 +430,7 @@ const EditarUsuario = () => {
                 })
                 .catch((error) => console.error('Error al cargar coarrendatarios relacionados:', error));
 
-            fetch(`${import.meta.env.VITE_BASE_URL}/api/dependientes/`)
+            fetch(`${API_URL}/api/dependientes/`)
                 .then((response) => response.json())
                 .then((data) => {
                     console.log('Dependientes relacionados:', data);
@@ -437,7 +438,7 @@ const EditarUsuario = () => {
                 })
                 .catch((error) => console.error('Error al cargar dependientes relacionados:', error));
 
-            fetch(`${import.meta.env.VITE_BASE_URL}/api/referencias/`)
+            fetch(`${API_URL}/api/referencias/`)
                 .then((response) => response.json())
                 .then((data) => {
                     console.log('Referencias relacionados:', data);
