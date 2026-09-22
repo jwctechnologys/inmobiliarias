@@ -49,6 +49,9 @@ jobs:
 
       - run: npm ci
 
+      # Monta todas las pantallas con datos simulados: si un cambio rompe una, no se publica.
+      - run: npm test
+
       - run: npm run build
         env:
           VITE_BASE_URL: ${{ vars.VITE_BASE_URL }}
@@ -60,15 +63,28 @@ jobs:
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
+          retry-max-attempts: 3
 
-      # Sin --delete a proposito: si el bucket guarda algo mas que el frontend,
-      # un sync con --delete lo borraria. Los archivos viejos con hash son inofensivos.
-      - name: Subir assets (cache larga, llevan hash en el nombre)
+      # Cache segun el tipo de archivo. Vite pone un hash en lo que genera (assets/index-AbC123.js): si el
+      # contenido cambia, cambia el nombre, asi que se puede cachear un ano. Lo que viene de public/
+      # (images/, favicon, assets/css/main2.css) conserva su nombre: solo 1 hora, para ver los cambios.
+      # Sin --delete a proposito: si el bucket guarda algo mas que el frontend, un sync con --delete lo borraria.
+      - name: Subir archivos con hash (cache de 1 ano)
         if: github.event_name != 'pull_request'
         run: >
-          aws s3 sync dist/ "s3://${{ vars.S3_BUCKET }}"
-          --exclude index.html
+          aws s3 sync dist/assets/ "s3://${{ vars.S3_BUCKET }}/assets/"
+          --exclude "*/*"
           --cache-control "public,max-age=31536000,immutable"
+
+      - name: Subir archivos sin hash (cache de 1 hora)
+        if: github.event_name != 'pull_request'
+        run: |
+          aws s3 sync dist/ "s3://${{ vars.S3_BUCKET }}" \
+            --exclude index.html --exclude "assets/*" \
+            --cache-control "public,max-age=3600"
+          aws s3 sync dist/assets/ "s3://${{ vars.S3_BUCKET }}/assets/" \
+            --exclude "*" --include "*/*" \
+            --cache-control "public,max-age=3600"
 
       - name: Subir index.html (sin cache, para que los cambios se vean al instante)
         if: github.event_name != 'pull_request'
