@@ -18,4 +18,11 @@ module.exports = {
       { allowConstantExport: true },
     ],
   },
+  overrides: [
+    {
+      // Las pruebas corren en Node (process, fs) ademas de en el navegador simulado.
+      files: ['src/tests/**/*.{js,jsx}'],
+      env: { node: true },
+    },
+  ],
 }

@@ -49,6 +49,9 @@ jobs:
 
       - run: npm ci
 
+      # Monta todas las pantallas con datos simulados: si un cambio rompe una, no se publica.
+      - run: npm test
+
       - run: npm run build
         env:
           VITE_BASE_URL: ${{ vars.VITE_BASE_URL }}
