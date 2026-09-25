@@ -76,7 +76,9 @@ def create_coarrendatario(request):
     # Serializar y guardar
     serializer = coarrendatarioSerializer(data=data)
     if serializer.is_valid():
-        serializer.save()
+        # El serializador usa depth=2, que deja el campo "arrendatario" como solo lectura: hay que
+        # pasarlo al guardar o el INSERT falla con arrendatario_id NULL (error 500).
+        serializer.save(arrendatario=arrendatario_obj)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     # Retornar errores de validación
