@@ -44,6 +44,15 @@ class RegistroCompletoTests(TestCase):
         self.assertEqual(r.status_code, 201, r.content)
         self.assertEqual(arrendatario.objects.get(user__username="ana").CodClasificaIndustrialIU, 9602)
 
+    def test_celular_colombiano_de_10_digitos(self):
+        # 3209028064 supera el maximo de un entero de 32 bits (2.147.483.647): en PostgreSQL daba
+        # "integer out of range" y el usuario recien creado se borraba.
+        for grupo in ("arrendatario", "proveedor"):
+            r = self.registrar(grupo, username=f"celu_{grupo}", celular=3209028064, celularDos=3017654321)
+            self.assertEqual(r.status_code, 201, r.content)
+        self.assertEqual(arrendatario.objects.get(user__username="celu_arrendatario").celular, 3209028064)
+        self.assertEqual(proveedor.objects.get(user__username="celu_proveedor").celularDos, 3017654321)
+
     def test_propietario_y_proveedor_siguen_funcionando(self):
         self.assertEqual(self.registrar("propietario").status_code, 201)
         self.assertTrue(propietario.objects.filter(user__username="ana").exists())
