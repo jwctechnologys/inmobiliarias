@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { getCsrfToken } from '../../utils/csrf';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../../config';
+import DireccionesRegistro, { correspondenciaAEnviar } from '../../components/DireccionesRegistro';
 
 const CompletarPerfilArrendatario = () => {
     const navigate = useNavigate();
@@ -47,12 +48,13 @@ const CompletarPerfilArrendatario = () => {
     const [descActividadEconomica, setdescActividadEconomica] = useState('');
     const [ocupacion, setOcupacion] = useState('');
     const [empresa, setEmpresa] = useState('');
-    const [direccionCorrespondencia, setDireccionCorrespondencia] = useState('');
-    const [barrioCorrespondencia, setBarrioCorrespondencia] = useState('');
-    const [ciudadCorrespondencia, setCiudadCorrespondencia] = useState('');
-    const [direccion, setDireccion] = useState('');
-    const [barrio, setBarrio] = useState('');
-    const [ciudad, setCiudad] = useState('');
+    const [direcciones, setDirecciones] = useState({
+        direccion: '', barrio: '', ciudad: '',
+        direccionCorrespondencia: '', barrioCorrespondencia: '', ciudadCorrespondencia: '',
+    });
+    const [mismaDireccion, setMismaDireccion] = useState(true);
+    const cambiarDireccion = (campo, valor) => setDirecciones((prev) => ({ ...prev, [campo]: valor }));
+    const { direccion, barrio, ciudad } = direcciones;
     const [celular, setCelular] = useState('');
     const [celularDos, setCelularDos] = useState('');
 
@@ -117,9 +119,7 @@ const CompletarPerfilArrendatario = () => {
             descActividadEconomica: descActividadEconomica || null,
             ocupacion,
             empresa: empresa || null,
-            direccionCorrespondencia,
-            barrioCorrespondencia,
-            ciudadCorrespondencia,
+            ...correspondenciaAEnviar(mismaDireccion, direcciones),
             direccion,
             barrio,
             ciudad,
@@ -378,87 +378,15 @@ const CompletarPerfilArrendatario = () => {
                             </div>
 
                             {/* Direcciones */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-4">
-                                    <h2 className={sectionTitleClassName}>Dirección de Correspondencia</h2>
-
-                                    <div>
-                                        <label className={labelClassName}>Dirección *</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Ej: Carrera 7 # 123-45"
-                                            value={direccionCorrespondencia}
-                                            onChange={(e) => setDireccionCorrespondencia(e.target.value)}
-                                            required
-                                            className={inputClassName}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className={labelClassName}>Barrio *</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Ej: Chapinero"
-                                            value={barrioCorrespondencia}
-                                            onChange={(e) => setBarrioCorrespondencia(e.target.value)}
-                                            required
-                                            className={inputClassName}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className={labelClassName}>Ciudad *</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Ej: Bogotá"
-                                            value={ciudadCorrespondencia}
-                                            onChange={(e) => setCiudadCorrespondencia(e.target.value)}
-                                            required
-                                            className={inputClassName}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <h2 className={sectionTitleClassName}>Dirección de Residencia</h2>
-
-                                    <div>
-                                        <label className={labelClassName}>Dirección *</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Ej: Calle 26 # 69-76"
-                                            value={direccion}
-                                            onChange={(e) => setDireccion(e.target.value)}
-                                            required
-                                            className={inputClassName}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className={labelClassName}>Barrio *</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Ej: Salitre"
-                                            value={barrio}
-                                            onChange={(e) => setBarrio(e.target.value)}
-                                            required
-                                            className={inputClassName}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className={labelClassName}>Ciudad *</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Ej: Bogotá"
-                                            value={ciudad}
-                                            onChange={(e) => setCiudad(e.target.value)}
-                                            required
-                                            className={inputClassName}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
+                            <DireccionesRegistro
+                                valores={direcciones}
+                                onChange={cambiarDireccion}
+                                mismaDireccion={mismaDireccion}
+                                onMismaDireccionChange={setMismaDireccion}
+                                inputClassName={inputClassName}
+                                labelClassName={labelClassName}
+                                sectionTitleClassName={sectionTitleClassName}
+                            />
 
                             {/* Campos dinámicos según tipo de postulación */}
                             {tipoPostulacion === 'comercial' && (

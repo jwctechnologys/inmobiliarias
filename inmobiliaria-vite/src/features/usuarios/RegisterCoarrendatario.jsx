@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { getCsrfToken } from '../../utils/csrf';
 import { Link, useNavigate } from 'react-router-dom';
 import { API_URL } from '../../config';
+import DireccionesRegistro, { correspondenciaAEnviar } from '../../components/DireccionesRegistro';
 
 const RegisterCoarrendatario = () => {
     const [arrendatarios, setArrendatarios] = useState([]);
@@ -19,12 +20,13 @@ const RegisterCoarrendatario = () => {
     const [genero, setGenero] = useState('');
     const [ocupacion, setOcupacion] = useState('');
     const [empresa, setEmpresa] = useState('');
-    const [direccionCorrespondencia, setDireccionCorrespondencia] = useState('');
-    const [barrioCorrespondencia, setBarrioCorrespondencia] = useState('');
-    const [ciudadCorrespondencia, setCiudadCorrespondencia] = useState('');
-    const [direccion, setDireccion] = useState('');
-    const [barrio, setBarrio] = useState('');
-    const [ciudad, setCiudad] = useState('');
+    const [direcciones, setDirecciones] = useState({
+        direccion: '', barrio: '', ciudad: '',
+        direccionCorrespondencia: '', barrioCorrespondencia: '', ciudadCorrespondencia: '',
+    });
+    const [mismaDireccion, setMismaDireccion] = useState(true);
+    const cambiarDireccion = (campo, valor) => setDirecciones((prev) => ({ ...prev, [campo]: valor }));
+    const { direccion, barrio, ciudad } = direcciones;
     const [celular, setCelular] = useState('');
     const [celularDos, setCelularDos] = useState('');
     const [csrfToken, setCsrfToken] = useState('');
@@ -109,9 +111,7 @@ const RegisterCoarrendatario = () => {
             genero,
             empresa,
             ocupacion,
-            direccionCorrespondencia,
-            barrioCorrespondencia,
-            ciudadCorrespondencia,
+            ...correspondenciaAEnviar(mismaDireccion, direcciones),
             direccion,
             barrio,
             ciudad,
@@ -351,86 +351,17 @@ const RegisterCoarrendatario = () => {
                             </div>
                         </div>
 
-                        {/* Dirección de Correspondencia */}
-                        <div>
-                            <h2 className={sectionTitleClassName}>Dirección de Correspondencia</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div>
-                                    <label className={labelClassName}>Dirección *</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Ej: Carrera 7 # 123-45"
-                                        value={direccionCorrespondencia}
-                                        onChange={(e) => setDireccionCorrespondencia(e.target.value)}
-                                        required
-                                        className={inputClassName}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className={labelClassName}>Barrio *</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Ej: Chapinero"
-                                        value={barrioCorrespondencia}
-                                        onChange={(e) => setBarrioCorrespondencia(e.target.value)}
-                                        required
-                                        className={inputClassName}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className={labelClassName}>Ciudad *</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Ej: Bogotá"
-                                        value={ciudadCorrespondencia}
-                                        onChange={(e) => setCiudadCorrespondencia(e.target.value)}
-                                        required
-                                        className={inputClassName}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Dirección de Residencia (opcional) */}
-                        <div>
-                            <h2 className={sectionTitleClassName}>Dirección de Residencia <span className="text-sm font-normal text-gray-500">(Opcional)</span></h2>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div>
-                                    <label className={labelClassName}>Dirección</label>
-                                    <input
-                                        type="text"
-                                        value={direccion}
-                                        onChange={(e) => setDireccion(e.target.value)}
-                                        className={inputClassName}
-                                        placeholder="Ej: Calle 26 # 69-76"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className={labelClassName}>Barrio</label>
-                                    <input
-                                        type="text"
-                                        value={barrio}
-                                        onChange={(e) => setBarrio(e.target.value)}
-                                        className={inputClassName}
-                                        placeholder="Ej: Salitre"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className={labelClassName}>Ciudad</label>
-                                    <input
-                                        type="text"
-                                        value={ciudad}
-                                        onChange={(e) => setCiudad(e.target.value)}
-                                        className={inputClassName}
-                                        placeholder="Ej: Bogotá"
-                                    />
-                                </div>
-                            </div>
-                        </div>
+                        {/* Direcciones */}
+                        <DireccionesRegistro
+                            valores={direcciones}
+                            onChange={cambiarDireccion}
+                            mismaDireccion={mismaDireccion}
+                            onMismaDireccionChange={setMismaDireccion}
+                            residenciaObligatoria={false}
+                            inputClassName={inputClassName}
+                            labelClassName={labelClassName}
+                            sectionTitleClassName={sectionTitleClassName}
+                        />
 
                         {/* Contacto */}
                         <div>
