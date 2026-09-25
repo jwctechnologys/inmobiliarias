@@ -32,6 +32,18 @@ class RegistroCompletoTests(TestCase):
         self.assertEqual(r.status_code, 201, r.content)
         self.assertIsNone(arrendatario.objects.get(user__username="ana").estadoCivil)
 
+    def test_arrendatario_de_vivienda_sin_codigo_industrial(self):
+        # El formulario manda "" cuando se deja vacio (no aplica a vivienda): antes daba
+        # "Field 'CodClasificaIndustrialIU' expected a number but got ''".
+        r = self.registrar("arrendatario", CodClasificaIndustrialIU="")
+        self.assertEqual(r.status_code, 201, r.content)
+        self.assertIsNone(arrendatario.objects.get(user__username="ana").CodClasificaIndustrialIU)
+
+    def test_arrendatario_comercial_guarda_su_codigo_industrial(self):
+        r = self.registrar("arrendatario", CodClasificaIndustrialIU="9602")
+        self.assertEqual(r.status_code, 201, r.content)
+        self.assertEqual(arrendatario.objects.get(user__username="ana").CodClasificaIndustrialIU, 9602)
+
     def test_propietario_y_proveedor_siguen_funcionando(self):
         self.assertEqual(self.registrar("propietario").status_code, 201)
         self.assertTrue(propietario.objects.filter(user__username="ana").exists())

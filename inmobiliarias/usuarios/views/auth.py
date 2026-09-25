@@ -13,6 +13,13 @@ from arrendatarios.models import coarrendatario
 from usuarios.models import User, administrador, arrendatario, propietario, proveedor
 
 
+def entero_o_none(valor):
+    """Campo numerico opcional: el formulario manda '' cuando se deja vacio, y Django no lo acepta en un IntegerField."""
+    if valor is None or (isinstance(valor, str) and not valor.strip()):
+        return None
+    return valor
+
+
 @require_GET
 @ensure_csrf_cookie
 def get_csrf_token(request):
@@ -181,7 +188,7 @@ def user_create_view(request):
                             celularDos=celularDos,
                             ocupacion=data.get("ocupacion"),
                             empresa=data.get("empresa"),
-                            CodClasificaIndustrialIU=data.get("CodClasificaIndustrialIU"),
+                            CodClasificaIndustrialIU=entero_o_none(data.get("CodClasificaIndustrialIU")),
                             descActividadEconomica=data.get("descActividadEconomica"),
                         )
                     
@@ -269,7 +276,7 @@ def completar_perfil_view(request):
                     lugarExpCedula=data.get("lugarExpCedula"),
                     ocupacion=data.get("ocupacion"),
                     empresa=data.get("empresa"),
-                    CodClasificaIndustrialIU=data.get("CodClasificaIndustrialIU"),
+                    CodClasificaIndustrialIU=entero_o_none(data.get("CodClasificaIndustrialIU")),
                     descActividadEconomica=data.get("descActividadEconomica"),
                     direccion=data.get("direccion"),
                     estadoCivil=data.get("estadoCivil"),

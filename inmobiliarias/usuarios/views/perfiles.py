@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from arrendatarios.models import coarrendatario
 from usuarios.models import User, administrador, arrendatario, propietario, proveedor
 from usuarios.serializers import ArrendatarioSerializer, administradorSerializer
+from usuarios.views.auth import entero_o_none
 
 
 @csrf_protect
@@ -92,6 +93,8 @@ def user_profile_update_view(request):
                 if field in data:
                     # Si el campo está en la solicitud, tomar su valor
                     value = data.get(field)
+                    if field == "CodClasificaIndustrialIU":
+                        value = entero_o_none(value)
                     data_to_update[field] = value
                 # Si NO está en la solicitud, NO lo actualizamos
 
