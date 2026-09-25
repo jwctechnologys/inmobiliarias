@@ -32,10 +32,10 @@ class coarrendatario(models.Model):
     first_name = models.CharField(max_length=50, blank=True, null=True)  
     last_name = models.CharField(max_length=50, blank=True, null=True) 
     tipo_documento = models.CharField(max_length=3, choices=TipoDocumento.choices, blank=True, null=True)
-    doc_identificacion = models.IntegerField(blank=True, null=True)
+    doc_identificacion = models.PositiveBigIntegerField(blank=True, null=True)
     lugarExpCedula = models.CharField(blank=True,max_length=255)
     parentezco = models.CharField(max_length=30, blank=True, null=True) #Conyuge, Codeudor, Familiar o amigo
-    celular = models.IntegerField(blank=True, null=True)
+    celular = models.PositiveBigIntegerField(blank=True, null=True)
     email = models.EmailField(max_length=50, blank=True, null=True) 
     direccion = models.CharField(blank=True,max_length=255)
     barrio = models.CharField(blank=True,max_length=255)
@@ -50,7 +50,7 @@ class coarrendatario(models.Model):
     barrioCorrespondencia = models.CharField(blank=True,max_length=255)
     ciudadCorrespondencia = models.CharField(blank=True,max_length=255) 
     
-    celularDos = models.IntegerField(null=True, blank=True) 
+    celularDos = models.PositiveBigIntegerField(null=True, blank=True) 
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}" 
@@ -82,7 +82,7 @@ class referencias(models.Model):
     first_name = models.CharField(max_length=30, blank=True, null=True)
     last_name = models.CharField(max_length=30, blank=True, null=True)    
     parentezco = models.CharField(max_length=30, blank=True, null=True)
-    celular = models.IntegerField(blank=True, null=True)    
+    celular = models.PositiveBigIntegerField(blank=True, null=True)    
     dir_residencia = models.CharField(max_length=50, blank=True, null=True)
     ocupacion = models.CharField(max_length=30, blank=True, null=True)
     motivoRetiro = models.CharField(max_length=50, blank=True, null=True)
