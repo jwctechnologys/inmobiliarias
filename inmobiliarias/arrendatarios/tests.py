@@ -4,7 +4,7 @@ from django.test import TestCase
 
 from usuarios.models import User, arrendatario
 
-from .models import coarrendatario
+from .models import coarrendatario, dependientes
 
 
 class CrearCoarrendatarioTests(TestCase):
@@ -36,3 +36,43 @@ class CrearCoarrendatarioTests(TestCase):
     def test_sin_arrendatario_responde_400(self):
         r = self.crear(arrendatario="")
         self.assertEqual(r.status_code, 400)
+
+
+class CrearDependienteTests(TestCase):
+    def setUp(self):
+        user = User.objects.create_user(username="ana", email="ana@ejemplo.co", password="Segura123!")
+        self.arrendatario = arrendatario.objects.create(user=user)
+
+    def crear(self, **extra):
+        payload = {
+            "arrendatario": self.arrendatario.id, "first_name": "Neyda", "last_name": "Gutierrez",
+            "parentezco": " Conyuge", "tipo_documento": "CC", "doc_identificacion": 1122649920,
+            "lugarExpCedula": "Restrepo", "ocupacion": "ama de casa", "empresa": "", "genero": "F",
+            **extra,
+        }
+        return self.client.post("/api/dependientes/create/", data=json.dumps(payload),
+                                content_type="application/json")
+
+    def test_edad_vacia_es_valida(self):
+        # La edad es opcional: el formulario manda "" y antes daba 400 "A valid integer is required".
+        r = self.crear(edad="")
+        self.assertEqual(r.status_code, 201, r.content)
+        dep = dependientes.objects.get()
+        self.assertIsNone(dep.edad)
+        self.assertEqual(dep.parentezco, "Conyuge")  # sin el espacio inicial
+
+    def test_edad_con_valor_se_guarda(self):
+        r = self.crear(edad="12")
+        self.assertEqual(r.status_code, 201, r.content)
+        self.assertEqual(dependientes.objects.get().edad, 12)
+
+    def test_parentezco_y_edad_son_opcionales(self):
+        r = self.crear(parentezco="", edad="")
+        self.assertEqual(r.status_code, 201, r.content)
+        dep = dependientes.objects.get()
+        self.assertEqual(dep.parentezco, "")
+        self.assertIsNone(dep.edad)
+
+        # El texto de los contratos no queda con un "su" suelto.
+        texto = self.client.get(f"/api/dependientes/{self.arrendatario.id}/").json()["descripcion"]
+        self.assertTrue(texto.startswith("y <strong>Neyda Gutierrez</strong>"), texto)

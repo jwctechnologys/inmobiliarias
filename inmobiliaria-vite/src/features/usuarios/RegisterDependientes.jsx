@@ -93,7 +93,9 @@ const RegisterDependientes = () => {
                 alert('Dependiente registrado exitosamente');
                 navigate('/');
             } else {
-                alert(`Error al registrar dependiente: ${data.error}`);
+                // El servidor responde {error: "..."} o, si un campo no es valido, {campo: ["mensaje"]}.
+                const motivo = data.error || Object.entries(data).map(([campo, msgs]) => `${campo}: ${[].concat(msgs).join(' ')}`).join(', ');
+                alert(`Error al registrar dependiente: ${motivo}`);
             }
         } catch (error) {
             alert('Error de conexión');
@@ -198,12 +200,11 @@ const RegisterDependientes = () => {
                                 </div>
 
                                 <div>
-                                    <label className={labelClassName}>Parentezco *</label>
+                                    <label className={labelClassName}>Parentezco</label>
                                     <input
                                         type="text"
                                         value={parentezco}
                                         onChange={(e) => setParentezco(e.target.value)}
-                                        required
                                         className={inputClassName}
                                         placeholder="Ej: Hijo, Hermano, Padre"
                                     />

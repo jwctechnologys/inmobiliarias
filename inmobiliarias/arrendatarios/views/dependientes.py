@@ -31,10 +31,11 @@ def create_dependientes(request):
     # Extraer y asignar las variables del request
     data["first_name"] = request.data.get("first_name", "")
     data["last_name"] = request.data.get("last_name", "")
-    data["edad"] = request.data.get("edad", None)
+    # La edad es opcional: el formulario manda "" cuando se deja vacia y un campo numerico no lo acepta.
+    data["edad"] = request.data.get("edad") or None
     data["ocupacion"] = request.data.get("ocupacion", "")
     data["empresa"] = request.data.get("empresa", "")
-    data["parentezco"] = request.data.get("parentezco", "")
+    data["parentezco"] = (request.data.get("parentezco") or "").strip()
     data["tipo_documento"] = request.data.get("tipo_documento", "")
 
     # Validar y asignar doc_identificacion como entero
@@ -71,17 +72,19 @@ def get_dependientes_por_arrendatario(request, arrendatario_id):
             f"<strong>{dependiente.first_name} {dependiente.last_name}</strong>"
         )
 
+        # El parentezco es opcional: sin el, el texto queda "y NOMBRE ..." en vez de "y su PARENTEZCO NOMBRE ..."
+        su_parentezco = f"su {dependiente.parentezco.strip()} " if (dependiente.parentezco or "").strip() else ""
+
         # Verificar si el dependiente es mayor o menor de edad
         if dependiente.edad and dependiente.edad < 18:
-            descripcion += f"y su {dependiente.parentezco} {nombre_negrita} de {dependiente.edad} años de edad"
+            descripcion += f"y {su_parentezco}{nombre_negrita} de {dependiente.edad} años de edad"
             if dependiente.ocupacion:
                 descripcion += f", quien es {dependiente.ocupacion}"
         else:
-            descripcion += f"y su {dependiente.parentezco} {nombre_negrita} identificado con <strong>{dependiente.tipo_documento}</strong> Nro <strong>{numero_id_formateado}</strong> expedida en {dependiente.lugarExpCedula}"
-            if dependiente.ocupacion and dependiente.empresa:
-                descripcion += (
-                    f", y de ocupación {dependiente.ocupacion} ({dependiente.empresa})"
-                )
+            descripcion += f"y {su_parentezco}{nombre_negrita} identificado con <strong>{dependiente.tipo_documento}</strong> Nro <strong>{numero_id_formateado}</strong> expedida en {dependiente.lugarExpCedula}"
+            # El modelo no guarda la empresa (el formulario la manda pero se descarta): solo la ocupacion.
+            if dependiente.ocupacion:
+                descripcion += f", y de ocupación {dependiente.ocupacion}"
 
         resultado.append(descripcion)
 
