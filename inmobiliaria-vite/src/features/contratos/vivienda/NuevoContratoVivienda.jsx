@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getCsrfToken } from '../../../utils/csrf';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { API_URL } from '../../../config';
+import { mesesEnteros } from '../../../utils/fechas';
 
 const NuevoContratoVivienda = () => {
   const location = useLocation();
@@ -308,6 +309,15 @@ const NuevoContratoVivienda = () => {
       [name]: type === 'checkbox' ? checked : value,
     }));
   };
+
+  // La duracion se calcula sola a partir de la fecha de inicio y la fecha de fin (en meses
+  // completos): asi no puede quedar desincronizada de las fechas que se citan en las clausulas.
+  useEffect(() => {
+    const meses = mesesEnteros(formData.fechainicio, formData.fechafin);
+    if (meses !== null) {
+      setFormData((prevState) => ({ ...prevState, duracionMeses: meses }));
+    }
+  }, [formData.fechainicio, formData.fechafin]);
 
   const handleUserAdminChange = (idCompuesto, tipo) => {
     const usuarioSeleccionado = usuariosDisponibles.find(u => u.idCompuesto === idCompuesto);
@@ -1077,8 +1087,8 @@ const NuevoContratoVivienda = () => {
                 <input type="number" name="diaFinPago" className={inputClass} value={formData.diaFinPago} onChange={handleInputChange} placeholder="08" />
               </div>
               <div>
-                <label className={labelClass}>Duración (meses):</label>
-                <input type="number" name="duracionMeses" className={inputClass} value={formData.duracionMeses} onChange={handleInputChange} placeholder="6" />
+                <label className={labelClass}>Duración (meses): <span className="text-gray-400 text-xs font-normal">(se calcula solo)</span></label>
+                <input type="number" name="duracionMeses" className={`${inputClass} bg-gray-100`} value={formData.duracionMeses} readOnly />
               </div>
               <div>
                 <label className={labelClass}>% Cláusula Penal:</label>

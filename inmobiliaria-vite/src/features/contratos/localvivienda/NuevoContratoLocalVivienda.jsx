@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getCsrfToken } from '../../../utils/csrf';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { API_URL } from '../../../config';
+import { mesesEnteros } from '../../../utils/fechas';
 
 const NuevoContratoLocalVivienda = () => {
   const location = useLocation();
@@ -310,6 +311,15 @@ const NuevoContratoLocalVivienda = () => {
       [name]: type === 'checkbox' ? checked : value,
     }));
   };
+
+  // La duracion se calcula sola a partir de la fecha de inicio y la fecha de fin (en meses
+  // completos): asi no puede quedar desincronizada de las fechas que se citan en las clausulas.
+  useEffect(() => {
+    const meses = mesesEnteros(formData.fechainicio, formData.fechafin);
+    if (meses !== null) {
+      setFormData((prevState) => ({ ...prevState, duracionMeses: meses }));
+    }
+  }, [formData.fechainicio, formData.fechafin]);
 
   const handleUserAdminChange = (idCompuesto, tipo) => {
     const usuarioSeleccionado = usuariosDisponibles.find(u => u.idCompuesto === idCompuesto);
@@ -1030,8 +1040,8 @@ const NuevoContratoLocalVivienda = () => {
                 <input type="number" name="diaFinPago" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border" value={formData.diaFinPago} onChange={handleInputChange} placeholder="29" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Duración (meses):</label>
-                <input type="number" name="duracionMeses" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border" value={formData.duracionMeses} onChange={handleInputChange} placeholder="6" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Duración (meses): <span className="text-gray-400 text-xs font-normal">(se calcula solo)</span></label>
+                <input type="number" name="duracionMeses" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm p-2 border bg-gray-100" value={formData.duracionMeses} readOnly />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">% Cláusula Penal:</label>
