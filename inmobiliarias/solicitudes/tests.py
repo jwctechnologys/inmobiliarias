@@ -4,6 +4,7 @@ from inmuebles.models import arrendar
 from usuarios.models import User, arrendatario, propietario
 
 from .models import Solicitud
+from .serializers import SolicitudSerializer
 
 
 class SolicitudCompletaTests(TestCase):
@@ -32,3 +33,18 @@ class SolicitudCompletaTests(TestCase):
                         "coarrendatario[direccion]": "", "coarrendatario[empresa]": ""})
         self.assertEqual(r.status_code, 201, r.content)
         self.assertIsNotNone(Solicitud.objects.get().idCoarrendatario)
+
+
+class SolicitudSerializerTests(TestCase):
+    """La tarjeta de "Solicitudes Aceptadas" (Crear Contratos) necesita saber si el inmueble es
+    de uso Vivienda o Comercial, para saber que tipo de contrato corresponde."""
+
+    def test_expone_el_uso_del_inmueble(self):
+        dueno = User.objects.create_user(username="pedro", email="pedro@ejemplo.co", password="Segura123!")
+        casa = arrendar.objects.create(propietario=propietario.objects.create(user=dueno),
+                                       direccion="Calle 1", canonmensual=900000,
+                                       tipoInmueble="Casa", usoInmueble="Comercial")
+        user = User.objects.create_user(username="ana", email="ana@ejemplo.co", password="Segura123!")
+        solicitud = Solicitud.objects.create(casa=casa, usuario=arrendatario.objects.create(user=user),
+                                             idCoarrendatario=None)
+        self.assertEqual(SolicitudSerializer(solicitud).data["usoInmueble"], "Comercial")
