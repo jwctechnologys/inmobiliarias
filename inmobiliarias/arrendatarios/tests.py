@@ -65,3 +65,14 @@ class CrearDependienteTests(TestCase):
         r = self.crear(edad="12")
         self.assertEqual(r.status_code, 201, r.content)
         self.assertEqual(dependientes.objects.get().edad, 12)
+
+    def test_parentezco_y_edad_son_opcionales(self):
+        r = self.crear(parentezco="", edad="")
+        self.assertEqual(r.status_code, 201, r.content)
+        dep = dependientes.objects.get()
+        self.assertEqual(dep.parentezco, "")
+        self.assertIsNone(dep.edad)
+
+        # El texto de los contratos no queda con un "su" suelto.
+        texto = self.client.get(f"/api/dependientes/{self.arrendatario.id}/").json()["descripcion"]
+        self.assertTrue(texto.startswith("y <strong>Neyda Gutierrez</strong>"), texto)

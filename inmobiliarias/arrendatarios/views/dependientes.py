@@ -72,17 +72,19 @@ def get_dependientes_por_arrendatario(request, arrendatario_id):
             f"<strong>{dependiente.first_name} {dependiente.last_name}</strong>"
         )
 
+        # El parentezco es opcional: sin el, el texto queda "y NOMBRE ..." en vez de "y su PARENTEZCO NOMBRE ..."
+        su_parentezco = f"su {dependiente.parentezco.strip()} " if (dependiente.parentezco or "").strip() else ""
+
         # Verificar si el dependiente es mayor o menor de edad
         if dependiente.edad and dependiente.edad < 18:
-            descripcion += f"y su {dependiente.parentezco} {nombre_negrita} de {dependiente.edad} años de edad"
+            descripcion += f"y {su_parentezco}{nombre_negrita} de {dependiente.edad} años de edad"
             if dependiente.ocupacion:
                 descripcion += f", quien es {dependiente.ocupacion}"
         else:
-            descripcion += f"y su {dependiente.parentezco} {nombre_negrita} identificado con <strong>{dependiente.tipo_documento}</strong> Nro <strong>{numero_id_formateado}</strong> expedida en {dependiente.lugarExpCedula}"
-            if dependiente.ocupacion and dependiente.empresa:
-                descripcion += (
-                    f", y de ocupación {dependiente.ocupacion} ({dependiente.empresa})"
-                )
+            descripcion += f"y {su_parentezco}{nombre_negrita} identificado con <strong>{dependiente.tipo_documento}</strong> Nro <strong>{numero_id_formateado}</strong> expedida en {dependiente.lugarExpCedula}"
+            # El modelo no guarda la empresa (el formulario la manda pero se descarta): solo la ocupacion.
+            if dependiente.ocupacion:
+                descripcion += f", y de ocupación {dependiente.ocupacion}"
 
         resultado.append(descripcion)
 

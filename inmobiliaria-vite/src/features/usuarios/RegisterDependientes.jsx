@@ -200,12 +200,11 @@ const RegisterDependientes = () => {
                                 </div>
 
                                 <div>
-                                    <label className={labelClassName}>Parentezco *</label>
+                                    <label className={labelClassName}>Parentezco</label>
                                     <input
                                         type="text"
                                         value={parentezco}
                                         onChange={(e) => setParentezco(e.target.value)}
-                                        required
                                         className={inputClassName}
                                         placeholder="Ej: Hijo, Hermano, Padre"
                                     />
