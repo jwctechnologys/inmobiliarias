@@ -29,13 +29,9 @@ def user_profile_update_view(request):
                     {"error": "Grupo o ID del grupo no proporcionados."}, status=400
                 )
 
-            # Buscar el usuario por su ID
-            try:
-                user_to_update = User.objects.get(id=group_id)
-            except User.DoesNotExist:
-                return JsonResponse({"error": "Usuario no encontrado."}, status=404)
-
-            # Verificar el grupo y buscar al usuario correspondiente
+            # "id" es el id del PERFIL (administrador/arrendatario/propietario), tal como lo devuelve
+            # listar_usuarios_por_grupo -- no el id del User. Antes se buscaba el User con este mismo
+            # numero, y solo "funcionaba" cuando ambos ids coincidian por casualidad.
             if group == "administrador":
                 try:
                     perfil_to_update = administrador.objects.get(id=group_id)
@@ -83,6 +79,8 @@ def user_profile_update_view(request):
                 }
             else:
                 return JsonResponse({"error": "Grupo no válido."}, status=400)
+
+            user_to_update = perfil_to_update.user
 
             # ============================================================
             # IMPORTANTE: SOLO actualizar los campos que vienen en la solicitud

@@ -77,14 +77,23 @@ class RegistroCompletoTests(RegistroMixin, TestCase):
 
 
 class ActualizarPerfilTests(RegistroMixin, TestCase):
-    def test_actualizar_con_numericos_vacios(self):
-        # El formulario de edicion manda "" en los numericos que se borran: a NULL, no error 500.
+    def test_actualizar_con_id_del_perfil_distinto_al_del_usuario(self):
+        # listar_usuarios_por_grupo devuelve el id del PERFIL (arrendatario.id), no el del User: hay
+        # que crear otro usuario antes para que difieran y no pasar la prueba "por casualidad".
+        self.registrar("propietario", username="otro")
         self.registrar("arrendatario", celular=3209028064, CodClasificaIndustrialIU="9602")
-        uid = arrendatario.objects.get().user_id
+        perfil = arrendatario.objects.get(user__username="ana")
+        self.assertNotEqual(perfil.id, perfil.user_id)  # confirma que el caso realmente los distingue
+
+        # El formulario de edicion manda "" en los numericos que se borran: a NULL, no error 500.
         r = self.client.put("/api/user_profile_update/", data=json.dumps(
-            {"groups": "arrendatario", "id": uid, "celular": "", "CodClasificaIndustrialIU": ""}),
+            {"groups": "arrendatario", "id": perfil.id, "celular": "", "CodClasificaIndustrialIU": ""}),
             content_type="application/json")
         self.assertEqual(r.status_code, 200, r.content)
-        a = arrendatario.objects.get()
-        self.assertIsNone(a.celular)
-        self.assertIsNone(a.CodClasificaIndustrialIU)
+        # El "user_id" de la respuesta debe ser el de ana (dueña del perfil), no el de "otro": antes
+        # se buscaba el User con el mismo numero que el perfil, y aqui coincidia con OTRO usuario
+        # (sin dar error), devolviendo el usuario equivocado sin que nada lo delatara.
+        self.assertEqual(r.json()["user_id"], perfil.user_id)
+        perfil.refresh_from_db()
+        self.assertIsNone(perfil.celular)
+        self.assertIsNone(perfil.CodClasificaIndustrialIU)
