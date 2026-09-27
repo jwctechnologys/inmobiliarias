@@ -126,9 +126,19 @@ const CrearContratos = () => {
                                         onClick={() => handleSeleccionarSolicitud(solicitud)}
                                     >
                                         <div className="flex justify-between items-center mb-4">
-                                            <span className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                                                {formatTipoPropiedad(solicitud.tipo)}
-                                            </span>
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <span className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                                                    {formatTipoPropiedad(solicitud.tipo)}
+                                                </span>
+                                                {solicitud.usoInmueble && (
+                                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${solicitud.usoInmueble === 'Comercial'
+                                                        ? 'bg-orange-100 text-orange-700'
+                                                        : 'bg-blue-100 text-blue-700'
+                                                        }`}>
+                                                        Uso: {solicitud.usoInmueble}
+                                                    </span>
+                                                )}
+                                            </div>
                                             {solicitudSeleccionada?.id === solicitud.id && (
                                                 <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold animate-fadeIn">
                                                     ✓ Seleccionada

@@ -8,8 +8,10 @@ from solicitudes.models import Solicitud
 class SolicitudSerializer(serializers.ModelSerializer):
     nombres_arrendatario = serializers.CharField(source='usuario.user.first_name', read_only=True)
     apellidos_arrendatario = serializers.CharField(source='usuario.user.last_name', read_only=True)
-    celular_arrendatario = serializers.CharField(source='usuario.celular', read_only=True)
+    celular = serializers.CharField(source='usuario.celular', read_only=True)
+    email = serializers.CharField(source='usuario.user.email', read_only=True)
     tipo = serializers.CharField(source='casa.tipoInmueble', read_only=True)
+    usoInmueble = serializers.CharField(source='casa.usoInmueble', read_only=True)
     direccion = serializers.SerializerMethodField()
     
     # URLs para descargar documentos
@@ -28,13 +30,15 @@ class SolicitudSerializer(serializers.ModelSerializer):
     class Meta:
         model = Solicitud
         fields = [
-            'id', 
-            'tipo', 
-            'direccion', 
+            'id',
+            'tipo',
+            'usoInmueble',
+            'direccion',
             'nombres_arrendatario', 
             'apellidos_arrendatario',
-            'celular_arrendatario',
-            'fecha', 
+            'celular',
+            'email',
+            'fecha',
             'estado',
             'solicitudAtendida',
             'solicitudContratada',
