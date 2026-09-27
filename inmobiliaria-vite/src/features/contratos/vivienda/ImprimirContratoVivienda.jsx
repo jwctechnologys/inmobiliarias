@@ -632,17 +632,17 @@ const ImprimirContratoVivienda = () => {
           {/* ============================================================
               BOTONES DE ACCIÓN
               ============================================================ */}
-          <div className="acciones-contrato">
+          <div className="acciones-contrato no-print flex flex-wrap items-center gap-3 mt-6">
             {/* ADMINISTRADOR */}
             {user?.groups?.includes('administrador') && (
               <>
                 {!estaFirmado ? (
                   // Contrato NO firmado por administrador
                   <>
-                    <button onClick={handleEditarContrato} className="btn-editar">
+                    <button onClick={handleEditarContrato} className="btn-editar bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors">
                       ✏️ Editar Contrato
                     </button>
-                    <button onClick={handleAceptarContrato} className="btn-aceptar">
+                    <button onClick={handleAceptarContrato} className="btn-aceptar bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors">
                       ✅ Aceptar Contrato
                     </button>
                   </>
@@ -652,20 +652,20 @@ const ImprimirContratoVivienda = () => {
                     {contrato.pdf_firmado ? (
                       <>
                         <button
-                          className="view-pdf-button"
+                          className="view-pdf-button bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-300 font-medium py-2 px-4 rounded-lg shadow-sm transition-colors"
                           onClick={() => window.open(contrato.pdf_firmado, "_blank")}
                         >
                           📄 Ver PDF Firmado
                         </button>
                         {/* Cambiar PDF solo admin */}
                         <input
-                          className="upload-pdf"
+                          className="upload-pdf block text-sm text-gray-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
                           type="file"
                           accept=".pdf"
                           onChange={handleFileChange}
                         />
                         <button
-                          className="change-pdf-button"
+                          className="change-pdf-button bg-amber-600 hover:bg-amber-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors"
                           onClick={handleUploadPDF}
                         >
                           🔄 Cambiar PDF
@@ -674,17 +674,17 @@ const ImprimirContratoVivienda = () => {
                     ) : (
                       <>
                         <input
-                          className="upload-pdf"
+                          className="upload-pdf block text-sm text-gray-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
                           type="file"
                           accept=".pdf"
                           onChange={handleFileChange}
                         />
-                        <button className="upload-pdf-button" onClick={handleUploadPDF}>
+                        <button className="upload-pdf-button bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors" onClick={handleUploadPDF}>
                           📤 Subir PDF Firmado
                         </button>
                       </>
                     )}
-                    <button className="print-button" onClick={() => window.print()}>
+                    <button className="print-button bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors" onClick={() => window.print()}>
                       🖨️ Imprimir Contrato
                     </button>
                   </>
@@ -698,7 +698,7 @@ const ImprimirContratoVivienda = () => {
                 {!estaFirmadoArrendatario ? (
                   // Contrato NO firmado por arrendatario
                   <>
-                    <button onClick={handleAceptarContratoArrendatario} className="btn-aceptar">
+                    <button onClick={handleAceptarContratoArrendatario} className="btn-aceptar bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors">
                       ✅ Aceptar Contrato
                     </button>
 
@@ -750,7 +750,7 @@ const ImprimirContratoVivienda = () => {
                   <>
                     {contrato.pdf_firmado ? (
                       <button
-                        className="view-pdf-button"
+                        className="view-pdf-button bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-300 font-medium py-2 px-4 rounded-lg shadow-sm transition-colors"
                         onClick={() => window.open(contrato.pdf_firmado, "_blank")}
                       >
                         📄 Ver PDF Firmado
@@ -761,7 +761,7 @@ const ImprimirContratoVivienda = () => {
 
                     {contrato.pdf_inventario ? (
                       <button
-                        className="view-pdf-button"
+                        className="view-pdf-button bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-300 font-medium py-2 px-4 rounded-lg shadow-sm transition-colors"
                         onClick={() => window.open(contrato.pdf_inventario, "_blank")}
                       >
                         📄 Ver Inventario PDF
@@ -770,7 +770,7 @@ const ImprimirContratoVivienda = () => {
                       <p className="text-gray-500">📎 El inventario no se ha subido</p>
                     )}
 
-                    <button className="print-button" onClick={() => window.print()}>
+                    <button className="print-button bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors" onClick={() => window.print()}>
                       🖨️ Imprimir Contrato
                     </button>
                   </>

@@ -462,14 +462,14 @@ const ImprimirContratoComercial = () => {
 
         </main>
         {/* Botones condicionales */}
-        <div className="acciones-contrato">
+        <div className="acciones-contrato no-print flex flex-wrap items-center gap-3 mt-6">
           {user.groups[0] === 'administrador' && (<>
             {!estaFirmado && (
               <>
-                <button onClick={handleEditarContrato} className="btn-editar">
+                <button onClick={handleEditarContrato} className="btn-editar bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors">
                   Editar Contrato
                 </button>
-                <button onClick={handleAceptarContrato} className="btn-aceptar">
+                <button onClick={handleAceptarContrato} className="btn-aceptar bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors">
                   Aceptar Contrato
                 </button>
               </>
@@ -480,20 +480,20 @@ const ImprimirContratoComercial = () => {
                 {contrato.pdf_firmado === null ? (
                   <>
                     <input
-                      className="upload-pdf"
+                      className="upload-pdf block text-sm text-gray-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
                       type="file"
                       name="inventario"
                       accept=".pdf"
                       onChange={handleFileChange} // Esta función manejará el archivo seleccionado
                     />
-                    <button className="upload-pdf-button" onClick={handleUploadPDF}>
+                    <button className="upload-pdf-button bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors" onClick={handleUploadPDF}>
                       Subir PDF
                     </button>
                   </>
                 ) : (
                   <>
                     <button
-                      className="view-pdf-button"
+                      className="view-pdf-button bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-300 font-medium py-2 px-4 rounded-lg shadow-sm transition-colors"
                       onClick={() => window.open(contrato.pdf_firmado, "_blank")}
                     >
                       Ver PDF
@@ -503,14 +503,14 @@ const ImprimirContratoComercial = () => {
                     {user.groups[0] === 'administrador' && (
                       <>
                         <input
-                          className="upload-pdf"
+                          className="upload-pdf block text-sm text-gray-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
                           type="file"
                           name="cambiarPDF"
                           accept=".pdf"
                           onChange={handleFileChange} // Reutiliza la función para manejar el cambio de archivo
                         />
                         <button
-                          className="change-pdf-button"
+                          className="change-pdf-button bg-amber-600 hover:bg-amber-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors"
                           onClick={handleUploadPDF}
                         >
                           Cambiar PDF
@@ -519,7 +519,7 @@ const ImprimirContratoComercial = () => {
                     )}
                   </>
                 )}
-                <button className="print-button" onClick={() => window.print()}>
+                <button className="print-button bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors" onClick={() => window.print()}>
                   Imprimir Contrato
                 </button>
               </>
@@ -529,7 +529,7 @@ const ImprimirContratoComercial = () => {
           {user.groups[0] === 'arrendatario' && (<>
             {!estaFirmadoArrendatario && (
               <>
-                <button onClick={handleAceptarContratoArrendatario} className="btn-aceptar">
+                <button onClick={handleAceptarContratoArrendatario} className="btn-aceptar bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors">
                   Aceptar Contrato
                 </button>
                 <div>
@@ -563,7 +563,7 @@ const ImprimirContratoComercial = () => {
                 ) : (
                   <>
                     <button
-                      className="view-pdf-button"
+                      className="view-pdf-button bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-300 font-medium py-2 px-4 rounded-lg shadow-sm transition-colors"
                       onClick={() => window.open(contrato.pdf_inventario, "_blank")}
                     >
                       Ver inventario PDF
@@ -582,7 +582,7 @@ const ImprimirContratoComercial = () => {
                 ) : (
                   <>
                     <button
-                      className="view-pdf-button"
+                      className="view-pdf-button bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-300 font-medium py-2 px-4 rounded-lg shadow-sm transition-colors"
                       onClick={() => window.open(contrato.pdf_firmado, "_blank")}
                     >
                       Ver contrato PDF
@@ -596,14 +596,14 @@ const ImprimirContratoComercial = () => {
                 ) : (
                   <>
                     <button
-                      className="view-pdf-button"
+                      className="view-pdf-button bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-300 font-medium py-2 px-4 rounded-lg shadow-sm transition-colors"
                       onClick={() => window.open(contrato.pdf_inventario, "_blank")}
                     >
                       Ver inventario PDF
                     </button>
                   </>
                 )}
-                <button className="print-button" onClick={() => window.print()}>
+                <button className="print-button bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors" onClick={() => window.print()}>
                   Imprimir Contrato
                 </button>
               </>
