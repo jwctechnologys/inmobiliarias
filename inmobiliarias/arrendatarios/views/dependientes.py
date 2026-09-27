@@ -31,10 +31,11 @@ def create_dependientes(request):
     # Extraer y asignar las variables del request
     data["first_name"] = request.data.get("first_name", "")
     data["last_name"] = request.data.get("last_name", "")
-    data["edad"] = request.data.get("edad", None)
+    # La edad es opcional: el formulario manda "" cuando se deja vacia y un campo numerico no lo acepta.
+    data["edad"] = request.data.get("edad") or None
     data["ocupacion"] = request.data.get("ocupacion", "")
     data["empresa"] = request.data.get("empresa", "")
-    data["parentezco"] = request.data.get("parentezco", "")
+    data["parentezco"] = (request.data.get("parentezco") or "").strip()
     data["tipo_documento"] = request.data.get("tipo_documento", "")
 
     # Validar y asignar doc_identificacion como entero
