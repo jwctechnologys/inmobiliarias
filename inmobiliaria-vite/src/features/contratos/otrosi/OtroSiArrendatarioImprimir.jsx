@@ -176,6 +176,7 @@ const OtroSiArrendatarioImprimir = () => {
             headers: {
               'Content-Type': 'application/json',
             },
+            credentials: 'include',
             body: JSON.stringify({
               numOtrosi: numOtrosis,
               otrosiGenerado: false,

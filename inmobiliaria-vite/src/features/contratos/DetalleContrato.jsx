@@ -10,8 +10,8 @@ function DetalleContrato() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Cargar el detalle del contrato
-    fetch(`${API_URL}/api/contratos/${id}/`)
+    // Cargar el detalle del contrato. Exige sesion iniciada (IsAuthenticated).
+    fetch(`${API_URL}/api/contratos/${id}/`, { credentials: 'include' })
       .then((response) => response.json())
       .then((data) => {
         setDetalle(data);
@@ -25,7 +25,9 @@ function DetalleContrato() {
     if (detalle && detalle.arrendatarioId) {
       const arrId = Number(detalle.arrendatarioId);
   
-      fetch(`${API_URL}/api/contra_arrendatarios_otrosi_firmado/${arrId}`)
+      // Este endpoint exige sesion iniciada (IsAuthenticated): sin "credentials: include" no manda
+      // la cookie de sesion y el servidor responde 403 (por eso nunca aparecian los otrosi firmados).
+      fetch(`${API_URL}/api/contra_arrendatarios_otrosi_firmado/${arrId}`, { credentials: 'include' })
         .then((response) => {
           if (!response.ok) {
             // Manejar errores de respuesta no exitosa
