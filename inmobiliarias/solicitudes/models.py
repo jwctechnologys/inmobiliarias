@@ -8,7 +8,7 @@ from usuarios.models import arrendatario
 class Solicitud(models.Model):
     casa = models.ForeignKey(arrendar, related_name="solicitudes", on_delete=models.CASCADE)
     usuario = models.ForeignKey(arrendatario, related_name="solicitudes", on_delete=models.CASCADE)
-    idCoarrendatario = models.IntegerField(blank=True,)
+    idCoarrendatario = models.IntegerField(blank=True, null=True)  # sin codeudor: NULL
     idsDependientes = models.JSONField(blank=True, default=list)
     idsReferencias = models.JSONField(blank=True, default=list)
     idDeclaracionIngresos = models.IntegerField(blank=True, null=True) 

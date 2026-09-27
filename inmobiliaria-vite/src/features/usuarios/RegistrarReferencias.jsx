@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { getCsrfToken } from '../../utils/csrf';
 import { Link, useNavigate } from 'react-router-dom';
 import { API_URL } from '../../config';
+import { motivoDeError } from '../../utils/errores';
 
 const RegistrarReferencias = () => {
     const [arrendatarios, setArrendatarios] = useState([]);
@@ -112,7 +113,7 @@ const RegistrarReferencias = () => {
                 alert('Referencia registrada exitosamente');
                 navigate('/register/Arrendatario');
             } else {
-                alert(`Error al registrar referencia: ${data.error}`);
+                alert(`Error al registrar referencia: ${motivoDeError(data)}`);
             }
         } catch (error) {
             alert('Error de conexión');

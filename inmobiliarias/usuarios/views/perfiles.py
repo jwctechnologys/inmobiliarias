@@ -9,9 +9,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from arrendatarios.models import coarrendatario
+from inmobiliarias.vacios import vacios_a_none
 from usuarios.models import User, administrador, arrendatario, propietario, proveedor
 from usuarios.serializers import ArrendatarioSerializer, administradorSerializer
-from usuarios.views.auth import entero_o_none
 
 
 @csrf_protect
@@ -88,14 +88,13 @@ def user_profile_update_view(request):
             # IMPORTANTE: SOLO actualizar los campos que vienen en la solicitud
             # NO asignar None a los campos que no se envían
             # ============================================================
+            # Numericos opcionales vacios ("") -> NULL, en vez de un error 500 al guardar.
+            data = vacios_a_none(type(perfil_to_update), data)
             data_to_update = {}
             for field in allowed_fields:
                 if field in data:
                     # Si el campo está en la solicitud, tomar su valor
-                    value = data.get(field)
-                    if field == "CodClasificaIndustrialIU":
-                        value = entero_o_none(value)
-                    data_to_update[field] = value
+                    data_to_update[field] = data.get(field)
                 # Si NO está en la solicitud, NO lo actualizamos
 
             print(f"📝 Campos a actualizar: {data_to_update}")

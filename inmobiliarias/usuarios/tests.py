@@ -5,9 +5,7 @@ from django.test import TestCase
 from .models import arrendatario, propietario, proveedor
 
 
-class RegistroCompletoTests(TestCase):
-    """Registro con is_basic=False: crea el usuario y su perfil de rol en un solo paso."""
-
+class RegistroMixin:
     def registrar(self, group, username="ana", **extra):
         # Los mismos campos que envia el formulario del frontend.
         payload = {
@@ -20,6 +18,10 @@ class RegistroCompletoTests(TestCase):
         }
         return self.client.post("/api/create/", data=json.dumps(payload),
                                 content_type="application/json")
+
+
+class RegistroCompletoTests(RegistroMixin, TestCase):
+    """Registro con is_basic=False: crea el usuario y su perfil de rol en un solo paso."""
 
     def test_arrendatario_guarda_su_estado_civil(self):
         # Antes fallaba con NameError (estadoCivil no estaba definido) y borraba el usuario.
@@ -60,3 +62,29 @@ class RegistroCompletoTests(TestCase):
         r = self.registrar("proveedor", username="beto")
         self.assertEqual(r.status_code, 201, r.content)
         self.assertTrue(proveedor.objects.filter(user__username="beto").exists())
+
+    def test_registro_con_numericos_opcionales_vacios(self):
+        # Celular, documento, cuentas y codigo CIIU se dejan vacios ("" desde el formulario): a NULL.
+        vacios = dict(celular="", celularDos="", doc_identificacion="", cuentaDaviplata="",
+                      cuentaNequi="", CuentaBancolombia="", CodClasificaIndustrialIU="")
+        for grupo in ("arrendatario", "propietario", "proveedor"):
+            r = self.registrar(grupo, username=f"vacio_{grupo}", **vacios)
+            self.assertEqual(r.status_code, 201, (grupo, r.content))
+        p = propietario.objects.get(user__username="vacio_propietario")
+        self.assertIsNone(p.celular)
+        self.assertIsNone(p.cuentaNequi)
+        self.assertIsNone(p.doc_identificacion)
+
+
+class ActualizarPerfilTests(RegistroMixin, TestCase):
+    def test_actualizar_con_numericos_vacios(self):
+        # El formulario de edicion manda "" en los numericos que se borran: a NULL, no error 500.
+        self.registrar("arrendatario", celular=3209028064, CodClasificaIndustrialIU="9602")
+        uid = arrendatario.objects.get().user_id
+        r = self.client.put("/api/user_profile_update/", data=json.dumps(
+            {"groups": "arrendatario", "id": uid, "celular": "", "CodClasificaIndustrialIU": ""}),
+            content_type="application/json")
+        self.assertEqual(r.status_code, 200, r.content)
+        a = arrendatario.objects.get()
+        self.assertIsNone(a.celular)
+        self.assertIsNone(a.CodClasificaIndustrialIU)

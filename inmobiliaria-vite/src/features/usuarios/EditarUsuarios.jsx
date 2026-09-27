@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getCsrfToken } from '../../utils/csrf';
 import { API_URL } from '../../config';
+import { motivoDeError } from '../../utils/errores';
 
 const EditarUsuario = () => {
     const { id } = useParams();
@@ -299,7 +300,7 @@ const EditarUsuario = () => {
         if (response.ok) {
             alert('Coarrendatario actualizado exitosamente');
         } else {
-            alert(`Error al actualizar coarrendatario: ${data.error}`);
+            alert(`Error al actualizar coarrendatario: ${motivoDeError(data)}`);
         }
     };
 
@@ -336,7 +337,7 @@ const EditarUsuario = () => {
         if (response.ok) {
             alert('Dependiente actualizado exitosamente');
         } else {
-            alert(`Error al actualizar dependiente: ${data.error}`);
+            alert(`Error al actualizar dependiente: ${motivoDeError(data)}`);
         }
     };
 
@@ -371,7 +372,7 @@ const EditarUsuario = () => {
         if (response.ok) {
             alert('Referencia actualizada exitosamente');
         } else {
-            alert(`Error al actualizar referencia: ${data.error}`);
+            alert(`Error al actualizar referencia: ${motivoDeError(data)}`);
         }
     };
 

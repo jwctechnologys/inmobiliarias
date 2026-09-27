@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { getCsrfToken } from '../../utils/csrf';
 import { Link, useNavigate } from 'react-router-dom';
 import { API_URL } from '../../config';
+import { motivoDeError } from '../../utils/errores';
 
 const RegisterDependientes = () => {
     const [arrendatarios, setArrendatarios] = useState([]);
@@ -93,9 +94,7 @@ const RegisterDependientes = () => {
                 alert('Dependiente registrado exitosamente');
                 navigate('/');
             } else {
-                // El servidor responde {error: "..."} o, si un campo no es valido, {campo: ["mensaje"]}.
-                const motivo = data.error || Object.entries(data).map(([campo, msgs]) => `${campo}: ${[].concat(msgs).join(' ')}`).join(', ');
-                alert(`Error al registrar dependiente: ${motivo}`);
+                alert(`Error al registrar dependiente: ${motivoDeError(data)}`);
             }
         } catch (error) {
             alert('Error de conexión');
