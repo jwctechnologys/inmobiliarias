@@ -28,6 +28,11 @@ function NavBar() {
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   
   const navItemsRef = useRef(null);
+  const desktopRowRef = useRef(null); // fila completa (logo + items + usuario): su ancho no depende de cuantos items se muestren
+  const logoRef = useRef(null);
+  const userButtonRef = useRef(null);
+  const moreButtonRef = useRef(null);
+  const itemMeasureRefs = useRef({}); // ancho REAL de cada item, medido en una copia oculta (nunca adivinado por longitud de texto)
 
   // Obtener el usuario actual combinando context y localStorage
   const getCurrentUser = () => {
@@ -146,71 +151,79 @@ function NavBar() {
     return items.sort((a, b) => a.priority - b.priority);
   };
 
-  // Función para calcular qué items mostrar y cuáles van al menú "Más"
+  // Cuantos items caben en la fila, midiendo el ancho REAL de cada boton (nunca adivinando por la
+  // longitud del texto: eso fallaba al cargar la pagina y solo se corregia si el usuario cambiaba el
+  // tamano de la ventana, porque eso forzaba a recalcular con datos ya correctos).
   const calculateVisibleItems = () => {
-    if (!navItemsRef.current) return;
+    if (!desktopRowRef.current) return;
 
-    const container = navItemsRef.current;
-    const containerWidth = container.offsetWidth;
-    
-    // Medir el ancho de cada item (aproximado)
     const items = getMenuItems();
-    
-    // Ancho reservado para el menú de usuario y espacios (aproximadamente 200px)
-    const RESERVED_WIDTH = 200;
-    // Ancho promedio de cada botón (aproximadamente 120-150px)
-    const AVG_ITEM_WIDTH = 130;
-    
-    let availableWidth = containerWidth - RESERVED_WIDTH;
-    let itemsThatFit = 0;
-    let totalWidth = 0;
-    
-    for (let i = 0; i < items.length; i++) {
-      // Estimación del ancho basada en la longitud del texto
-      const estimatedWidth = Math.min(200, Math.max(80, items[i].label.length * 12));
-      if (totalWidth + estimatedWidth <= availableWidth) {
-        totalWidth += estimatedWidth;
-        itemsThatFit++;
-      } else {
-        break;
-      }
+    const GAP = 4; // space-x-1
+
+    // Si algun boton todavia no se pudo medir (recien montado), se reintenta en el proximo frame
+    // en vez de calcular con anchos a medias.
+    if (items.some((item) => !itemMeasureRefs.current[item.id])) {
+      requestAnimationFrame(calculateVisibleItems);
+      return;
     }
-    
-    // Mostrar al menos 2 items
-    itemsThatFit = Math.max(2, itemsThatFit);
-    
+
+    const rowWidth = desktopRowRef.current.offsetWidth;
+    const logoWidth = logoRef.current?.offsetWidth || 0;
+    const userWidth = userButtonRef.current?.offsetWidth || 0;
+    const moreWidth = (moreButtonRef.current?.offsetWidth || 90) + GAP;
+
+    const anchoDe = (item) => (itemMeasureRefs.current[item.id]?.offsetWidth || 0) + GAP;
+
+    const contarCuantosCaben = (availableWidth) => {
+      let total = 0;
+      let cuantos = 0;
+      for (const item of items) {
+        total += anchoDe(item);
+        if (total > availableWidth) break;
+        cuantos++;
+      }
+      return cuantos;
+    };
+
+    const availableSinMas = rowWidth - logoWidth - userWidth;
+    let itemsThatFit = contarCuantosCaben(availableSinMas);
+
+    if (itemsThatFit < items.length) {
+      // No caben todos: hay que dejarle sitio tambien al boton "Más".
+      itemsThatFit = contarCuantosCaben(availableSinMas - moreWidth);
+    }
+
     if (itemsThatFit >= items.length) {
-      // Todos los items caben
       setItemsToShow(items);
       setItemsInMore([]);
       setShowMoreButton(false);
     } else {
-      // Algunos items no caben
-      setItemsToShow(items.slice(0, itemsThatFit - 1));
-      setItemsInMore(items.slice(itemsThatFit - 1));
+      itemsThatFit = Math.max(1, itemsThatFit);
+      setItemsToShow(items.slice(0, itemsThatFit));
+      setItemsInMore(items.slice(itemsThatFit));
       setShowMoreButton(true);
     }
   };
 
-  // Efecto para manejar el resize
+  // Recalcular cuando cambia el tamano de la fila (ventana, sidebar, lo que sea) y cuando cambian
+  // los datos que afectan la lista de items (rol, contadores de pendientes, etc.). "loading" tiene
+  // que estar en la lista: mientras es true la fila de escritorio ni siquiera esta montada
+  // (desktopRowRef.current es null), asi que hay que reintentar observarla en cuanto pasa a false
+  // -- si no, el ResizeObserver nunca llega a engancharse y el menu se queda vacio hasta que algo
+  // (como cambiar el tamano de la ventana, que dispara el resize de mas abajo) fuerce un recalculo.
   useEffect(() => {
-    const handleResize = () => {
-      setTimeout(calculateVisibleItems, 100);
-    };
+    if (!desktopRowRef.current) return;
+    const observer = new ResizeObserver(() => calculateVisibleItems());
+    observer.observe(desktopRowRef.current);
+    return () => observer.disconnect();
+  }, [loading, solicitudesPendientes, solicitudesPendientesContrato, userRole, isAdminActive, isOtrosi, isOtrosiArrendatario, estaFirmadoArrendatario]);
 
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    
-    const observer = new ResizeObserver(handleResize);
-    if (navItemsRef.current) {
-      observer.observe(navItemsRef.current);
-    }
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      observer.disconnect();
-    };
-  }, [solicitudesPendientes, solicitudesPendientesContrato, userRole, isAdminActive, isOtrosi, isOtrosiArrendatario, estaFirmadoArrendatario]);
+  // Red de seguridad: si por lo que sea el ResizeObserver no llega a dispararse, un resize de la
+  // ventana siempre recalcula.
+  useEffect(() => {
+    window.addEventListener('resize', calculateVisibleItems);
+    return () => window.removeEventListener('resize', calculateVisibleItems);
+  });
 
   // Contar solicitudes aceptadas pendientes
   const contarSolicitudesAceptadasPendientes = async () => {
@@ -356,11 +369,6 @@ function NavBar() {
     }
   }, [isLoggedIn]);
 
-  // Recalcular cuando cambian los datos
-  useEffect(() => {
-    setTimeout(calculateVisibleItems, 100);
-  }, [solicitudesPendientes, solicitudesPendientesContrato, isAdminActive, isOtrosi, isOtrosiArrendatario, estaFirmadoArrendatario]);
-
   // Cargar usuario de localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -487,23 +495,40 @@ function NavBar() {
     <nav className="bg-gradient-to-r from-blue-600 to-indigo-700 shadow-lg sticky top-0 z-50 no-print">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Fila única para desktop - Logo + items + usuario */}
-        <div className="hidden md:flex justify-between items-center h-16">
-          <div className="flex items-center flex-shrink-0">
+        <div className="hidden md:flex justify-between items-center h-16" ref={desktopRowRef}>
+          <div className="flex items-center flex-shrink-0" ref={logoRef}>
             <Link to="/" className="text-white font-bold text-xl">
               Inmobiliaria CL
             </Link>
           </div>
 
+          {/* Fila oculta, fuera de pantalla: mide el ancho REAL de cada boton posible (con la
+              tipografia y el padding reales) para saber cuantos caben. Nunca se ve. */}
+          <div
+            aria-hidden="true"
+            className="flex items-center space-x-1"
+            style={{ position: 'absolute', top: -9999, left: -9999, visibility: 'hidden', pointerEvents: 'none' }}
+          >
+            {getMenuItems().map((item) => (
+              <div key={item.id} ref={(el) => { if (el) itemMeasureRefs.current[item.id] = el; }}>
+                <MenuItemLink item={item} />
+              </div>
+            ))}
+            <button ref={moreButtonRef} className="px-3 py-2 text-sm font-medium flex items-center space-x-1">
+              <span>Más</span>
+            </button>
+          </div>
+
           {/* Contenedor de items del menú - VISIBLE SOLO UNA VEZ */}
           <div className="flex items-center space-x-1 flex-1 justify-end" ref={navItemsRef}>
             {itemsToShow.map((item) => (
-              <MenuItemLink 
-                key={item.id} 
-                item={item} 
-                onClick={() => setMobileMenuOpen(false)} 
+              <MenuItemLink
+                key={item.id}
+                item={item}
+                onClick={() => setMobileMenuOpen(false)}
               />
             ))}
-            
+
             {/* Botón "Más" para items ocultos */}
             {showMoreButton && itemsInMore.length > 0 && (
               <div className="relative">
@@ -543,7 +568,7 @@ function NavBar() {
           </div>
 
           {/* User Info */}
-          <div className="relative flex-shrink-0 ml-4">
+          <div className="relative flex-shrink-0 ml-4" ref={userButtonRef}>
             <button
               onClick={toggleUserMenu}
               className="flex items-center space-x-2 text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium transition-colors"
