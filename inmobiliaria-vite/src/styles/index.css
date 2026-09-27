@@ -1,1 +1,10 @@
 @import "tailwindcss";
+
+/* La clase "no-print" (usada por el NavBar y por botones de accion en pantallas de impresion) no
+   tenia ninguna regla que la hiciera invisible al imprimir: por eso el NavBar tapaba el contenido
+   en la vista previa de impresion/PDF. Global para que funcione en cualquier pantalla. */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}
