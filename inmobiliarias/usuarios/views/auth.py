@@ -10,14 +10,8 @@ from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.views.decorators.http import require_GET
 
 from arrendatarios.models import coarrendatario
+from inmobiliarias.vacios import vacios_a_none
 from usuarios.models import User, administrador, arrendatario, propietario, proveedor
-
-
-def entero_o_none(valor):
-    """Campo numerico opcional: el formulario manda '' cuando se deja vacio, y Django no lo acepta en un IntegerField."""
-    if valor is None or (isinstance(valor, str) and not valor.strip()):
-        return None
-    return valor
 
 
 @require_GET
@@ -114,6 +108,13 @@ def user_create_view(request):
             
             # Si es registro completo, creamos el perfil con todos los datos
             else:
+                # Los campos numericos opcionales llegan como "" cuando se dejan vacios (celular, documento, cuentas,
+                # codigo CIIU...): a NULL, o el servidor los rechaza.
+                modelo_perfil = {"administrador": administrador, "propietario": propietario,
+                                 "arrendatario": arrendatario, "proveedor": proveedor}.get(group_name)
+                if modelo_perfil:
+                    data = vacios_a_none(modelo_perfil, data)
+
                 # Extraer campos específicos del perfil
                 genero = data.get("genero")
                 tipo_documento = data.get("tipo_documento")
@@ -188,7 +189,7 @@ def user_create_view(request):
                             celularDos=celularDos,
                             ocupacion=data.get("ocupacion"),
                             empresa=data.get("empresa"),
-                            CodClasificaIndustrialIU=entero_o_none(data.get("CodClasificaIndustrialIU")),
+                            CodClasificaIndustrialIU=data.get("CodClasificaIndustrialIU"),
                             descActividadEconomica=data.get("descActividadEconomica"),
                         )
                     
@@ -268,6 +269,7 @@ def completar_perfil_view(request):
                     )
                 
                 # Crear perfil de arrendatario
+                data = vacios_a_none(arrendatario, data)
                 arrendatario_obj = arrendatario.objects.create(
                     user=user,
                     genero=data.get("genero"),
@@ -276,7 +278,7 @@ def completar_perfil_view(request):
                     lugarExpCedula=data.get("lugarExpCedula"),
                     ocupacion=data.get("ocupacion"),
                     empresa=data.get("empresa"),
-                    CodClasificaIndustrialIU=entero_o_none(data.get("CodClasificaIndustrialIU")),
+                    CodClasificaIndustrialIU=data.get("CodClasificaIndustrialIU"),
                     descActividadEconomica=data.get("descActividadEconomica"),
                     direccion=data.get("direccion"),
                     estadoCivil=data.get("estadoCivil"),

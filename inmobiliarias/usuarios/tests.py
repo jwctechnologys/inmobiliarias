@@ -5,9 +5,7 @@ from django.test import TestCase
 from .models import arrendatario, propietario, proveedor
 
 
-class RegistroCompletoTests(TestCase):
-    """Registro con is_basic=False: crea el usuario y su perfil de rol en un solo paso."""
-
+class RegistroMixin:
     def registrar(self, group, username="ana", **extra):
         # Los mismos campos que envia el formulario del frontend.
         payload = {
@@ -20,6 +18,10 @@ class RegistroCompletoTests(TestCase):
         }
         return self.client.post("/api/create/", data=json.dumps(payload),
                                 content_type="application/json")
+
+
+class RegistroCompletoTests(RegistroMixin, TestCase):
+    """Registro con is_basic=False: crea el usuario y su perfil de rol en un solo paso."""
 
     def test_arrendatario_guarda_su_estado_civil(self):
         # Antes fallaba con NameError (estadoCivil no estaba definido) y borraba el usuario.
@@ -60,3 +62,38 @@ class RegistroCompletoTests(TestCase):
         r = self.registrar("proveedor", username="beto")
         self.assertEqual(r.status_code, 201, r.content)
         self.assertTrue(proveedor.objects.filter(user__username="beto").exists())
+
+    def test_registro_con_numericos_opcionales_vacios(self):
+        # Celular, documento, cuentas y codigo CIIU se dejan vacios ("" desde el formulario): a NULL.
+        vacios = dict(celular="", celularDos="", doc_identificacion="", cuentaDaviplata="",
+                      cuentaNequi="", CuentaBancolombia="", CodClasificaIndustrialIU="")
+        for grupo in ("arrendatario", "propietario", "proveedor"):
+            r = self.registrar(grupo, username=f"vacio_{grupo}", **vacios)
+            self.assertEqual(r.status_code, 201, (grupo, r.content))
+        p = propietario.objects.get(user__username="vacio_propietario")
+        self.assertIsNone(p.celular)
+        self.assertIsNone(p.cuentaNequi)
+        self.assertIsNone(p.doc_identificacion)
+
+
+class ActualizarPerfilTests(RegistroMixin, TestCase):
+    def test_actualizar_con_id_del_perfil_distinto_al_del_usuario(self):
+        # listar_usuarios_por_grupo devuelve el id del PERFIL (arrendatario.id), no el del User: hay
+        # que crear otro usuario antes para que difieran y no pasar la prueba "por casualidad".
+        self.registrar("propietario", username="otro")
+        self.registrar("arrendatario", celular=3209028064, CodClasificaIndustrialIU="9602")
+        perfil = arrendatario.objects.get(user__username="ana")
+        self.assertNotEqual(perfil.id, perfil.user_id)  # confirma que el caso realmente los distingue
+
+        # El formulario de edicion manda "" en los numericos que se borran: a NULL, no error 500.
+        r = self.client.put("/api/user_profile_update/", data=json.dumps(
+            {"groups": "arrendatario", "id": perfil.id, "celular": "", "CodClasificaIndustrialIU": ""}),
+            content_type="application/json")
+        self.assertEqual(r.status_code, 200, r.content)
+        # El "user_id" de la respuesta debe ser el de ana (dueña del perfil), no el de "otro": antes
+        # se buscaba el User con el mismo numero que el perfil, y aqui coincidia con OTRO usuario
+        # (sin dar error), devolviendo el usuario equivocado sin que nada lo delatara.
+        self.assertEqual(r.json()["user_id"], perfil.user_id)
+        perfil.refresh_from_db()
+        self.assertIsNone(perfil.celular)
+        self.assertIsNone(perfil.CodClasificaIndustrialIU)

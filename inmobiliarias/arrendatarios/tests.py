@@ -4,7 +4,7 @@ from django.test import TestCase
 
 from usuarios.models import User, arrendatario
 
-from .models import coarrendatario, dependientes
+from .models import coarrendatario, dependientes, referencias
 
 
 class CrearCoarrendatarioTests(TestCase):
@@ -76,3 +76,37 @@ class CrearDependienteTests(TestCase):
         # El texto de los contratos no queda con un "su" suelto.
         texto = self.client.get(f"/api/dependientes/{self.arrendatario.id}/").json()["descripcion"]
         self.assertTrue(texto.startswith("y <strong>Neyda Gutierrez</strong>"), texto)
+
+
+class CamposOpcionalesVaciosTests(TestCase):
+    """Los formularios mandan "" en los campos opcionales que se dejan vacios."""
+
+    def setUp(self):
+        user = User.objects.create_user(username="ana", email="ana@ejemplo.co", password="Segura123!")
+        self.arrendatario = arrendatario.objects.create(user=user)
+
+    def post(self, url, **datos):
+        return self.client.post(url, data=json.dumps({"arrendatario": self.arrendatario.id, **datos}),
+                                content_type="application/json")
+
+    def test_coarrendatario_con_celular_y_documento_vacios(self):
+        r = self.post("/api/coarrendatarios/create/", first_name="Luis", last_name="Perez",
+                      tipo_documento="CC", doc_identificacion="", celular="", celularDos="", email="")
+        self.assertEqual(r.status_code, 201, r.content)
+        co = coarrendatario.objects.get()
+        self.assertIsNone(co.celular)
+        self.assertIsNone(co.doc_identificacion)
+
+    def test_referencia_con_celular_vacio(self):
+        r = self.post("/api/referencias/create/", first_name="Marta", last_name="Diaz", celular="")
+        self.assertEqual(r.status_code, 201, r.content)
+        self.assertIsNone(referencias.objects.get().celular)
+
+    def test_actualizar_coarrendatario_con_celular_vacio(self):
+        co = coarrendatario.objects.create(arrendatario=self.arrendatario, first_name="Luis", celular=3112977693)
+        r = self.client.put(f"/api/coarrendatarios/{co.id}/", data=json.dumps(
+            {"arrendatarioId": self.arrendatario.id, "first_name": "Luis", "celular": ""}),
+            content_type="application/json")
+        self.assertEqual(r.status_code, 200, r.content)
+        co.refresh_from_db()
+        self.assertIsNone(co.celular)

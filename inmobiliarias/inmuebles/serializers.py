@@ -1,5 +1,6 @@
 """Serializadores de casas, fotos y videos."""
 from rest_framework import serializers
+from inmobiliarias.vacios import VaciosANoneMixin
 
 from inmuebles.models import Imagen_casa_arrendar, Video_Casa, arrendar
 
@@ -11,7 +12,7 @@ class InmuebleSerializer(serializers.ModelSerializer):
         depth = 3
 
 
-class CasaSerializer(serializers.ModelSerializer):
+class CasaSerializer(VaciosANoneMixin, serializers.ModelSerializer):
     solicitudes_count = serializers.IntegerField(source="solicitudes.count", read_only=True)
     class Meta:
         model = arrendar

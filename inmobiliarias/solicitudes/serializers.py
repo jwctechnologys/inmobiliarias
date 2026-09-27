@@ -1,5 +1,6 @@
 """Serializadores de solicitudes de arriendo."""
 from rest_framework import serializers
+from inmobiliarias.vacios import VaciosANoneMixin
 
 from solicitudes.models import Solicitud
 
@@ -123,7 +124,7 @@ class SolicitudSerializer(serializers.ModelSerializer):
         return None
 
 
-class SolicitudCreateSerializer(serializers.ModelSerializer):
+class SolicitudCreateSerializer(VaciosANoneMixin, serializers.ModelSerializer):
     class Meta:
         model = Solicitud
         fields = [

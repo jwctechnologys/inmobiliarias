@@ -4,6 +4,7 @@ import { getCsrfToken } from '../../utils/csrf';
 import { Link, useNavigate } from 'react-router-dom';
 import { API_URL } from '../../config';
 import DireccionesRegistro, { correspondenciaAEnviar } from '../../components/DireccionesRegistro';
+import { motivoDeError } from '../../utils/errores';
 
 const RegisterCoarrendatario = () => {
     const [arrendatarios, setArrendatarios] = useState([]);
@@ -138,7 +139,7 @@ const RegisterCoarrendatario = () => {
                 alert('Coarrendatario registrado exitosamente');
                 navigate('/register/Arrendatario');
             } else {
-                alert(`Error al registrar coarrendatario: ${data.error}`);
+                alert(`Error al registrar coarrendatario: ${motivoDeError(data)}`);
             }
         } catch (error) {
             alert('Error de conexión');

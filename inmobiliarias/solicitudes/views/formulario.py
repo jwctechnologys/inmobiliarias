@@ -149,20 +149,22 @@ def solicitud_completa(request):
                             'arrendatario': arrendatario_obj,
                             'first_name': request.POST.get('coarrendatario[first_name]'),
                             'last_name': request.POST.get('coarrendatario[last_name]'),
-                            'tipo_documento': request.POST.get('coarrendatario[tipo_documento]'),
-                            'doc_identificacion': request.POST.get('coarrendatario[doc_identificacion]'),
-                            'lugarExpCedula': request.POST.get('coarrendatario[lugarExpCedula]') or None,
+                            # Segun el modelo: los numericos y los campos con null=True van a None si estan vacios;
+                            # los de texto sin null=True ("" y no None, o la base rechaza el INSERT).
+                            'tipo_documento': request.POST.get('coarrendatario[tipo_documento]') or None,
+                            'doc_identificacion': request.POST.get('coarrendatario[doc_identificacion]') or None,
+                            'lugarExpCedula': request.POST.get('coarrendatario[lugarExpCedula]') or '',
                             'parentezco': request.POST.get('coarrendatario[parentezco]') or None,
-                            'celular': request.POST.get('coarrendatario[celular]'),
-                            'email': request.POST.get('coarrendatario[email]'),
-                            'direccion': request.POST.get('coarrendatario[direccion]') or None,
-                            'barrio': request.POST.get('coarrendatario[barrio]') or None,
-                            'ciudad': request.POST.get('coarrendatario[ciudad]') or None,
-                            'empresa': request.POST.get('coarrendatario[empresa]'),
-                            'ocupacion': request.POST.get('coarrendatario[ocupacion]'),
-                            'ingresosMensualesTotales': request.POST.get('coarrendatario[ingresosMensualesTotales]') or None,
+                            'celular': request.POST.get('coarrendatario[celular]') or None,
+                            'email': request.POST.get('coarrendatario[email]') or None,
+                            'direccion': request.POST.get('coarrendatario[direccion]') or '',
+                            'barrio': request.POST.get('coarrendatario[barrio]') or '',
+                            'ciudad': request.POST.get('coarrendatario[ciudad]') or '',
+                            'empresa': request.POST.get('coarrendatario[empresa]') or '',
+                            'ocupacion': request.POST.get('coarrendatario[ocupacion]') or '',
+                            'ingresosMensualesTotales': request.POST.get('coarrendatario[ingresosMensualesTotales]') or '',
                             'declaraRenta': request.POST.get('coarrendatario[declaraRenta]') == 'true',
-                            'genero': request.POST.get('coarrendatario[genero]') or None
+                            'genero': request.POST.get('coarrendatario[genero]') or ''
                         }
                         
                         nuevo_coarrendatario = coarrendatario.objects.create(**coarrendatario_data)

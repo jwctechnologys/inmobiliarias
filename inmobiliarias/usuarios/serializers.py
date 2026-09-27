@@ -1,10 +1,11 @@
 """Serializadores de usuarios y perfiles de rol."""
 from rest_framework import serializers
+from inmobiliarias.vacios import VaciosANoneMixin
 
 from usuarios.models import administrador, arrendatario, propietario
 
 
-class administradorSerializer(serializers.ModelSerializer):
+class administradorSerializer(VaciosANoneMixin, serializers.ModelSerializer):
     class Meta:
         model = administrador
         fields = '__all__'
@@ -14,7 +15,7 @@ class administradorSerializer(serializers.ModelSerializer):
         }
 
 
-class ArrendatarioSerializer(serializers.ModelSerializer):
+class ArrendatarioSerializer(VaciosANoneMixin, serializers.ModelSerializer):
     class Meta:
         model = arrendatario
         fields = '__all__'
@@ -24,7 +25,7 @@ class ArrendatarioSerializer(serializers.ModelSerializer):
         }
 
 
-class PropietarioSerializer(serializers.ModelSerializer):
+class PropietarioSerializer(VaciosANoneMixin, serializers.ModelSerializer):
     class Meta:
         model = propietario
         fields = '__all__'

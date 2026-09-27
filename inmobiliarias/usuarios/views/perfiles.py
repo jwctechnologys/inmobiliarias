@@ -9,9 +9,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from arrendatarios.models import coarrendatario
+from inmobiliarias.vacios import vacios_a_none
 from usuarios.models import User, administrador, arrendatario, propietario, proveedor
 from usuarios.serializers import ArrendatarioSerializer, administradorSerializer
-from usuarios.views.auth import entero_o_none
 
 
 @csrf_protect
@@ -29,13 +29,9 @@ def user_profile_update_view(request):
                     {"error": "Grupo o ID del grupo no proporcionados."}, status=400
                 )
 
-            # Buscar el usuario por su ID
-            try:
-                user_to_update = User.objects.get(id=group_id)
-            except User.DoesNotExist:
-                return JsonResponse({"error": "Usuario no encontrado."}, status=404)
-
-            # Verificar el grupo y buscar al usuario correspondiente
+            # "id" es el id del PERFIL (administrador/arrendatario/propietario), tal como lo devuelve
+            # listar_usuarios_por_grupo -- no el id del User. Antes se buscaba el User con este mismo
+            # numero, y solo "funcionaba" cuando ambos ids coincidian por casualidad.
             if group == "administrador":
                 try:
                     perfil_to_update = administrador.objects.get(id=group_id)
@@ -84,18 +80,19 @@ def user_profile_update_view(request):
             else:
                 return JsonResponse({"error": "Grupo no válido."}, status=400)
 
+            user_to_update = perfil_to_update.user
+
             # ============================================================
             # IMPORTANTE: SOLO actualizar los campos que vienen en la solicitud
             # NO asignar None a los campos que no se envían
             # ============================================================
+            # Numericos opcionales vacios ("") -> NULL, en vez de un error 500 al guardar.
+            data = vacios_a_none(type(perfil_to_update), data)
             data_to_update = {}
             for field in allowed_fields:
                 if field in data:
                     # Si el campo está en la solicitud, tomar su valor
-                    value = data.get(field)
-                    if field == "CodClasificaIndustrialIU":
-                        value = entero_o_none(value)
-                    data_to_update[field] = value
+                    data_to_update[field] = data.get(field)
                 # Si NO está en la solicitud, NO lo actualizamos
 
             print(f"📝 Campos a actualizar: {data_to_update}")

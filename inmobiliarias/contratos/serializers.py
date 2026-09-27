@@ -2,6 +2,7 @@
 from datetime import datetime
 
 from rest_framework import serializers
+from inmobiliarias.vacios import VaciosANoneMixin
 
 from contratos.models import (
     FechaPago,
@@ -162,7 +163,7 @@ class ContratoViviendaSerializer(serializers.ModelSerializer):
         return obj.calcular_meses()
 
 
-class ContratoViviendaCreateSerializer(serializers.ModelSerializer):
+class ContratoViviendaCreateSerializer(VaciosANoneMixin, serializers.ModelSerializer):
     """
     Serializer para CREAR un contrato - Recibe todos los datos del frontend
     """
@@ -195,7 +196,7 @@ class ContratoViviendaCreateSerializer(serializers.ModelSerializer):
         return data
 
 
-class ContratoViviendaUpdateSerializer(serializers.ModelSerializer):
+class ContratoViviendaUpdateSerializer(VaciosANoneMixin, serializers.ModelSerializer):
     """
     Serializer para ACTUALIZAR un contrato
     Solo permite actualizar ciertos campos (estados, documentos, fechas de otrosí)
@@ -329,7 +330,7 @@ class VideoReporteNovedadesSerializer(serializers.ModelSerializer):
         fields = ['id', 'video_archivo']
 
 
-class ReporteNovedadesSerializer(serializers.ModelSerializer):
+class ReporteNovedadesSerializer(VaciosANoneMixin, serializers.ModelSerializer):
     imagenes = ImagenReporteNovedadesSerializer(many=True, read_only=True)
     videos = VideoReporteNovedadesSerializer(many=True, read_only=True)
     contrato_detalle = serializers.SerializerMethodField()
@@ -436,13 +437,13 @@ class ContratoInconformeSerializer(serializers.ModelSerializer):
             return None
 
 
-class OtroSiSerializer(serializers.ModelSerializer):
+class OtroSiSerializer(VaciosANoneMixin, serializers.ModelSerializer):
     class Meta:
         model = otroSi
         fields = '__all__'
 
 
-class ReporteInconformidadSerializer(serializers.ModelSerializer):
+class ReporteInconformidadSerializer(VaciosANoneMixin, serializers.ModelSerializer):
     class Meta:
         model = ReporteInconformidad
         fields = '__all__'
