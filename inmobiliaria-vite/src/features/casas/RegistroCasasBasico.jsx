@@ -293,8 +293,18 @@ const RegistroCasasBasico = () => {
                                 value={formData.tipoInmueble}
                                 onChange={handleChange}
                                 required
+                                list="tipos-inmueble"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                             />
+                            {/* El datalist solo sugiere: se puede escribir cualquier otro tipo. */}
+                            <datalist id="tipos-inmueble">
+                                <option value="Casa" />
+                                <option value="Apartamento" />
+                                <option value="Habitación" />
+                                <option value="Local" />
+                                <option value="Oficina" />
+                                <option value="Bodega" />
+                            </datalist>
                         </div>
 
                         <div>
@@ -311,8 +321,16 @@ const RegistroCasasBasico = () => {
                                 value={formData.usoInmueble}
                                 onChange={handleChange}
                                 required
+                                list="usos-inmueble"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                             />
+                            {/* El datalist solo sugiere: se puede escribir cualquier otro uso. */}
+                            <datalist id="usos-inmueble">
+                                <option value="Vivienda" />
+                                <option value="Comercial" />
+                                <option value="Industrial" />
+                                <option value="Mixto" />
+                            </datalist>
                         </div>
                         <InputField
                             label="Matrícula Inmobiliaria"

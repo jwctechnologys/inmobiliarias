@@ -37,14 +37,25 @@ class SolicitudCompletaTests(TestCase):
 
 class SolicitudSerializerTests(TestCase):
     """La tarjeta de "Solicitudes Aceptadas" (Crear Contratos) necesita saber si el inmueble es
-    de uso Vivienda o Comercial, para saber que tipo de contrato corresponde."""
+    de uso Vivienda o Comercial, para saber que tipo de contrato corresponde, y el celular/email
+    del arrendatario para poder contactarlo."""
+
+    def setUp(self):
+        dueno = User.objects.create_user(username="pedro", email="pedro@ejemplo.co", password="Segura123!")
+        self.casa = arrendar.objects.create(propietario=propietario.objects.create(user=dueno),
+                                            direccion="Calle 1", canonmensual=900000,
+                                            tipoInmueble="Casa", usoInmueble="Comercial")
+        user = User.objects.create_user(username="ana", email="ana@ejemplo.co", password="Segura123!")
+        self.arrendatario_obj = arrendatario.objects.create(user=user, celular=3001234567)
+        self.solicitud = Solicitud.objects.create(casa=self.casa, usuario=self.arrendatario_obj,
+                                                  idCoarrendatario=None)
 
     def test_expone_el_uso_del_inmueble(self):
-        dueno = User.objects.create_user(username="pedro", email="pedro@ejemplo.co", password="Segura123!")
-        casa = arrendar.objects.create(propietario=propietario.objects.create(user=dueno),
-                                       direccion="Calle 1", canonmensual=900000,
-                                       tipoInmueble="Casa", usoInmueble="Comercial")
-        user = User.objects.create_user(username="ana", email="ana@ejemplo.co", password="Segura123!")
-        solicitud = Solicitud.objects.create(casa=casa, usuario=arrendatario.objects.create(user=user),
-                                             idCoarrendatario=None)
-        self.assertEqual(SolicitudSerializer(solicitud).data["usoInmueble"], "Comercial")
+        self.assertEqual(SolicitudSerializer(self.solicitud).data["usoInmueble"], "Comercial")
+
+    def test_expone_celular_y_email_del_arrendatario(self):
+        # La tarjeta de "Solicitudes Aceptadas" los mostraba siempre vacios: el serializador
+        # exponia "celular_arrendatario" (que ningun formulario usa) y no exponia el email.
+        data = SolicitudSerializer(self.solicitud).data
+        self.assertEqual(data["celular"], "3001234567")
+        self.assertEqual(data["email"], "ana@ejemplo.co")
