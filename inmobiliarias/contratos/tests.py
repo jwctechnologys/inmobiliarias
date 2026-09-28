@@ -3,7 +3,9 @@ from datetime import date
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from .models import ReportePagoRecibos, contrato_local_vivienda
+from usuarios.models import arrendatario as ArrendatarioPerfil
+
+from .models import ReportePagoRecibos, contrato_local_vivienda, reporteNovedades
 
 
 def crear_contrato(arrendatario_id, **extra):
@@ -18,6 +20,15 @@ def crear_contrato(arrendatario_id, **extra):
     )
     datos.update(extra)
     return contrato_local_vivienda.objects.create(**datos)
+
+
+def crear_arrendatario_con_perfil(username):
+    """Crea un usuario con su perfil de arrendatario (el "id" que se usa como
+    arrendatario_id_original en los contratos es el id de este perfil, no el del usuario)."""
+    usuario = get_user_model().objects.create_user(
+        username=username, password="x", email=f"{username}@ejemplo.co"
+    )
+    return ArrendatarioPerfil.objects.create(user=usuario)
 
 
 class VerPagosServiciosTests(TestCase):
@@ -47,23 +58,70 @@ class VerPagosServiciosTests(TestCase):
 
 
 class ReporteNovedadesConAudioTests(TestCase):
-    """POST /api/reportes-novedades/: el arrendatario puede adjuntar fotos, videos y audios."""
+    """POST /api/reportes-novedades/: el arrendatario puede adjuntar fotos, videos y audios,
+    pero solo para un contrato que sea suyo."""
+
+    def setUp(self):
+        self.perfil = crear_arrendatario_con_perfil("arrendatario1")
+        self.contrato = crear_contrato(arrendatario_id=self.perfil.id)
+        self.client.force_login(self.perfil.user)
 
     def test_crea_el_reporte_con_un_audio_adjunto(self):
         from django.core.files.uploadedfile import SimpleUploadedFile
 
         from .models import audioReporteNovedades
 
-        contrato = crear_contrato(arrendatario_id=5)
         audio = SimpleUploadedFile("nota.mp3", b"contenido falso de audio", content_type="audio/mpeg")
 
         r = self.client.post("/api/reportes-novedades/", data={
-            "contratoNum": contrato.id, "texto": "Se dañó la llave del baño", "audios": [audio],
+            "contratoNum": self.contrato.id, "texto": "Se dañó la llave del baño", "audios": [audio],
         })
 
         self.assertEqual(r.status_code, 201, r.content)
         self.assertEqual(audioReporteNovedades.objects.filter(reporteNovedad_id=r.json()["id"]).count(), 1)
         self.assertEqual(r.json()["audios"][0]["id"], audioReporteNovedades.objects.get().id)
+
+    def test_requiere_sesion_iniciada(self):
+        self.client.logout()
+
+        r = self.client.post("/api/reportes-novedades/", data={
+            "contratoNum": self.contrato.id, "texto": "Se dañó la llave del baño",
+        })
+
+        self.assertEqual(r.status_code, 403)
+
+    def test_no_puede_reportar_novedades_de_un_contrato_ajeno(self):
+        otro_perfil = crear_arrendatario_con_perfil("arrendatario2")
+        contrato_ajeno = crear_contrato(arrendatario_id=otro_perfil.id)
+
+        r = self.client.post("/api/reportes-novedades/", data={
+            "contratoNum": contrato_ajeno.id, "texto": "Intento de reportar una casa que no es mia",
+        })
+
+        self.assertEqual(r.status_code, 403)
+        self.assertEqual(reporteNovedades.objects.count(), 0)
+
+
+class ReporteNovedadesListViewTests(TestCase):
+    """GET /api/verreportes-novedades/?arrendatario_id=...: filtraba por un campo
+    "userArrendatario" que no existe en el modelo (tiraba FieldError apenas se usaba)."""
+
+    def setUp(self):
+        self.perfil = crear_arrendatario_con_perfil("arrendatario1")
+        self.client.force_login(self.perfil.user)
+
+    def test_filtra_los_reportes_del_arrendatario_indicado(self):
+        propio = crear_contrato(arrendatario_id=self.perfil.id)
+        otro_perfil = crear_arrendatario_con_perfil("arrendatario2")
+        ajeno = crear_contrato(arrendatario_id=otro_perfil.id)
+        reporteNovedades.objects.create(contratoNum=propio, texto="Fuga de agua")
+        reporteNovedades.objects.create(contratoNum=ajeno, texto="Puerta dañada")
+
+        r = self.client.get(f"/api/verreportes-novedades/?arrendatario_id={self.perfil.id}")
+
+        self.assertEqual(r.status_code, 200, r.content)
+        self.assertEqual(len(r.json()), 1)
+        self.assertEqual(r.json()[0]["texto"], "Fuga de agua")
 
 
 class ContratosArrendatarioViewTests(TestCase):
