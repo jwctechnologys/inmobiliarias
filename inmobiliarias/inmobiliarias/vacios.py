@@ -31,7 +31,13 @@ def vacios_a_none(modelo, datos):
 class VaciosANoneMixin:
     """Para ModelSerializer: "" en un campo numerico/fecha/relacion opcional se trata como "sin valor".
 
-    Solo actua con datos JSON (dict). Los formularios multipart ya los maneja DRF de esta forma.
+    Funciona tanto con datos JSON (un dict comun) como con datos de un formulario multipart (un
+    QueryDict, para peticiones con archivos): un QueryDict TAMBIEN es un dict, asi que hay que
+    tener cuidado al copiarlo. dict(un_querydict) rompe todos sus valores (cada uno queda envuelto
+    en una lista de un elemento, porque por dentro un QueryDict guarda listas) y por eso antes esto
+    tumbaba cualquier serializador con este mixin que recibiera un formulario multipart (ej. un
+    reporte de novedades con fotos, o una casa con foto principal). data.copy() evita el problema:
+    da una copia mutable conservando el tipo real (QueryDict o dict).
     """
 
     _TIPOS_SERIALIZADOR = (
@@ -42,12 +48,13 @@ class VaciosANoneMixin:
 
     def to_internal_value(self, data):
         if isinstance(data, dict):
-            datos = dict(data)
+            datos = data.copy()
             for nombre, campo in self.fields.items():
+                valor = datos.get(nombre)
                 if (
                     campo.allow_null and not campo.read_only
                     and isinstance(campo, self._TIPOS_SERIALIZADOR)
-                    and isinstance(datos.get(nombre), str) and not datos[nombre].strip()
+                    and isinstance(valor, str) and not valor.strip()
                 ):
                     datos[nombre] = None
             data = datos
