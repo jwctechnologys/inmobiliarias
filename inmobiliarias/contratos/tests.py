@@ -41,3 +41,23 @@ class VerPagosServiciosTests(TestCase):
         r = self.client.get("/api/ver-pagos-servicios/7/")
         self.assertEqual(r.status_code, 200)
         self.assertEqual(len(r.json()), 1)
+
+
+class ReporteNovedadesConAudioTests(TestCase):
+    """POST /api/reportes-novedades/: el arrendatario puede adjuntar fotos, videos y audios."""
+
+    def test_crea_el_reporte_con_un_audio_adjunto(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        from .models import audioReporteNovedades
+
+        contrato = crear_contrato(arrendatario_id=5)
+        audio = SimpleUploadedFile("nota.mp3", b"contenido falso de audio", content_type="audio/mpeg")
+
+        r = self.client.post("/api/reportes-novedades/", data={
+            "contratoNum": contrato.id, "texto": "Se dañó la llave del baño", "audios": [audio],
+        })
+
+        self.assertEqual(r.status_code, 201, r.content)
+        self.assertEqual(audioReporteNovedades.objects.filter(reporteNovedad_id=r.json()["id"]).count(), 1)
+        self.assertEqual(r.json()["audios"][0]["id"], audioReporteNovedades.objects.get().id)

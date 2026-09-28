@@ -8,6 +8,7 @@ from contratos.models import (
     FechaPago,
     ReporteInconformidad,
     ReportePagoRecibos,
+    audioReporteNovedades,
     contrato_local_vivienda,
     imagenReporteNovedades,
     otroSi,
@@ -330,9 +331,16 @@ class VideoReporteNovedadesSerializer(serializers.ModelSerializer):
         fields = ['id', 'video_archivo']
 
 
+class AudioReporteNovedadesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = audioReporteNovedades
+        fields = ['id', 'audio_archivo']
+
+
 class ReporteNovedadesSerializer(VaciosANoneMixin, serializers.ModelSerializer):
     imagenes = ImagenReporteNovedadesSerializer(many=True, read_only=True)
     videos = VideoReporteNovedadesSerializer(many=True, read_only=True)
+    audios = AudioReporteNovedadesSerializer(many=True, read_only=True)
     contrato_detalle = serializers.SerializerMethodField()
 
     class Meta:

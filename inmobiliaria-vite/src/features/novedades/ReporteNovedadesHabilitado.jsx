@@ -149,6 +149,7 @@ const ReporteNovedadesHabilitado = () => {
               <th>Texto</th>
               <th>Imágenes</th>
               <th>Videos</th>
+              <th>Audios</th>
               <th>Habilitado</th>
               <th>Comentario del Administrador</th>
               <th>Acciones</th>
@@ -193,6 +194,25 @@ const ReporteNovedadesHabilitado = () => {
                       </button>
                     ) : (
                       "No hay videos"
+                    )}
+                  </td>
+                  <td>
+                    {reporte.audios && reporte.audios.length > 0 ? (
+                      <button
+                        onClick={() => openModal("audio", reporte.audios, 0)}
+                        style={{
+                          padding: "5px 10px",
+                          cursor: "pointer",
+                          backgroundColor: "#6f42c1",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "5px",
+                        }}
+                      >
+                        Escuchar Audio
+                      </button>
+                    ) : (
+                      "No hay audios"
                     )}
                   </td>
                   {/* Checkbox deshabilitado para "estaHabilitado" */}
@@ -282,6 +302,18 @@ const ReporteNovedadesHabilitado = () => {
               />
               Tu navegador no soporta la etiqueta de video.
             </video>
+          )}
+          {contentType === "audio" && (
+            <audio
+              key={modalContent[currentIndex].audio_archivo}
+              controls
+              style={{ width: "80%" }}
+            >
+              <source
+                src={`${API_URL}/${modalContent[currentIndex].audio_archivo}`}
+              />
+              Tu navegador no soporta la etiqueta de audio.
+            </audio>
           )}
           {modalContent.length > 1 && (
             <>
