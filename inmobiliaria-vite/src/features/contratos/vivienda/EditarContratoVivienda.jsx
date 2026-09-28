@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { getCsrfToken } from '../../../utils/csrf';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { API_URL } from '../../../config';
+import { estilosFormulario } from '../../../utils/formStyles';
+
+const st = estilosFormulario('azul');
 
 const EditarContratoVivienda = () => {
   const { id } = useParams();
@@ -601,160 +604,162 @@ const EditarContratoVivienda = () => {
     }
   };
   return (
-    <div className="container">
-      <form>
-        <h1>Editar Contrato de Vivienda</h1>
+    <div className={st.pagina}>
+      <div className="max-w-3xl mx-auto">
+        <h1 className={st.titulo}>Editar Contrato de Vivienda</h1>
+        <div className={st.tarjeta}>
+          <form className="space-y-6">
+            <div className={st.grid2}>
+              <div>
+                <label className={st.label}>Administrador</label>
+                <select
+                  name="userAdministrador"
+                  onChange={(e) => handleUserAdminChange(e.target.value)}
+                  className={st.select}
+                >
+                  <option value="">Selecciona un administrador</option>
+                  {administradores.map((admin) => (
+                    <option key={admin.id} value={admin.id}>
+                      {admin.first_name} {admin.last_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-        <div>
-          <label>Administrador:</label>
-          <select
-            name="userAdministrador"
-            // Establecer el valor inicial
-            onChange={(e) => handleUserAdminChange(e.target.value)}
-          >
-            <option value="">Selecciona un administrador</option>
-            {administradores.map((admin) => (
-              <option key={admin.id} value={admin.id}>
-                {admin.first_name} {admin.last_name}
-              </option>
-            ))}
-          </select> 
-        </div>
+              <div>
+                <label className={st.label}>Arrendatario</label>
+                <select
+                  name="userArrendatario"
+                  onChange={(e) => handleUserArrendatarioChange(e.target.value)}
+                  className={st.select}
+                >
+                  <option value="">Selecciona un arrendatario</option>
+                  {arrendatarios.map((arrendatario) => (
+                    <option key={arrendatario.id} value={arrendatario.id}>
+                      {arrendatario.first_name} {arrendatario.last_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-        <div>
-          <label>Arrendatario:</label>
-          <select
-            name="userArrendatario"
-            // Establecer el valor inicial del arrendatario
-            onChange={(e) => handleUserArrendatarioChange(e.target.value)}
-          >
-            <option value="">Selecciona un arrendatario</option>
-            {arrendatarios.map((arrendatario) => (
-              <option key={arrendatario.id} value={arrendatario.id}>
-                {arrendatario.first_name} {arrendatario.last_name}
-              </option>
-            ))}
-          </select> 
-        </div>
+              <div>
+                <label className={st.label}>Coarrendatario</label>
+                <select
+                  name="coarrendatario"
+                  onChange={(e) => handlecoarrendatarioChange(e.target.value)}
+                  disabled={!formData.userArrendatario.id}
+                  className={`${st.select} disabled:bg-gray-100 disabled:cursor-not-allowed`}
+                >
+                  <option value="">Selecciona un coarrendatario</option>
+                  {coarrendatarios.map((coarrendatario) => (
+                    <option key={coarrendatario.id} value={coarrendatario.id}>
+                      {coarrendatario.first_name} {coarrendatario.last_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-        <div>
-          <label>Coarrendatario:</label>
-          <select
-            name="coarrendatario"
-            // Establecer el valor inicial del coarrendatario
-            onChange={(e) => handlecoarrendatarioChange(e.target.value)}
-            disabled={!formData.userArrendatario.id} // Deshabilitar si no hay arrendatario seleccionado
-          >
-            <option value="">Selecciona un coarrendatario</option>
-            {coarrendatarios.map((coarrendatario) => (
-              <option key={coarrendatario.id} value={coarrendatario.id}>
-                {coarrendatario.first_name} {coarrendatario.last_name}
-              </option>
-            ))}
-          </select> 
-        </div>
-
-        <div>
-          <label>Fecha de Inicio:</label>
-          <input
-            type="date"
-            name="fechainicio"
-            // Establecer el valor de la fecha de inicio
-            onChange={handleInputChange} // Manejador para actualizar el estado
-          /> {primData.fechainicio}
-        </div>
-
-        <div>
-          <label>Fecha de Fin:</label>
-          <input type="date"
-            name="fechafin"
-            onChange={handleInputChange} /> {primData.fechafin}
-        </div>
-
-        <div>
-          <label>Fecha de Entrega de inmueble:</label>
-          <input type="date" name="fechaEntregaInmueble"  onChange={handleInputChange} /> {primData.fechaEntregaInmueble}
-        </div>
-
-        <div>
-          <label>Fecha de Restitucion inmueble:</label>
-          <input type="date" name="fechaRestitucionInmueble" onChange={handleInputChange} /> {primData.fechaRestitucionInmueble} 
-        </div>
-
-        <div>
-          <label>Dia de Inicio de pago:</label>
-          <input type="text" name="diaHInicioPago" onChange={handleInputChange} /> {primData.diaHInicioPago}
-        </div>
-
-        <div>
-          <label>Dia Fin de pago:</label>
-          <input type="text" name="diaFinPago" onChange={handleInputChange} /> {primData.diaFinPago}
-        </div>
-        <div>
-          <label>Contrato activo:</label>
-          <input type="checkbox" defaultChecked={true}  name="contrato_Activo" onChange={handleInputChange} />
-        </div>
-
-        <div>
-          <label>Inmueble:</label>
-          <select
-            name="inmueble"
-             // Establecer el valor inicial del inmueble
-            onChange={(e) => handleinmuebleChange(e.target.value)} // Manejador para actualizar el estado
-          >
-            <option value="">Selecciona un inmueble</option>
-            {inmuebles.map((inmueble) => (
-              <option key={inmueble.id} value={inmueble.id}>
-                {inmueble.direccion}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label>Ciudad donde se firma el contrato:</label>
-          <input type="text" name="ciudad" onChange={handleInputChange} /> {primData.ciudad}
-        </div>
-
-        <div>
-          <label>Fecha de firma del contrato:</label>
-          <input type="date" name="fecha" onChange={handleInputChange} /> {primData.fecha}
-        </div>
-        <div>
-          <label>Subir inventario (PDF):</label>
-          <input
-            type="file"
-            name="inventario"
-            accept=".pdf"
-            onChange={handleFileChange} // Esta función manejará el archivo seleccionado
-          />
-        </div>
-        <div>
-          <h2>Cláusulas</h2>
-
-          {clausulas && clausulas.map((clausula) => (
-            <div key={clausula.id}>
-              <input
-                type="checkbox"
-                id={`clausula-${clausula.id}`}
-                checked={clausula.selected || false} // Muestra si está seleccionada o no
-                onChange={() => handleCheckboxChange(clausula.id)} // Cambiar el estado de "selected"
-              />
-              <textarea
-                value={clausula.texto || ''} // Muestra el texto de la cláusula
-                onChange={(e) => handleClausulaChange(clausula.id, e.target.value)} // Cambia el texto
-                placeholder="Escribe la cláusula aquí"
-                rows={6}
-                style={{ width: '100%', height: 'auto', resize: 'none' }} // Ajuste del tamaño
-              />
-              <button type="button" onClick={() => removeClausula(clausula.id)}>Eliminar</button>
+              <div>
+                <label className={st.label}>Inmueble</label>
+                <select
+                  name="inmueble"
+                  onChange={(e) => handleinmuebleChange(e.target.value)}
+                  className={st.select}
+                >
+                  <option value="">Selecciona un inmueble</option>
+                  {inmuebles.map((inmueble) => (
+                    <option key={inmueble.id} value={inmueble.id}>
+                      {inmueble.direccion}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-          ))}
-          <button type="button" onClick={addClausula}>Agregar Cláusula</button>
-        </div>
 
-        <button type="button" onClick={handleActualizarContrato}>Guardar Contrato</button>
-      </form></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label className={st.label}>Fecha de inicio <span className="text-gray-400 font-normal">(actual: {primData.fechainicio || '—'})</span></label>
+                <input type="date" name="fechainicio" onChange={handleInputChange} className={st.input} />
+              </div>
+              <div>
+                <label className={st.label}>Fecha de fin <span className="text-gray-400 font-normal">(actual: {primData.fechafin || '—'})</span></label>
+                <input type="date" name="fechafin" onChange={handleInputChange} className={st.input} />
+              </div>
+              <div>
+                <label className={st.label}>Entrega del inmueble <span className="text-gray-400 font-normal">(actual: {primData.fechaEntregaInmueble || '—'})</span></label>
+                <input type="date" name="fechaEntregaInmueble" onChange={handleInputChange} className={st.input} />
+              </div>
+              <div>
+                <label className={st.label}>Restitución del inmueble <span className="text-gray-400 font-normal">(actual: {primData.fechaRestitucionInmueble || '—'})</span></label>
+                <input type="date" name="fechaRestitucionInmueble" onChange={handleInputChange} className={st.input} />
+              </div>
+              <div>
+                <label className={st.label}>Día de inicio de pago <span className="text-gray-400 font-normal">(actual: {primData.diaHInicioPago || '—'})</span></label>
+                <input type="text" name="diaHInicioPago" onChange={handleInputChange} className={st.input} />
+              </div>
+              <div>
+                <label className={st.label}>Día de fin de pago <span className="text-gray-400 font-normal">(actual: {primData.diaFinPago || '—'})</span></label>
+                <input type="text" name="diaFinPago" onChange={handleInputChange} className={st.input} />
+              </div>
+              <div>
+                <label className={st.label}>Ciudad donde se firma <span className="text-gray-400 font-normal">(actual: {primData.ciudad || '—'})</span></label>
+                <input type="text" name="ciudad" onChange={handleInputChange} className={st.input} />
+              </div>
+              <div>
+                <label className={st.label}>Fecha de firma <span className="text-gray-400 font-normal">(actual: {primData.fecha || '—'})</span></label>
+                <input type="date" name="fecha" onChange={handleInputChange} className={st.input} />
+              </div>
+            </div>
+
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <input type="checkbox" defaultChecked={true} name="contrato_Activo" onChange={handleInputChange} className="h-4 w-4 rounded border-gray-300" />
+              Contrato activo
+            </label>
+
+            <div>
+              <label className={st.label}>Subir inventario (PDF)</label>
+              <input type="file" name="inventario" accept=".pdf" onChange={handleFileChange} className={st.archivo} />
+            </div>
+
+            <div>
+              <h2 className={st.seccionTitulo}>Cláusulas</h2>
+              <div className="space-y-4">
+                {clausulas && clausulas.map((clausula) => (
+                  <div key={clausula.id} className="border border-gray-200 rounded-lg p-4">
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                      <input
+                        type="checkbox"
+                        checked={clausula.selected || false}
+                        onChange={() => handleCheckboxChange(clausula.id)}
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                      Incluir esta cláusula
+                    </label>
+                    <textarea
+                      value={clausula.texto || ''}
+                      onChange={(e) => handleClausulaChange(clausula.id, e.target.value)}
+                      placeholder="Escribe la cláusula aquí"
+                      rows={6}
+                      className={`${st.textarea} resize-none`}
+                    />
+                    <button type="button" onClick={() => removeClausula(clausula.id)} className="mt-2 text-sm text-red-600 hover:text-red-700 font-medium">
+                      Eliminar cláusula
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button type="button" onClick={addClausula} className={`${st.botonSecundario} mt-4 text-sm`}>
+                + Agregar cláusula
+              </button>
+            </div>
+
+            <button type="button" onClick={handleActualizarContrato} className={st.botonPrimario}>
+              Guardar Contrato
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 };
 
