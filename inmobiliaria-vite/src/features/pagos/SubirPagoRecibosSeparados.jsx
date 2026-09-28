@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { getCsrfToken } from '../../utils/csrf';
 import { API_URL } from '../../config';
+import { estilosFormulario } from '../../utils/formStyles';
+
+const st = estilosFormulario('azul');
 
 const SubirPagoRecibosSeparados = () => {
   const [contratos, setContratos] = useState([]);
@@ -67,49 +70,65 @@ const SubirPagoRecibosSeparados = () => {
   };
 
   return (
-    <div>
-      <h2>Subir Recibo de Pago</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="contratoNum">Número de Contrato:</label>
-          <select
-            id="contratoNum"
-            value={contratoId}
-            onChange={(e) => setContratoId(e.target.value)}
-            required
-          >
-            <option value="">Seleccione un contrato</option>
-            {contratos.map((contrato) => (
-              <option key={contrato.id} value={contrato.id}>
-                {contrato.id} - {contrato.direccion}
-              </option>
-            ))}
-          </select>
+    <div className={st.pagina}>
+      <div className={st.contenedor}>
+        <h1 className={st.titulo}>Subir Recibo de Pago</h1>
+        <div className={st.tarjeta}>
+          <form onSubmit={handleSubmit} className={st.grupo}>
+            <div>
+              <label htmlFor="contratoNum" className={st.label}>Número de Contrato</label>
+              <select
+                id="contratoNum"
+                value={contratoId}
+                onChange={(e) => setContratoId(e.target.value)}
+                required
+                className={st.select}
+              >
+                <option value="">Seleccione un contrato</option>
+                {contratos.map((contrato) => (
+                  <option key={contrato.id} value={contrato.id}>
+                    {contrato.id} - {contrato.direccion}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="reciboTipo" className={st.label}>Tipo de Recibo</label>
+              <select
+                id="reciboTipo"
+                value={reciboTipo}
+                onChange={(e) => setReciboTipo(e.target.value)}
+                className={st.select}
+              >
+                <option value="imagenReciboLuz">Recibo Luz</option>
+                <option value="imagenReciboAgua">Recibo Agua</option>
+                <option value="imagenReciboGas">Recibo Gas</option>
+                <option value="imagenReciboBioagricola">Recibo Bioagricola</option>
+              </select>
+            </div>
+
+            <div>
+              <label className={st.label}>Archivo</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setSelectedFile(e.target.files[0])}
+                required
+                className={st.archivo}
+              />
+            </div>
+
+            <button type="submit" className={st.botonPrimario}>Subir Recibo</button>
+          </form>
+
+          {mensaje && (
+            <p className={`mt-4 text-sm font-medium ${mensaje.startsWith('Error') ? 'text-red-600' : 'text-green-600'}`}>
+              {mensaje}
+            </p>
+          )}
         </div>
-        <div>
-          <label>Tipo de Recibo:</label>
-          <select
-            value={reciboTipo}
-            onChange={(e) => setReciboTipo(e.target.value)}
-          >
-            <option value="imagenReciboLuz">Recibo Luz</option>
-            <option value="imagenReciboAgua">Recibo Agua</option>
-            <option value="imagenReciboGas">Recibo Gas</option>
-            <option value="imagenReciboBioagricola">Recibo Bioagricola</option>
-          </select>
-        </div>
-        <div>
-          <label>Archivo:</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setSelectedFile(e.target.files[0])}
-            required
-          />
-        </div>
-        <button type="submit">Subir Recibo</button>
-      </form>
-      {mensaje && <p>{mensaje}</p>}
+      </div>
     </div>
   );
 };

@@ -2,6 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { getCsrfToken } from '../../utils/csrf';
 import { Link } from "react-router-dom";
 import { API_URL } from '../../config';
+import { estilosFormulario } from '../../utils/formStyles';
+
+const st = estilosFormulario('indigo');
+
+// Imagenes, videos y audios se cargan de la misma forma (varios campos, "Añadir mas ..."): un solo
+// componente para los tres, en vez de repetir la misma seccion tres veces.
+const SeccionArchivos = ({ titulo, tipo, accept, listas, onFileChange, onAgregar }) => (
+  <div>
+    <h3 className={st.seccionTitulo}>{titulo}</h3>
+    <div className="space-y-3">
+      {listas.map((_, index) => (
+        <div key={index}>
+          <label className={st.label}>{titulo} #{index + 1}</label>
+          <input
+            type="file"
+            multiple
+            accept={accept}
+            onChange={(e) => onFileChange(e, tipo, index)}
+            className={st.archivo}
+          />
+        </div>
+      ))}
+    </div>
+    <button type="button" onClick={() => onAgregar(tipo)} className={`${st.botonSecundario} mt-3 text-sm`}>
+      + Añadir más {titulo.toLowerCase()}
+    </button>
+  </div>
+);
 
 function ReporteNovedadesForm() {
   const [formData, setFormData] = useState({
@@ -148,98 +176,59 @@ function ReporteNovedadesForm() {
   };
 
   return (
-    <div className="reporte-novedades">
-      <h2>Crear Reporte de Novedades</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="contratoNum">Número de Contrato</label>
-          <select
-            id="contratoNum"
-            value={formData.contratoNum}
-            onChange={(e) => setFormData({ ...formData, contratoNum: e.target.value })}
-            required
-          >
-            <option value="">Seleccione un contrato</option>
-            {contratos.map((contrato) => (
-              <option key={contrato.id} value={contrato.id}>
-                {contrato.id} - {contrato.direccion}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="texto">Descripción del reporte</label>
-          <textarea
-            id="texto"
-            value={formData.texto}
-            onChange={(e) => setFormData({ ...formData, texto: e.target.value })}
-            required
-          ></textarea>
-        </div>
-
-        <div className="form-group">
-          <h3>Imágenes</h3>
-          {formData.imagenes.map((_, index) => (
-            <div key={index} className="file-group">
-              <label>Imágenes #{index + 1}</label>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={(e) => handleFileChange(e, 'imagen', index)}
-              />
+    <div className={st.pagina}>
+      <div className={st.contenedor}>
+        <h1 className={st.titulo}>Crear Reporte de Novedades</h1>
+        <div className={st.tarjeta}>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="contratoNum" className={st.label}>Número de Contrato</label>
+              <select
+                id="contratoNum"
+                value={formData.contratoNum}
+                onChange={(e) => setFormData({ ...formData, contratoNum: e.target.value })}
+                required
+                className={st.select}
+              >
+                <option value="">Seleccione un contrato</option>
+                {contratos.map((contrato) => (
+                  <option key={contrato.id} value={contrato.id}>
+                    {contrato.id} - {contrato.direccion}
+                  </option>
+                ))}
+              </select>
             </div>
-          ))}
-          <button type="button" onClick={() => addFileField('imagen')}>
-            Añadir más imágenes
-          </button>
-        </div>
 
-        <div className="form-group">
-          <h3>Videos</h3>
-          {formData.videos.map((_, index) => (
-            <div key={index} className="file-group">
-              <label>Videos #{index + 1}</label>
-              <input
-                type="file"
-                multiple
-                accept="video/*"
-                onChange={(e) => handleFileChange(e, 'video', index)}
-              />
+            <div>
+              <label htmlFor="texto" className={st.label}>Descripción del reporte</label>
+              <textarea
+                id="texto"
+                value={formData.texto}
+                onChange={(e) => setFormData({ ...formData, texto: e.target.value })}
+                required
+                className={st.textarea}
+              ></textarea>
             </div>
-          ))}
-          <button type="button" onClick={() => addFileField('video')}>
-            Añadir más videos
-          </button>
+
+            <SeccionArchivos titulo="Imágenes" tipo="imagen" accept="image/*"
+              listas={formData.imagenes} onFileChange={handleFileChange} onAgregar={addFileField} />
+
+            <SeccionArchivos titulo="Videos" tipo="video" accept="video/*"
+              listas={formData.videos} onFileChange={handleFileChange} onAgregar={addFileField} />
+
+            <SeccionArchivos titulo="Audios" tipo="audio" accept="audio/*"
+              listas={formData.audios} onFileChange={handleFileChange} onAgregar={addFileField} />
+
+            <button type="submit" className={st.botonPrimario}>
+              Enviar Reporte
+            </button>
+          </form>
+
+          <Link to="/VerReporteNovedades-arrendatario" className="block mt-4 text-center text-indigo-600 hover:text-indigo-700 font-medium text-sm">
+            Ver estado de los reportes →
+          </Link>
         </div>
-
-        <div className="form-group">
-          <h3>Audios</h3>
-          {formData.audios.map((_, index) => (
-            <div key={index} className="file-group">
-              <label>Audios #{index + 1}</label>
-              <input
-                type="file"
-                multiple
-                accept="audio/*"
-                onChange={(e) => handleFileChange(e, 'audio', index)}
-              />
-            </div>
-          ))}
-          <button type="button" onClick={() => addFileField('audio')}>
-            Añadir más audios
-          </button>
-        </div>
-
-        <button type="submit" className="btn-submit">
-          Enviar Reporte
-        </button>
-      </form>
-
-      <Link to="/VerReporteNovedades-arrendatario" className="btn-submit">
-  Ver estado de los reportes
-</Link>
+      </div>
     </div>
   );
 }
