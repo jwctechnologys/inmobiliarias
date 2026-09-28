@@ -227,6 +227,10 @@ class videoReporteNovedades(models.Model):
     reporteNovedad = models.ForeignKey(reporteNovedades, on_delete=models.CASCADE, related_name="videos")
     video_archivo = models.FileField(upload_to="media/", storage=private_media_storage)
 
+class audioReporteNovedades(models.Model):
+    reporteNovedad = models.ForeignKey(reporteNovedades, on_delete=models.CASCADE, related_name="audios")
+    audio_archivo = models.FileField(upload_to="media/", storage=private_media_storage)
+
 
 class ReportePagoRecibos(models.Model):
     reportePagoReciboContrato = models.ForeignKey(

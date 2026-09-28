@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from contratos.models import (
+    audioReporteNovedades,
     imagenReporteNovedades,
     reporteNovedades,
     videoReporteNovedades,
@@ -32,6 +33,13 @@ class ReporteNovedadesCreateView(APIView):
             for video in videos:
                 videoReporteNovedades.objects.create(
                     reporteNovedad=reporte, video_archivo=video
+                )
+
+            # Manejar audios
+            audios = request.FILES.getlist("audios")
+            for audio in audios:
+                audioReporteNovedades.objects.create(
+                    reporteNovedad=reporte, audio_archivo=audio
                 )
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)

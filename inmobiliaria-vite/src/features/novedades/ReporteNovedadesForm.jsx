@@ -9,6 +9,7 @@ function ReporteNovedadesForm() {
     texto: '',
     imagenes: [[]], // Lista de listas para imágenes (en caso de que quieras manejar más de una)
     videos: [[]], // Lista de listas para videos
+    audios: [[]], // Lista de listas para audios
   });
   const [contratos, setContratos] = useState([]); // Lista de contratos cargados desde la API
   const [csrfToken, setCsrfToken] = useState('');
@@ -57,6 +58,12 @@ function ReporteNovedadesForm() {
         newVideos[index] = files; // Reemplazar la lista de videos por la nueva selección
         return { ...prevData, videos: newVideos };
       });
+    } else if (type === 'audio') {
+      setFormData((prevData) => {
+        const newAudios = [...prevData.audios];
+        newAudios[index] = files; // Reemplazar la lista de audios por la nueva selección
+        return { ...prevData, audios: newAudios };
+      });
     }
   };
 
@@ -70,6 +77,11 @@ function ReporteNovedadesForm() {
       setFormData((prevData) => ({
         ...prevData,
         videos: [...prevData.videos, []], // Añadir un nuevo array para videos
+      }));
+    } else if (type === 'audio') {
+      setFormData((prevData) => ({
+        ...prevData,
+        audios: [...prevData.audios, []], // Añadir un nuevo array para audios
       }));
     }
   };
@@ -96,6 +108,11 @@ function ReporteNovedadesForm() {
       form.append('videos', file);
     });
 
+    // Añadir audios
+    formData.audios.flat().forEach((file) => {
+      form.append('audios', file);
+    });
+
     console.log('Datos enviados:', formData);
 
     try {
@@ -117,6 +134,7 @@ function ReporteNovedadesForm() {
           texto: '',
           imagenes: [[]], // Limpiar los campos después de enviar
           videos: [[]],
+          audios: [[]],
         });
       } else {
         const errorData = await response.json();
@@ -193,6 +211,24 @@ function ReporteNovedadesForm() {
           ))}
           <button type="button" onClick={() => addFileField('video')}>
             Añadir más videos
+          </button>
+        </div>
+
+        <div className="form-group">
+          <h3>Audios</h3>
+          {formData.audios.map((_, index) => (
+            <div key={index} className="file-group">
+              <label>Audios #{index + 1}</label>
+              <input
+                type="file"
+                multiple
+                accept="audio/*"
+                onChange={(e) => handleFileChange(e, 'audio', index)}
+              />
+            </div>
+          ))}
+          <button type="button" onClick={() => addFileField('audio')}>
+            Añadir más audios
           </button>
         </div>
 
