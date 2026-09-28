@@ -34,10 +34,12 @@ function OtroSiVivienda() {
 
   useEffect(() => {
     const contratoId = Number(id); // Convertir id a número
-    fetch(`${API_URL}/api/contratos/activos/`)
+    // Exige sesion iniciada (IsAuthenticated): sin "credentials: include" el servidor responde 403
+    // y su cuerpo (un objeto, no una lista) hacia fallar el .filter() de mas abajo.
+    fetch(`${API_URL}/api/contratos/activos/`, { credentials: 'include' })
       .then((response) => response.json())
       .then((data) => {
-        const filteredContratos = data.filter((contrato) => contrato.id === contratoId);
+        const filteredContratos = Array.isArray(data) ? data.filter((contrato) => contrato.id === contratoId) : [];
         setContratos(filteredContratos);
         console.log("Contratos Cargado:", filteredContratos);
 

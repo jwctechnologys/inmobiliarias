@@ -150,6 +150,7 @@ const ImprimirContratoComercial = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ estaFirmado: true }),
       });
 
@@ -170,6 +171,7 @@ const ImprimirContratoComercial = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ estaFirmadoArrendatario: true }),
       });
 

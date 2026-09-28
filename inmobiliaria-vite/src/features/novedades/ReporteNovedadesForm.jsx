@@ -23,15 +23,23 @@ function ReporteNovedadesForm() {
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user')) || {};  // O donde tengas guardado el id del arrendatario
-  
-    fetch(`${API_URL}/api/contratos-arrendatario/${userData.id}/`)  // Incluir el ID en la URL
-      .then((response) => response.json())
+
+    // Este endpoint exige sesion iniciada (IsAuthenticated): sin "credentials: include" no manda la
+    // cookie de sesion, el servidor responde 403 y el cuerpo del error (un objeto, no una lista) se
+    // guardaba igual, haciendo fallar el .map() del <select> de contratos.
+    fetch(`${API_URL}/api/contratos-arrendatario/${userData.id}/`, { credentials: 'include' })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || data.error || 'No se pudieron cargar los contratos');
+        return data;
+      })
       .then((data) => {
-        setContratos(data);
+        setContratos(Array.isArray(data) ? data : []);
         console.log('datos cargados, ', data);
       })
       .catch((error) => {
         console.error('Error al cargar contratos:', error);
+        setContratos([]);
       });
   }, []);
 

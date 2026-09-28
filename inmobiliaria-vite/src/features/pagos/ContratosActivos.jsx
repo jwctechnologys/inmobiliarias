@@ -31,10 +31,12 @@ function ContratosActivos() {
 
 
     useEffect(() => {
-        fetch(`${API_URL}/api/contratos/activos/`)
+        // Exige sesion iniciada (IsAuthenticated): sin "credentials: include" el servidor responde
+        // 403 y su cuerpo (un objeto, no una lista) quedaba guardado igual como si fueran contratos.
+        fetch(`${API_URL}/api/contratos/activos/`, { credentials: 'include' })
             .then((response) => response.json())
             .then((data) => {
-                setContratos(data);
+                setContratos(Array.isArray(data) ? data : []);
                 console.log("Contratos activos:", data);
 
             })
@@ -84,6 +86,7 @@ function ContratosActivos() {
                         headers: {
                             'Content-Type': 'application/json',
                         },
+                        credentials: 'include',
                         body: JSON.stringify({ otrosiGenerado: true }),
                     });
 
@@ -158,6 +161,7 @@ function ContratosActivos() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({ contrato_Activo: false }),
             });
 
