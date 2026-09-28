@@ -1,11 +1,13 @@
 """Reportes de novedades de la vivienda."""
 from rest_framework import status
 from rest_framework.exceptions import NotFound
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from contratos.models import (
     audioReporteNovedades,
+    contrato_local_vivienda,
     imagenReporteNovedades,
     reporteNovedades,
     videoReporteNovedades,
@@ -14,10 +16,28 @@ from contratos.serializers import ReporteNovedadesSerializer
 
 
 class ReporteNovedadesCreateView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        # El arrendatario solo puede reportar novedades de un contrato que sea suyo: sin esta
+        # validacion, cualquier usuario autenticado podia mandar el "contratoNum" de OTRA casa
+        # directamente a la API (el desplegable del formulario ya filtraba por usuario, pero eso
+        # no impedia una llamada directa con un id distinto).
+        perfil_arrendatario = getattr(request.user, "arrendatario", None)
+        try:
+            contrato = contrato_local_vivienda.objects.get(pk=request.data.get("contratoNum"))
+        except (contrato_local_vivienda.DoesNotExist, ValueError, TypeError):
+            return Response(
+                {"error": "El contrato indicado no existe."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        if not perfil_arrendatario or contrato.arrendatario_id_original != perfil_arrendatario.id:
+            return Response(
+                {"error": "No tienes un contrato activo para ese inmueble."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         serializer = ReporteNovedadesSerializer(data=request.data)
-        print(serializer)
         if serializer.is_valid():
             reporte = serializer.save()
 
@@ -47,15 +67,19 @@ class ReporteNovedadesCreateView(APIView):
 
 
 class ReporteNovedadesListView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, *args, **kwargs):
         arrendatario_id = request.query_params.get(
             "arrendatario_id"
         )  # Obtener el ID del arrendatario de los parámetros de consulta
 
         if arrendatario_id:
-            # Filtrar reportes por arrendatario a través de la relación con contratoNum y userArrendatario
+            # contrato_local_vivienda no tiene un campo "userArrendatario" (ese filtro nunca
+            # funciono, tiraba FieldError apenas se mandaba arrendatario_id): el dueno del contrato
+            # se identifica con arrendatario_id_original.
             reportes = reporteNovedades.objects.filter(
-                contratoNum__userArrendatario__id=arrendatario_id
+                contratoNum__arrendatario_id_original=arrendatario_id
             )
             if not reportes.exists():
                 raise NotFound("No se encontraron reportes para este arrendatario.")

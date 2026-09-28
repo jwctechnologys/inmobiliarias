@@ -167,7 +167,7 @@ function ReporteNovedadesForm() {
       } else {
         const errorData = await response.json();
         console.error(errorData);
-        alert(`Error: ${errorData.detail || 'Algo salió mal'}`);
+        alert(`Error: ${errorData.error || errorData.detail || 'Algo salió mal'}`);
       }
     } catch (error) {
       console.error(error);
