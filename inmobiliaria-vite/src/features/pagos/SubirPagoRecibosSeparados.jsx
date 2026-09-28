@@ -87,7 +87,9 @@ const SubirPagoRecibosSeparados = () => {
                 <option value="">Seleccione un contrato</option>
                 {contratos.map((contrato) => (
                   <option key={contrato.id} value={contrato.id}>
-                    {contrato.id} - {contrato.direccion}
+                    Contrato #{contrato.id} - {contrato.inmueble}
+                    {contrato.inmuebleTipo ? ` (${contrato.inmuebleTipo})` : ''}
+                    {contrato.inmuebleBarrio ? `, Barrio ${contrato.inmuebleBarrio}` : ''}
                   </option>
                 ))}
               </select>
