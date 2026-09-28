@@ -245,13 +245,18 @@ class ContratoViviendaListSerializer(serializers.ModelSerializer):
     estado = serializers.SerializerMethodField()
     arrendatario = serializers.CharField(source='arrendatario_nombre_completo')
     inmueble = serializers.CharField(source='inmueble_direccion')
-    
+    inmuebleBarrio = serializers.CharField(source='inmueble_barrio')
+    inmuebleTipo = serializers.CharField(source='inmueble_tipo')
+
     class Meta:
         model = contrato_local_vivienda
         fields = [
             'id',
             'arrendatario',
             'inmueble',
+            'inmuebleBarrio',
+            'inmuebleTipo',
+            'tipoContrato',
             'fechainicio',
             'fechafin',
             'canonArrendamiento',

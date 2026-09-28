@@ -1,12 +1,13 @@
 from datetime import date
 
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from .models import ReportePagoRecibos, contrato_local_vivienda
 
 
-def crear_contrato(arrendatario_id):
-    return contrato_local_vivienda.objects.create(
+def crear_contrato(arrendatario_id, **extra):
+    datos = dict(
         arrendador_nombre_completo="Propietario Demo", arrendador_doc_identificacion="1",
         arrendatario_nombre_completo="Arrendatario Demo", arrendatario_doc_identificacion="2",
         inmueble_direccion="Calle 1 # 2-3", inmueble_barrio="Centro", inmueble_matricula="123",
@@ -15,6 +16,8 @@ def crear_contrato(arrendatario_id):
         fechaEntregaInmueble=date(2025, 1, 1), fechaRestitucionInmueble=date(2026, 1, 1),
         fecha=date(2025, 1, 1), arrendatario_id_original=arrendatario_id,
     )
+    datos.update(extra)
+    return contrato_local_vivienda.objects.create(**datos)
 
 
 class VerPagosServiciosTests(TestCase):
@@ -61,3 +64,38 @@ class ReporteNovedadesConAudioTests(TestCase):
         self.assertEqual(r.status_code, 201, r.content)
         self.assertEqual(audioReporteNovedades.objects.filter(reporteNovedad_id=r.json()["id"]).count(), 1)
         self.assertEqual(r.json()["audios"][0]["id"], audioReporteNovedades.objects.get().id)
+
+
+class ContratosArrendatarioViewTests(TestCase):
+    """GET /api/contratos-arrendatario/<arrendatario_id>/: el selector de "Número de Contrato"
+    (Reporte Novedades, Subir Recibo de Pago) necesita la direccion y el tipo del inmueble, no solo
+    el id."""
+
+    def setUp(self):
+        self.usuario = get_user_model().objects.create_user(username="arrendatario1", password="x")
+        self.client.force_login(self.usuario)
+
+    def test_expone_direccion_barrio_y_tipo_del_inmueble(self):
+        crear_contrato(
+            arrendatario_id=5,
+            inmueble_direccion="Calle 1 # 2-3", inmueble_barrio="Centro", inmueble_tipo="Apartamento",
+            tipoContrato="vivienda", estaFirmado=True, estaFirmadoArrendatario=True,
+        )
+
+        r = self.client.get("/api/contratos-arrendatario/5/")
+
+        self.assertEqual(r.status_code, 200, r.content)
+        contrato = r.json()[0]
+        self.assertEqual(contrato["inmueble"], "Calle 1 # 2-3")
+        self.assertEqual(contrato["inmuebleBarrio"], "Centro")
+        self.assertEqual(contrato["inmuebleTipo"], "Apartamento")
+        self.assertEqual(contrato["tipoContrato"], "vivienda")
+
+    def test_no_expone_contratos_de_otro_arrendatario(self):
+        crear_contrato(arrendatario_id=5, estaFirmado=True, estaFirmadoArrendatario=True)
+        crear_contrato(arrendatario_id=6, estaFirmado=True, estaFirmadoArrendatario=True)
+
+        r = self.client.get("/api/contratos-arrendatario/5/")
+
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.json()), 1)
