@@ -36,6 +36,7 @@ const EditarUsuario = () => {
         cuentaDaviplata: "",
         cuentaNequi: "",
         CuentaBancolombia: "",
+        llave: "",
         ocupacion: "",
         empresa: "",
         CodClasificaIndustrialIU: "",
@@ -233,6 +234,7 @@ const EditarUsuario = () => {
             cuentaDaviplata: formData.cuentaDaviplata,
             cuentaNequi: formData.cuentaNequi,
             CuentaBancolombia: formData.CuentaBancolombia,
+            llave: formData.llave,
             ocupacion: formData.ocupacion,
             empresa: formData.empresa,
             CodClasificaIndustrialIU: formData.CodClasificaIndustrialIU,
@@ -410,6 +412,7 @@ const EditarUsuario = () => {
                     cuentaDaviplata: data[0]?.cuentaDaviplata || '',
                     cuentaNequi: data[0]?.cuentaNequi || '',
                     CuentaBancolombia: data[0]?.CuentaBancolombia || '',
+                    llave: data[0]?.llave || '',
                     ocupacion: data[0]?.ocupacion || '',
                     empresa: data[0]?.empresa || '',
                     CodClasificaIndustrialIU: data[0]?.CodClasificaIndustrialIU || '',
@@ -813,6 +816,17 @@ const EditarUsuario = () => {
                                                 type="number"
                                                 name="CuentaBancolombia"
                                                 value={formData.CuentaBancolombia || ''}
+                                                onChange={handleInputChange}
+                                                className={inputClassName}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className={labelClassName}>Llave Bre-B</label>
+                                            <input
+                                                type="text"
+                                                name="llave"
+                                                value={formData.llave || ''}
                                                 onChange={handleInputChange}
                                                 className={inputClassName}
                                             />

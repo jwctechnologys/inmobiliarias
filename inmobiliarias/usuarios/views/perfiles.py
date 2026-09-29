@@ -43,7 +43,7 @@ def user_profile_update_view(request):
                 allowed_fields = {
                     "genero", "tipo_documento", "doc_identificacion", "lugarExpCedula",
                     "direccionCorrespondencia", "barrioCorrespondencia", "ciudadCorrespondencia",
-                    "cuentaDaviplata", "cuentaNequi", "CuentaBancolombia",
+                    "cuentaDaviplata", "cuentaNequi", "CuentaBancolombia", "llave",
                     "direccion", "barrio", "ciudad", "celular", "celularDos",
                 }
 
@@ -75,7 +75,7 @@ def user_profile_update_view(request):
                     "genero", "tipo_documento", "doc_identificacion", "lugarExpCedula",
                     "direccionCorrespondencia", "barrioCorrespondencia", "ciudadCorrespondencia",
                     "direccion", "barrio", "ciudad", "celular", "celularDos",
-                    "cuentaDaviplata", "cuentaNequi", "CuentaBancolombia",
+                    "cuentaDaviplata", "cuentaNequi", "CuentaBancolombia", "llave",
                 }
             else:
                 return JsonResponse({"error": "Grupo no válido."}, status=400)
@@ -95,12 +95,12 @@ def user_profile_update_view(request):
                     data_to_update[field] = data.get(field)
                 # Si NO está en la solicitud, NO lo actualizamos
 
-            print(f"📝 Campos a actualizar: {data_to_update}")
+            print(f"Campos a actualizar: {data_to_update}")
 
             # Actualizar los campos permitidos
             for field, value in data_to_update.items():
                 setattr(perfil_to_update, field, value)
-                print(f"   ✅ {field} = {value}")
+                print(f"   OK: {field} = {value}")
 
             # Guardar los cambios
             perfil_to_update.save()
@@ -115,7 +115,7 @@ def user_profile_update_view(request):
         except json.JSONDecodeError as e:
             return JsonResponse({"error": f"Error al parsear JSON: {str(e)}"}, status=400)
         except Exception as e:
-            print(f"❌ Error: {str(e)}")
+            print(f"Error: {str(e)}")
             import traceback
             traceback.print_exc()
             return JsonResponse(
