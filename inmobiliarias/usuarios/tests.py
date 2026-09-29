@@ -2,7 +2,7 @@ import json
 
 from django.test import TestCase
 
-from .models import arrendatario, propietario, proveedor
+from .models import administrador, arrendatario, propietario, proveedor
 
 
 class RegistroMixin:
@@ -97,3 +97,30 @@ class ActualizarPerfilTests(RegistroMixin, TestCase):
         perfil.refresh_from_db()
         self.assertIsNone(perfil.celular)
         self.assertIsNone(perfil.CodClasificaIndustrialIU)
+
+    def test_actualizar_llave_bre_b_de_administrador(self):
+        # El campo "llave" (Llave Bre-B, el nuevo sistema de pagos interoperables) existia en el
+        # modelo y ya lo devolvia el listado, pero el formulario de edicion no lo mostraba y el
+        # endpoint de actualizacion lo ignoraba en silencio (no estaba en "allowed_fields").
+        self.registrar("administrador")
+        perfil = administrador.objects.get(user__username="ana")
+
+        r = self.client.put("/api/user_profile_update/", data=json.dumps(
+            {"groups": "administrador", "id": perfil.id, "llave": "3001234567"}),
+            content_type="application/json")
+
+        self.assertEqual(r.status_code, 200, r.content)
+        perfil.refresh_from_db()
+        self.assertEqual(perfil.llave, "3001234567")
+
+    def test_actualizar_llave_bre_b_de_propietario(self):
+        self.registrar("propietario")
+        perfil = propietario.objects.get(user__username="ana")
+
+        r = self.client.put("/api/user_profile_update/", data=json.dumps(
+            {"groups": "propietario", "id": perfil.id, "llave": "propietario@correo.co"}),
+            content_type="application/json")
+
+        self.assertEqual(r.status_code, 200, r.content)
+        perfil.refresh_from_db()
+        self.assertEqual(perfil.llave, "propietario@correo.co")
