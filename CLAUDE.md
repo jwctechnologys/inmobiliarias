@@ -38,13 +38,20 @@ npx vitest run     # pruebas
 npm run lint
 npm run preview -- --port 4173   # probar el build real (sin StrictMode); el .claude/launch.json local no está en el repo
 ```
-Backend (`inmobiliarias/`), pruebas locales:
+Backend (`inmobiliarias/`), pruebas locales (primera vez en un equipo):
+```bash
+cd inmobiliarias
+python -m venv venv && source venv/Scripts/activate      # Git Bash en Windows; en Linux/macOS: venv/bin/activate
+pip install -r requirements.txt
+cp verify_settings.example.py verify_settings.py          # copia local, ignorada por git
+```
+Y para correr las pruebas:
 ```bash
 DJANGO_SETTINGS_MODULE=verify_settings DJANGO_SECRET_KEY=x USE_S3=0 python manage.py test
 ```
 - `USE_S3=0` es obligatorio en local (si no, `botocore` falla por falta de credenciales AWS).
-- `verify_settings.py` **no está en el repo**: es un archivo local (SQLite en memoria, `DEBUG=False`, `ALLOWED_HOSTS=["*"]`) que hereda de `inmobiliarias.settings`. Si no existe, créalo en un directorio fuera del repo y ponlo en `PYTHONPATH`. En la sesión anterior vivía en el scratchpad junto con un venv (`venv6`, Django 6.0.3, igual que `requirements.txt`).
-- **Windows:** `PYTHONPATH` debe usar rutas estilo `C:/Users/...`, **no** `/c/Users/...` (Python las convierte mal en `C:\c\Users\...`).
+- `verify_settings.py` usa SQLite y hereda de `inmobiliarias.settings`; su plantilla es `inmobiliarias/verify_settings.example.py` (ahí están las instrucciones, incluida la versión de PowerShell). Como vive junto a `manage.py`, no hace falta tocar `PYTHONPATH`.
+- Si algún día fijas `PYTHONPATH` en Windows, usa rutas estilo `C:/Users/...`, **no** `/c/Users/...` (Python las convierte mal en `C:\c\Users\...`).
 - CI (`deploy-backend.yml`) corre `manage.py check`, `makemigrations --check --dry-run` (modelos y migraciones deben coincidir) y `manage.py test` contra Postgres 16. En PR solo prueba; en push a `main` prueba y despliega.
 
 ## Arquitectura y datos: lo que no es obvio

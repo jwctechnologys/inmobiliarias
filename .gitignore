@@ -34,3 +34,7 @@ inmobiliarias/media/
 
 # Socket de gunicorn (lo crea el servicio dentro de la carpeta del proyecto)
 *.sock
+
+# Config local para correr las pruebas sin Postgres (se crea copiando verify_settings.example.py)
+inmobiliarias/verify_settings.py
+inmobiliarias/verify.sqlite3
