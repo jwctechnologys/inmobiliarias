@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../../config';
 import {
   IconoCasa, IconoUbicacion, IconoCama, IconoBano, IconoGaraje, IconoPatio, IconoEdificio, IconoBuscar,
-  IconoEscudo, IconoPersonas, IconoCocina, IconoSala, IconoMapa, IconoTelefono, IconoCorreo, IconoFlecha, IconoEtiqueta, IconoLlave, IconoChevron,
+  IconoEscudo, IconoPersonas, IconoCocina, IconoSala, IconoMapa, IconoWhatsapp, IconoTelefono, IconoCorreo, IconoFlecha, IconoEtiqueta, IconoLlave, IconoChevron,
 } from './iconosInicio';
 
 // Foto opcional del encabezado: si existe public/images/portada-inmobiliaria.jpg se usa de fondo; si no, el
@@ -28,6 +28,11 @@ const VENTAJAS = [
 
 const formatearPrecio = (precio) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(precio);
+
+const WHATSAPP = '573144568091';
+const enlaceWhatsapp = (mensaje) => `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
+const mensajeDe = (casa) =>
+  `Hola, me interesa el ${(casa.tipoInmueble || 'inmueble').toLowerCase()} ubicado en ${[casa.direccion, casa.barrio].filter(Boolean).join(', ')} (${formatearPrecio(casa.canonmensual)}/mes). ¿Me puede dar más información?`;
 
 // El mapa (Leaflet) se descarga solo cuando alguien abre una ubicacion.
 const MapaInmueble = lazy(() => import('./MapaInmueble'));
@@ -172,6 +177,16 @@ function TarjetaCasa({ casa, variante, alAbrir, alVerMapa }) {
           >
             <IconoMapa className="w-4 h-4" /> Ubicación
           </button>
+          <a
+            href={enlaceWhatsapp(mensajeDe(casa))}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            title="Escribirnos por WhatsApp sobre esta propiedad"
+            className="inline-flex items-center gap-2 rounded-full bg-[#1fa855] px-4 py-2 text-sm font-semibold text-white no-underline hover:bg-[#178a45]"
+          >
+            <IconoWhatsapp className="w-4 h-4" /> WhatsApp
+          </a>
         </div>
       </div>
     </article>
@@ -328,11 +343,13 @@ function Home() {
               Ver propiedades
             </button>
             <a
-              href="#contacto"
-              className="inline-flex items-center gap-2 rounded-full border border-white/70 hover:bg-white/10 px-7 py-3 font-semibold text-white no-underline"
+              href={enlaceWhatsapp('Hola, quisiera información sobre las propiedades disponibles en Inmobiliaria CL.')}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-[#1fa855] hover:bg-[#178a45] px-7 py-3 font-semibold text-white no-underline"
             >
-              <IconoTelefono className="w-5 h-5" />
-              Contáctanos
+              <IconoWhatsapp className="w-5 h-5" />
+              Contáctanos por WhatsApp
             </a>
           </div>
           <p className="mt-10 max-w-sm text-lg italic text-fuchsia-100 md:absolute md:right-8 md:bottom-28 md:text-right md:text-xl">
@@ -415,6 +432,18 @@ function Home() {
         )}
       </section>
 
+      {/* Boton flotante de WhatsApp, siempre visible */}
+      <a
+        href={enlaceWhatsapp('Hola, quisiera información sobre las propiedades disponibles en Inmobiliaria CL.')}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Comunicarse por WhatsApp"
+        title="Comunicarse por WhatsApp"
+        className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#1fa855] text-white shadow-lg no-underline hover:bg-[#178a45]"
+      >
+        <IconoWhatsapp className="w-8 h-8" />
+      </a>
+
       {casaEnMapa && (
         <Suspense fallback={null}>
           <MapaInmueble casa={casaEnMapa} onCerrar={() => setCasaEnMapa(null)} />
@@ -426,9 +455,13 @@ function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center text-gray-600">
           <p className="mb-4">¿Tienes preguntas? Contáctanos para ayudarte a encontrar tu hogar ideal.</p>
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm font-medium">
-            <a href="tel:+1234567890" className="inline-flex items-center gap-2 text-fuchsia-900 hover:text-fuchsia-700 no-underline">
+            <a href={enlaceWhatsapp('Hola, quisiera información sobre las propiedades disponibles en Inmobiliaria CL.')} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-fuchsia-900 hover:text-fuchsia-700 no-underline">
+              <IconoWhatsapp className="w-5 h-5" />
+              WhatsApp +57 314 456 8091
+            </a>
+            <a href="tel:+573144568091" className="inline-flex items-center gap-2 text-fuchsia-900 hover:text-fuchsia-700 no-underline">
               <IconoTelefono className="w-5 h-5" />
-              +57 123 456 7890
+              +57 314 456 8091
             </a>
             <a href="mailto:info@inmobiliaria.cl" className="inline-flex items-center gap-2 text-fuchsia-900 hover:text-fuchsia-700 no-underline">
               <IconoCorreo className="w-5 h-5" />
