@@ -1,10 +1,10 @@
 // Home.jsx
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../../config';
 import {
   IconoCasa, IconoUbicacion, IconoCama, IconoBano, IconoGaraje, IconoPatio, IconoEdificio, IconoBuscar,
-  IconoEscudo, IconoPersonas, IconoCocina, IconoSala, IconoTelefono, IconoCorreo, IconoFlecha, IconoEtiqueta, IconoLlave, IconoChevron,
+  IconoEscudo, IconoPersonas, IconoCocina, IconoSala, IconoMapa, IconoTelefono, IconoCorreo, IconoFlecha, IconoEtiqueta, IconoLlave, IconoChevron,
 } from './iconosInicio';
 
 // Foto opcional del encabezado: si existe public/images/portada-inmobiliaria.jpg se usa de fondo; si no, el
@@ -29,9 +29,8 @@ const VENTAJAS = [
 const formatearPrecio = (precio) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(precio);
 
-// Enlace a Google Maps con la direccion completa (la propiedad no guarda coordenadas, asi que se busca por texto).
-const enlaceMapa = (casa) =>
-  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([casa.direccion, casa.barrio, casa.ciudad, 'Colombia'].filter(Boolean).join(', '))}`;
+// El mapa (Leaflet) se descarga solo cuando alguien abre una ubicacion.
+const MapaInmueble = lazy(() => import('./MapaInmueble'));
 
 const textoUbicacion = (casa) => [casa.barrio, casa.ciudad].filter(Boolean).join(', ');
 
@@ -105,7 +104,7 @@ function Caracteristicas({ casa, grande }) {
   );
 }
 
-function TarjetaCasa({ casa, variante, alAbrir }) {
+function TarjetaCasa({ casa, variante, alAbrir, alVerMapa }) {
   const destacada = variante === 'destacada';
   const grande = variante === 'grande';
   const alturaFoto = destacada ? 'h-64 lg:h-full lg:min-h-[26rem]' : grande ? 'h-64' : 'h-48';
@@ -165,15 +164,14 @@ function TarjetaCasa({ casa, variante, alAbrir }) {
           <span className="inline-flex items-center gap-2 rounded-full border border-fuchsia-800 px-5 py-2 text-sm font-semibold text-fuchsia-900">
             Ver más <IconoFlecha className="w-4 h-4" />
           </span>
-          <a
-            href={enlaceMapa(casa)}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="inline-flex items-center gap-2 rounded-full bg-fuchsia-50 px-4 py-2 text-sm font-semibold text-fuchsia-900 no-underline hover:bg-fuchsia-100"
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); alVerMapa(casa); }}
+            title="Ver la ubicación en el mapa"
+            className="inline-flex items-center gap-2 rounded-full bg-fuchsia-800 px-4 py-2 text-sm font-semibold text-white hover:bg-fuchsia-900"
           >
-            <IconoUbicacion className="w-4 h-4" /> Ver en Google Maps
-          </a>
+            <IconoMapa className="w-4 h-4" /> Ubicación
+          </button>
         </div>
       </div>
     </article>
@@ -209,6 +207,7 @@ function Home() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const [fotoPortada, setFotoPortada] = useState(false);
+  const [casaEnMapa, setCasaEnMapa] = useState(null);
   const [filtros, setFiltros] = useState({ tipo: '', ubicacion: '', uso: '', precio: '' });
   const navigate = useNavigate();
 
@@ -410,11 +409,17 @@ function Home() {
         ) : (
           <div className={`grid gap-6 ${rejilla}`}>
             {visibles.map((casa) => (
-              <TarjetaCasa key={casa.id} casa={casa} variante={variante} alAbrir={handleCasaClick} />
+              <TarjetaCasa key={casa.id} casa={casa} variante={variante} alAbrir={handleCasaClick} alVerMapa={setCasaEnMapa} />
             ))}
           </div>
         )}
       </section>
+
+      {casaEnMapa && (
+        <Suspense fallback={null}>
+          <MapaInmueble casa={casaEnMapa} onCerrar={() => setCasaEnMapa(null)} />
+        </Suspense>
+      )}
 
       {/* Contacto */}
       <footer id="contacto" className="bg-white border-t border-gray-200 mt-4">

@@ -13,6 +13,7 @@ const ActualizarCasas = () => {
         direccion: '',
         barrio: '',
         ciudad: '',
+        coordenadas: '',
         descripcion: '',
         condiciones: '',
         con_administracion: false,
@@ -109,6 +110,7 @@ const ActualizarCasas = () => {
                     direccion: casaData.direccion || '',
                     barrio: casaData.barrio || '',
                     ciudad: casaData.ciudad || '',
+                    coordenadas: casaData.coordenadas || '',
                     descripcion: casaData.descripcion || '',
                     condiciones: casaData.condiciones || '',
                     con_administracion: casaData.con_administracion || false,
@@ -191,6 +193,7 @@ const ActualizarCasas = () => {
 
         setUpdating(true);
         const form = new FormData();
+        form.append('coordenadas', formData.coordenadas || ''); // vacio tambien se envia: asi se puede borrar una ubicacion
 
         for (const key in formData) {
             if (formData[key] !== null && formData[key] !== '') {
@@ -366,6 +369,17 @@ const ActualizarCasas = () => {
                                     value={formData.barrio}
                                     onChange={handleChange}
                                     className={inputClass}
+                                />
+                            </div>
+                            <div>
+                                <label className={labelClass}>Ubicación en el mapa (opcional):</label>
+                                <input
+                                    type="text"
+                                    name="coordenadas"
+                                    value={formData.coordenadas}
+                                    onChange={handleChange}
+                                    className={inputClass}
+                                    placeholder="Ej: 4.1295747, -73.6220074 (clic derecho sobre el punto en Google Maps)"
                                 />
                             </div>
                             <div>

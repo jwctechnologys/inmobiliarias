@@ -84,6 +84,7 @@ const RegistroCasasBasico = () => {
         direccion: '',
         barrio: '',
         ciudad: '',
+        coordenadas: '',
         descripcion: '',
         condiciones: '',
         con_administracion: false,
@@ -360,6 +361,13 @@ const RegistroCasasBasico = () => {
                             value={formData.ciudad}
                             onChange={handleChange}
                             required
+                        />
+                        <InputField
+                            label="Ubicación en el mapa (opcional)"
+                            name="coordenadas"
+                            value={formData.coordenadas}
+                            onChange={handleChange}
+                            placeholder="Ej: 4.1295747, -73.6220074 (clic derecho sobre el punto en Google Maps)"
                         />
                         <InputField
                             label="Descripción"

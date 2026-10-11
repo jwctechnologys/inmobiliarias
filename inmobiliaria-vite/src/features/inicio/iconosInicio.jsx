@@ -35,5 +35,6 @@ export const IconoFlecha = crear('M5 12h14', 'm13 6 6 6-6 6');
 export const IconoEtiqueta = crear('M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z', { cx: 7.5, cy: 7.5, r: 1 });
 export const IconoLlave = crear({ cx: 8, cy: 15, r: 4 }, 'm10.8 12.2 9.2-9.2', 'm17 6 3 3', 'm15 8 2 2');
 export const IconoChevron = crear('m6 9 6 6 6-6');
+export const IconoMapa = crear('M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z', 'M9 4v14', 'M15 6v14');
 export const IconoCocina = crear('M5 3v7a2 2 0 0 0 2 2v9', 'M9 3v7a2 2 0 0 1-2 2', 'M7 3v5', 'M17 21V3c-2.5 1.5-4 4.5-4 8h4');
 export const IconoSala = crear('M5 11V8a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v3', 'M3 13a2 2 0 0 1 4 0v1h10v-1a2 2 0 0 1 4 0v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z', 'M6 18v2', 'M18 18v2');
