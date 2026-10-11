@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../../config';
 import {
   IconoCasa, IconoUbicacion, IconoCama, IconoBano, IconoGaraje, IconoPatio, IconoEdificio, IconoBuscar,
-  IconoEscudo, IconoPersonas, IconoTelefono, IconoCorreo, IconoFlecha, IconoEtiqueta, IconoLlave, IconoChevron,
+  IconoEscudo, IconoPersonas, IconoCocina, IconoSala, IconoTelefono, IconoCorreo, IconoFlecha, IconoEtiqueta, IconoLlave, IconoChevron,
 } from './iconosInicio';
 
 // Foto opcional del encabezado: si existe public/images/portada-inmobiliaria.jpg se usa de fondo; si no, el
@@ -28,6 +28,10 @@ const VENTAJAS = [
 
 const formatearPrecio = (precio) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(precio);
+
+// Enlace a Google Maps con la direccion completa (la propiedad no guarda coordenadas, asi que se busca por texto).
+const enlaceMapa = (casa) =>
+  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([casa.direccion, casa.barrio, casa.ciudad, 'Colombia'].filter(Boolean).join(', '))}`;
 
 const textoUbicacion = (casa) => [casa.barrio, casa.ciudad].filter(Boolean).join(', ');
 
@@ -59,20 +63,42 @@ function Foto({ casa, className }) {
   );
 }
 
+// Cada espacio de la casa lleva su icono y, al lado, la cantidad (se toma de la observacion que escribe el
+// propietario: "2", "3 con closet"...). Si la observacion no empieza por un numero se muestra como nota.
+const ESPACIOS = [
+  { campo: 'habitaciones', obs: 'observacion_habitaciones', Icono: IconoCama, singular: 'Habitación', plural: 'Habitaciones' },
+  { campo: 'baños', obs: 'observacion_baños', Icono: IconoBano, singular: 'Baño', plural: 'Baños' },
+  { campo: 'cocina', obs: 'observacion_cocina', Icono: IconoCocina, singular: 'Cocina', plural: 'Cocinas' },
+  { campo: 'garage', obs: 'observacion_garage', Icono: IconoGaraje, singular: 'Parqueadero', plural: 'Parqueaderos' },
+  { campo: 'sala', obs: 'observacion_sala', Icono: IconoSala, singular: 'Sala', plural: 'Salas' },
+  { campo: 'patio', obs: 'observacion_patio', Icono: IconoPatio, singular: 'Patio', plural: 'Patios' },
+];
+
+const espaciosDe = (casa) =>
+  ESPACIOS.filter((e) => casa[e.campo]).map((e) => {
+    const texto = String(casa[e.obs] || '').trim();
+    const m = texto.match(/^(\d+)\s*(.*)$/);
+    const cantidad = m ? Number(m[1]) : null;
+    return { ...e, cantidad, nota: m ? m[2] : texto, etiqueta: cantidad === 1 || cantidad === null ? e.singular : e.plural };
+  });
+
 function Caracteristicas({ casa, grande }) {
-  const lista = [
-    casa.habitaciones && { Icono: IconoCama, texto: 'Habitaciones' },
-    casa.baños && { Icono: IconoBano, texto: 'Baños' },
-    casa.garage && { Icono: IconoGaraje, texto: 'Garaje' },
-    casa.patio && { Icono: IconoPatio, texto: 'Patio' },
-  ].filter(Boolean);
+  const lista = espaciosDe(casa);
   if (lista.length === 0) return null;
   return (
-    <ul className={`flex flex-wrap gap-x-5 gap-y-2 text-gray-700 ${grande ? 'text-base' : 'text-sm'}`}>
-      {lista.map(({ Icono, texto }) => (
-        <li key={texto} className="flex items-center gap-1.5">
-          <Icono className={`${grande ? 'w-6 h-6' : 'w-5 h-5'} text-fuchsia-800`} />
-          {texto}
+    <ul className={`grid gap-3 border-y border-gray-100 py-3 ${grande ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2'}`}>
+      {lista.map(({ Icono, cantidad, etiqueta, nota, campo }) => (
+        <li key={campo} className="flex items-center gap-2.5">
+          <span className={`flex shrink-0 items-center justify-center rounded-full bg-fuchsia-50 text-fuchsia-900 ${grande ? 'h-11 w-11' : 'h-9 w-9'}`}>
+            <Icono className={grande ? 'w-6 h-6' : 'w-5 h-5'} />
+          </span>
+          <span className="min-w-0 leading-tight">
+            <span className="flex items-baseline gap-1">
+              {cantidad !== null && <strong className={`font-bold text-gray-900 ${grande ? 'text-xl' : 'text-base'}`}>{cantidad}</strong>}
+              <span className={`font-medium text-gray-700 ${grande ? 'text-sm' : 'text-xs'}`}>{etiqueta}</span>
+            </span>
+            {nota && <span className="block truncate text-xs text-gray-500" title={nota}>{nota}</span>}
+          </span>
         </li>
       ))}
     </ul>
@@ -105,8 +131,8 @@ function TarjetaCasa({ casa, variante, alAbrir }) {
           <span className="ml-1 text-sm text-gray-500">/mes</span>
         </div>
 
-        <h3 className={`font-semibold text-gray-900 ${destacada ? 'text-2xl' : grande ? 'text-xl line-clamp-2' : 'text-base line-clamp-2'}`}>
-          {casa.descripcion || (casa.tipoInmueble ? `${casa.tipoInmueble} en arriendo` : 'Propiedad en arriendo')}
+        <h3 className={`font-semibold text-gray-900 ${destacada ? 'text-2xl' : grande ? 'text-xl' : 'text-base'}`}>
+          {[casa.tipoInmueble || 'Propiedad', casa.barrio && `en ${casa.barrio}`].filter(Boolean).join(' ')}
         </h3>
 
         <p className={`flex items-start gap-1.5 text-gray-600 ${destacada ? 'text-base' : 'text-sm'}`}>
@@ -115,6 +141,15 @@ function TarjetaCasa({ casa, variante, alAbrir }) {
             {[casa.direccion, textoUbicacion(casa)].filter(Boolean).join(' · ')}
           </span>
         </p>
+
+        {casa.descripcion && (
+          <p
+            lang="es"
+            className={`whitespace-pre-line text-justify hyphens-auto leading-relaxed text-gray-600 ${destacada ? 'text-base' : grande ? 'text-sm line-clamp-4' : 'text-sm line-clamp-3'}`}
+          >
+            {casa.descripcion}
+          </p>
+        )}
 
         {(casa.tipoInmueble || casa.usoInmueble) && (
           <p className="flex flex-wrap gap-2 text-xs">
@@ -126,10 +161,19 @@ function TarjetaCasa({ casa, variante, alAbrir }) {
 
         <Caracteristicas casa={casa} grande={destacada || grande} />
 
-        <div className="mt-auto pt-2">
+        <div className="mt-auto flex flex-wrap items-center gap-3 pt-2">
           <span className="inline-flex items-center gap-2 rounded-full border border-fuchsia-800 px-5 py-2 text-sm font-semibold text-fuchsia-900">
             Ver más <IconoFlecha className="w-4 h-4" />
           </span>
+          <a
+            href={enlaceMapa(casa)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-2 rounded-full bg-fuchsia-50 px-4 py-2 text-sm font-semibold text-fuchsia-900 no-underline hover:bg-fuchsia-100"
+          >
+            <IconoUbicacion className="w-4 h-4" /> Ver en Google Maps
+          </a>
         </div>
       </div>
     </article>
