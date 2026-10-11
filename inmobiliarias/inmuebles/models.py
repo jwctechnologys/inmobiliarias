@@ -19,6 +19,9 @@ class Casa(models.Model):
         validators=[RegexValidator(r'^\s*-?\d{1,2}(?:\.\d+)?\s*,\s*-?\d{1,3}(?:\.\d+)?\s*$', 'Escribe latitud y longitud separadas por coma, por ejemplo 4.1295747, -73.6220074')],
         help_text='Latitud y longitud tal como las copia Google Maps (clic derecho sobre el punto). Ej: 4.1295747, -73.6220074',
     )
+    # Como se ofrece el inmueble en la pagina de inicio. Las casas ya registradas quedan "en arriendo".
+    modalidad = models.CharField(max_length=10, choices=[('arriendo', 'En arriendo'), ('venta', 'En venta')], default='arriendo')
+    precioVenta = models.IntegerField(blank=True, null=True, help_text='Solo si se ofrece en venta')
     descripcion = models.TextField(blank=True,null=True)  #venta, arriendo, arrendada, vendida
     condiciones = models.TextField(blank=True,null=True)  #venta, arriendo, arrendada, vendida
     con_administracion= models.BooleanField(default=False)
@@ -34,7 +37,7 @@ class Casa(models.Model):
 
 
 class arrendar(Casa):
-    canonmensual = models.IntegerField()
+    canonmensual = models.IntegerField(default=0)  # 0 cuando el inmueble se ofrece solo en venta
     observacion_canonmensual = models.TextField(blank=True)
     deposito = models.IntegerField(blank=True, null=True)
     observacion_deposito = models.TextField(blank=True)

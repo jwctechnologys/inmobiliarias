@@ -19,6 +19,8 @@ const ActualizarCasas = () => {
         con_administracion: false,
         fotoPrincipal: null,
         publicar: false,
+        modalidad: 'arriendo',
+        precioVenta: '',
         canonmensual: '',
         observacion_canonmensual: '',
         deposito: '',
@@ -115,6 +117,8 @@ const ActualizarCasas = () => {
                     condiciones: casaData.condiciones || '',
                     con_administracion: casaData.con_administracion || false,
                     publicar: casaData.publicar || false,
+                    modalidad: casaData.modalidad || 'arriendo',
+                    precioVenta: casaData.precioVenta || '',
                     canonmensual: casaData.canonmensual || '',
                     observacion_canonmensual: casaData.observacion_canonmensual || '',
                     deposito: casaData.deposito || '',
@@ -460,6 +464,32 @@ const ActualizarCasas = () => {
                     {/* Información Económica */}
                     <div className={sectionClass}>
                         <h2 className={titleClass}>💰 Información Económica</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className={labelClass}>Se ofrece:</label>
+                                <select
+                                    name="modalidad"
+                                    value={formData.modalidad}
+                                    onChange={handleChange}
+                                    className={inputClass}
+                                >
+                                    <option value="arriendo">En arriendo</option>
+                                    <option value="venta">En venta</option>
+                                </select>
+                            </div>
+                            {formData.modalidad === 'venta' && (
+                                <div>
+                                    <label className={labelClass}>Precio de venta ($):</label>
+                                    <input
+                                        type="number"
+                                        name="precioVenta"
+                                        value={formData.precioVenta}
+                                        onChange={handleChange}
+                                        className={inputClass}
+                                    />
+                                </div>
+                            )}
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className={labelClass}>Canon mensual ($):</label>

@@ -90,6 +90,8 @@ const RegistroCasasBasico = () => {
         con_administracion: false,
         fotoPrincipal: null,
         publicar: false,
+        modalidad: 'arriendo',
+        precioVenta: '',
         canonmensual: '',
         observacion_canonmensual: '',
         deposito: '',
@@ -412,6 +414,30 @@ const RegistroCasasBasico = () => {
                     {/* Información Económica */}
                     <FormSection title="Información Económica">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Se ofrece</label>
+                                <select
+                                    name="modalidad"
+                                    value={formData.modalidad}
+                                    onChange={handleChange}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="arriendo">En arriendo</option>
+                                    <option value="venta">En venta</option>
+                                </select>
+                            </div>
+                            {formData.modalidad === 'venta' && (
+                                <InputField
+                                    label="Precio de venta"
+                                    name="precioVenta"
+                                    type="number"
+                                    value={formData.precioVenta}
+                                    onChange={handleChange}
+                                />
+                            )}
+                        </div>
+
+                        <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${formData.modalidad === 'venta' ? 'hidden' : ''}`}>
                             <div>
                                 <InputField
                                     label="Canon mensual"

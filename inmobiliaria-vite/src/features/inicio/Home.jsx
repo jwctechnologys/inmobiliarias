@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../../config';
 import {
   IconoCasa, IconoUbicacion, IconoCama, IconoBano, IconoGaraje, IconoPatio, IconoEdificio, IconoBuscar,
-  IconoEscudo, IconoPersonas, IconoCocina, IconoSala, IconoMapa, IconoWhatsapp, IconoTelefono, IconoCorreo, IconoFlecha, IconoEtiqueta, IconoLlave, IconoChevron,
+  IconoEscudo, IconoPersonas, IconoCocina, IconoSala, IconoMapa, IconoWhatsapp, IconoMegafono, IconoTelefono, IconoCorreo, IconoFlecha, IconoEtiqueta, IconoLlave, IconoChevron,
 } from './iconosInicio';
 
 // Foto opcional del encabezado: si existe public/images/portada-inmobiliaria.jpg se usa de fondo; si no, el
@@ -12,11 +12,34 @@ import {
 // inicio (no con un 404) cuando el archivo no existe.
 const FOTO_PORTADA = '/images/portada-inmobiliaria.jpg';
 
-const RANGOS_PRECIO = [
-  { id: 'hasta500', texto: 'Hasta $ 500.000', min: 0, max: 500000 },
-  { id: '500a1000', texto: '$ 500.000 – $ 1.000.000', min: 500000, max: 1000000 },
-  { id: '1000a2000', texto: '$ 1.000.000 – $ 2.000.000', min: 1000000, max: 2000000 },
-  { id: 'mas2000', texto: 'Más de $ 2.000.000', min: 2000000, max: Infinity },
+// El canon mensual y el precio de venta no se comparan: cada segmento tiene sus propios rangos.
+const RANGOS_PRECIO = {
+  arriendo: [
+    { id: 'hasta500', texto: 'Hasta $ 500.000', min: 0, max: 500000 },
+    { id: '500a1000', texto: '$ 500.000 – $ 1.000.000', min: 500000, max: 1000000 },
+    { id: '1000a2000', texto: '$ 1.000.000 – $ 2.000.000', min: 1000000, max: 2000000 },
+    { id: 'mas2000', texto: 'Más de $ 2.000.000', min: 2000000, max: Infinity },
+  ],
+  venta: [
+    { id: 'hasta200', texto: 'Hasta $ 200.000.000', min: 0, max: 200000000 },
+    { id: '200a400', texto: '$ 200.000.000 – $ 400.000.000', min: 200000000, max: 400000000 },
+    { id: '400a800', texto: '$ 400.000.000 – $ 800.000.000', min: 400000000, max: 800000000 },
+    { id: 'mas800', texto: 'Más de $ 800.000.000', min: 800000000, max: Infinity },
+  ],
+};
+
+const SEGMENTOS = [
+  { id: 'todas', texto: 'Todas' },
+  { id: 'arriendo', texto: 'En arriendo' },
+  { id: 'venta', texto: 'En venta' },
+];
+
+const MENSAJE_PUBLICAR = 'Hola, quisiera publicar mi propiedad con Inmobiliaria CL. ¿Me pueden dar información?';
+
+const BENEFICIOS_PUBLICAR = [
+  { Icono: IconoEdificio, titulo: 'Más visibilidad', detalle: 'Tu inmueble frente a quienes buscan' },
+  { Icono: IconoPersonas, titulo: 'Acompañamiento', detalle: 'Te guiamos en todo el proceso' },
+  { Icono: IconoEscudo, titulo: 'Trámites seguros', detalle: 'Contratos y gestión con respaldo' },
 ];
 
 const VENTAJAS = [
@@ -32,10 +55,13 @@ const formatearPrecio = (precio) =>
 const WHATSAPP = '573144568091';
 const enlaceWhatsapp = (mensaje) => `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
 const mensajeDe = (casa) =>
-  `Hola, me interesa el ${(casa.tipoInmueble || 'inmueble').toLowerCase()} ubicado en ${[casa.direccion, casa.barrio].filter(Boolean).join(', ')} (${formatearPrecio(casa.canonmensual)}/mes). ¿Me puede dar más información?`;
+  `Hola, me interesa el ${(casa.tipoInmueble || 'inmueble').toLowerCase()} ubicado en ${[casa.direccion, casa.barrio].filter(Boolean).join(', ')} (${esVenta(casa) ? `en venta por ${formatearPrecio(precioDe(casa))}` : `${formatearPrecio(precioDe(casa))}/mes`}). ¿Me puede dar más información?`;
 
 // El mapa (Leaflet) se descarga solo cuando alguien abre una ubicacion.
 const MapaInmueble = lazy(() => import('./MapaInmueble'));
+
+const esVenta = (casa) => casa.modalidad === 'venta';
+const precioDe = (casa) => (esVenta(casa) ? casa.precioVenta : casa.canonmensual);
 
 const textoUbicacion = (casa) => [casa.barrio, casa.ciudad].filter(Boolean).join(', ');
 
@@ -123,16 +149,16 @@ function TarjetaCasa({ casa, variante, alAbrir, alVerMapa }) {
         <Foto casa={casa} className={`w-full ${alturaFoto}`} />
         <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-fuchsia-800 px-3 py-1 text-xs font-semibold text-white">
           <IconoEtiqueta className="w-3.5 h-3.5" />
-          En Arriendo
+          {esVenta(casa) ? 'En Venta' : 'En Arriendo'}
         </span>
       </div>
 
       <div className={`flex flex-1 flex-col ${destacada ? 'p-6 lg:p-10 justify-center gap-4' : grande ? 'p-5 gap-3' : 'p-4 gap-2'}`}>
         <div>
           <span className={`font-bold text-fuchsia-900 ${destacada ? 'text-4xl' : grande ? 'text-3xl' : 'text-2xl'}`}>
-            {formatearPrecio(casa.canonmensual)}
+            {formatearPrecio(precioDe(casa))}
           </span>
-          <span className="ml-1 text-sm text-gray-500">/mes</span>
+          {!esVenta(casa) && <span className="ml-1 text-sm text-gray-500">/mes</span>}
         </div>
 
         <h3 className={`font-semibold text-gray-900 ${destacada ? 'text-2xl' : grande ? 'text-xl' : 'text-base'}`}>
@@ -193,7 +219,7 @@ function TarjetaCasa({ casa, variante, alAbrir, alVerMapa }) {
   );
 }
 
-function Filtro({ Icono, etiqueta, valor, alCambiar, opciones }) {
+function Filtro({ Icono, etiqueta, valor, alCambiar, opciones, vacio = 'Selecciona...' }) {
   return (
     <label className="flex items-center gap-3 px-4 py-2 md:border-r md:border-gray-200 last:border-r-0">
       <Icono className="w-7 h-7 shrink-0 text-fuchsia-900" />
@@ -205,7 +231,7 @@ function Filtro({ Icono, etiqueta, valor, alCambiar, opciones }) {
             onChange={(e) => alCambiar(e.target.value)}
             className="w-full appearance-none bg-transparent pr-6 text-sm text-gray-500 focus:outline-none"
           >
-            <option value="">Selecciona...</option>
+            <option value="">{vacio}</option>
             {opciones.map((o) => (
               <option key={o.valor} value={o.valor}>{o.texto}</option>
             ))}
@@ -224,6 +250,7 @@ function Home() {
   const [fotoPortada, setFotoPortada] = useState(false);
   const [casaEnMapa, setCasaEnMapa] = useState(null);
   const [filtros, setFiltros] = useState({ tipo: '', ubicacion: '', uso: '', precio: '' });
+  const [segmento, setSegmento] = useState('todas');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -261,22 +288,34 @@ function Home() {
       tipo: aOpciones(unicos(casas.map((c) => c.tipoInmueble))),
       uso: aOpciones(unicos(casas.map((c) => c.usoInmueble))),
       ubicacion: aOpciones(unicos(casas.map(textoUbicacion))),
-      precio: RANGOS_PRECIO.map((r) => ({ valor: r.id, texto: r.texto })),
+      precio: (RANGOS_PRECIO[segmento] || []).map((r) => ({ valor: r.id, texto: r.texto })),
     };
-  }, [casas]);
+  }, [casas, segmento]);
+
+  const conteo = useMemo(() => ({
+    todas: casas.length,
+    arriendo: casas.filter((c) => !esVenta(c)).length,
+    venta: casas.filter(esVenta).length,
+  }), [casas]);
 
   const visibles = useMemo(() => {
-    const rango = RANGOS_PRECIO.find((r) => r.id === filtros.precio);
+    const rango = (RANGOS_PRECIO[segmento] || []).find((r) => r.id === filtros.precio);
     return casas.filter((c) => {
+      if (segmento === 'venta' && !esVenta(c)) return false;
+      if (segmento === 'arriendo' && esVenta(c)) return false;
       if (filtros.tipo && c.tipoInmueble !== filtros.tipo) return false;
       if (filtros.uso && c.usoInmueble !== filtros.uso) return false;
       if (filtros.ubicacion && textoUbicacion(c) !== filtros.ubicacion) return false;
-      if (rango && !(c.canonmensual >= rango.min && c.canonmensual <= rango.max)) return false;
+      if (rango && !(precioDe(c) >= rango.min && precioDe(c) <= rango.max)) return false;
       return true;
     });
-  }, [casas, filtros]);
+  }, [casas, filtros, segmento]);
 
   const hayFiltros = Object.values(filtros).some(Boolean);
+  const elegirSegmento = (id) => {
+    setSegmento(id);
+    setFiltros((previos) => ({ ...previos, precio: '' })); // los rangos de precio cambian con el segmento
+  };
   const cambiarFiltro = (clave) => (valor) => setFiltros((previos) => ({ ...previos, [clave]: valor }));
   const irAPropiedades = () => document.getElementById('propiedades')?.scrollIntoView();
   const { rejilla, variante } = distribucion(visibles.length);
@@ -351,6 +390,13 @@ function Home() {
               <IconoWhatsapp className="w-5 h-5" />
               Contáctanos por WhatsApp
             </a>
+            <a
+              href="#publicar"
+              className="inline-flex items-center gap-2 rounded-full border border-white/70 hover:bg-white/10 px-7 py-3 font-semibold text-white no-underline"
+            >
+              <IconoMegafono className="w-5 h-5" />
+              Publica tu propiedad
+            </a>
           </div>
           <p className="mt-10 max-w-sm text-lg italic text-fuchsia-100 md:absolute md:right-8 md:bottom-28 md:text-right md:text-xl">
             Más que propiedades, creamos historias.
@@ -364,7 +410,7 @@ function Home() {
           <Filtro Icono={IconoCasa} etiqueta="Tipo de propiedad" valor={filtros.tipo} alCambiar={cambiarFiltro('tipo')} opciones={opciones.tipo} />
           <Filtro Icono={IconoUbicacion} etiqueta="Ubicación" valor={filtros.ubicacion} alCambiar={cambiarFiltro('ubicacion')} opciones={opciones.ubicacion} />
           <Filtro Icono={IconoEdificio} etiqueta="Uso" valor={filtros.uso} alCambiar={cambiarFiltro('uso')} opciones={opciones.uso} />
-          <Filtro Icono={IconoEtiqueta} etiqueta="Rango de precio" valor={filtros.precio} alCambiar={cambiarFiltro('precio')} opciones={opciones.precio} />
+          <Filtro Icono={IconoEtiqueta} etiqueta="Rango de precio" valor={filtros.precio} alCambiar={cambiarFiltro('precio')} opciones={opciones.precio} vacio={segmento === 'todas' ? 'Elige arriendo o venta' : 'Selecciona...'} />
           <button
             type="button"
             onClick={irAPropiedades}
@@ -393,9 +439,25 @@ function Home() {
 
       {/* Propiedades */}
       <section id="propiedades" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div role="tablist" aria-label="Tipo de oferta" className="mb-6 inline-flex rounded-full border border-fuchsia-200 bg-white p-1 shadow-sm">
+          {SEGMENTOS.map(({ id, texto }) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={segmento === id}
+              onClick={() => elegirSegmento(id)}
+              className={`rounded-full px-5 py-2 text-sm font-semibold ${segmento === id ? 'bg-fuchsia-800 text-white' : 'text-fuchsia-900 hover:bg-fuchsia-50'}`}
+            >
+              {texto} <span className={segmento === id ? 'text-fuchsia-200' : 'text-gray-400'}>({conteo[id]})</span>
+            </button>
+          ))}
+        </div>
+
         <div className="mb-8 flex flex-wrap items-center justify-between gap-3 border-l-4 border-fuchsia-800 pl-4">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
-            Propiedades <span className="text-fuchsia-800">Destacadas</span>
+            {segmento === 'venta' ? 'Propiedades en ' : segmento === 'arriendo' ? 'Propiedades en ' : 'Propiedades '}
+            <span className="text-fuchsia-800">{segmento === 'venta' ? 'Venta' : segmento === 'arriendo' ? 'Arriendo' : 'Destacadas'}</span>
           </h2>
           <p className="text-gray-600">
             {visibles.length} {visibles.length === 1 ? 'propiedad disponible' : 'propiedades disponibles'}
@@ -422,6 +484,16 @@ function Home() {
             <p className="text-gray-500">
               {hayFiltros ? 'Prueba con otros filtros.' : 'Pronto tendremos nuevas propiedades para ti.'}
             </p>
+            {!hayFiltros && (
+              <a
+                href={enlaceWhatsapp(MENSAJE_PUBLICAR)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-5 inline-flex items-center gap-2 rounded-full bg-fuchsia-800 px-6 py-2.5 text-sm font-semibold text-white no-underline hover:bg-fuchsia-900"
+              >
+                <IconoMegafono className="w-4 h-4" /> ¿Tienes una propiedad? Publícala con nosotros
+              </a>
+            )}
           </div>
         ) : (
           <div className={`grid gap-6 ${rejilla}`}>
@@ -430,6 +502,54 @@ function Home() {
             ))}
           </div>
         )}
+      </section>
+
+      {/* Publicidad: invitacion a publicar una propiedad */}
+      <section id="publicar" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-[#1b0a26] via-[#3b1052] to-[#7a1f8e] px-6 py-10 text-white shadow-xl md:px-12">
+          <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+            <div>
+              <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] text-fuchsia-200">
+                <IconoMegafono className="w-5 h-5" /> Publica con nosotros
+              </p>
+              <h2 className="text-3xl font-bold leading-tight md:text-4xl">
+                ¿Tienes una propiedad para <span className="text-fuchsia-300">arrendar o vender</span>?
+              </h2>
+              <p className="mt-4 max-w-xl text-gray-200">
+                Publícala en Inmobiliaria CL y deja que más personas la conozcan. Nosotros te acompañamos en todo el proceso.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-4">
+                <a
+                  href={enlaceWhatsapp(MENSAJE_PUBLICAR)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#1fa855] px-7 py-3 font-semibold text-white no-underline hover:bg-[#178a45]"
+                >
+                  <IconoWhatsapp className="w-5 h-5" /> Quiero publicar mi propiedad
+                </a>
+                <a
+                  href="tel:+573144568091"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/70 px-7 py-3 font-semibold text-white no-underline hover:bg-white/10"
+                >
+                  <IconoTelefono className="w-5 h-5" /> Llamar al +57 314 456 8091
+                </a>
+              </div>
+            </div>
+            <ul className="grid gap-4">
+              {BENEFICIOS_PUBLICAR.map(({ Icono, titulo, detalle }) => (
+                <li key={titulo} className="flex items-center gap-4 rounded-2xl bg-white/10 px-5 py-4">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/15 text-fuchsia-200">
+                    <Icono className="w-6 h-6" />
+                  </span>
+                  <span className="leading-tight">
+                    <strong className="block text-lg font-semibold">{titulo}</strong>
+                    <span className="text-sm text-gray-200">{detalle}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </section>
 
       {/* Boton flotante de WhatsApp, siempre visible */}
