@@ -37,6 +37,7 @@ def listar_inmuebles(request):
                 "direccion": inmueble.direccion,
                 "barrio": inmueble.barrio,
                 "ciudad": inmueble.ciudad,
+                "coordenadas": inmueble.coordenadas,
                 "descripcion": inmueble.descripcion,
                 "condiciones": inmueble.condiciones,
                 "con_administracion": inmueble.con_administracion,

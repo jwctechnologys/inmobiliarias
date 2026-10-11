@@ -1,3 +1,4 @@
+from django.core.validators import RegexValidator
 from django.db import models
 
 from usuarios.models import propietario
@@ -12,6 +13,12 @@ class Casa(models.Model):
     direccion = models.CharField(max_length=100)
     barrio = models.CharField(blank=True, max_length=100)
     ciudad = models.CharField(blank=True, max_length=50)
+    # Ubicacion exacta para el mapa de la pagina de inicio. Es lo que Google Maps copia al tocar un punto: "4.1295747, -73.6220074"
+    coordenadas = models.CharField(
+        blank=True, max_length=40,
+        validators=[RegexValidator(r'^\s*-?\d{1,2}(?:\.\d+)?\s*,\s*-?\d{1,3}(?:\.\d+)?\s*$', 'Escribe latitud y longitud separadas por coma, por ejemplo 4.1295747, -73.6220074')],
+        help_text='Latitud y longitud tal como las copia Google Maps (clic derecho sobre el punto). Ej: 4.1295747, -73.6220074',
+    )
     descripcion = models.TextField(blank=True,null=True)  #venta, arriendo, arrendada, vendida
     condiciones = models.TextField(blank=True,null=True)  #venta, arriendo, arrendada, vendida
     con_administracion= models.BooleanField(default=False)
