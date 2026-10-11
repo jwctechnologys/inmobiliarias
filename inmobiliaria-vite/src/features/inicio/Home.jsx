@@ -1,12 +1,171 @@
 // Home.jsx
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../../config';
+import {
+  IconoCasa, IconoUbicacion, IconoCama, IconoBano, IconoGaraje, IconoPatio, IconoEdificio, IconoBuscar,
+  IconoEscudo, IconoPersonas, IconoTelefono, IconoCorreo, IconoFlecha, IconoEtiqueta, IconoLlave, IconoChevron,
+} from './iconosInicio';
+
+// Foto opcional del encabezado: si existe public/images/portada-inmobiliaria.jpg se usa de fondo; si no, el
+// degradado morado de la marca. Se prueba con un <img> porque el servidor puede responder con la pagina de
+// inicio (no con un 404) cuando el archivo no existe.
+const FOTO_PORTADA = '/images/portada-inmobiliaria.jpg';
+
+const RANGOS_PRECIO = [
+  { id: 'hasta500', texto: 'Hasta $ 500.000', min: 0, max: 500000 },
+  { id: '500a1000', texto: '$ 500.000 – $ 1.000.000', min: 500000, max: 1000000 },
+  { id: '1000a2000', texto: '$ 1.000.000 – $ 2.000.000', min: 1000000, max: 2000000 },
+  { id: 'mas2000', texto: 'Más de $ 2.000.000', min: 2000000, max: Infinity },
+];
+
+const VENTAJAS = [
+  { Icono: IconoEscudo, titulo: 'Seguridad', detalle: 'en tus trámites' },
+  { Icono: IconoPersonas, titulo: 'Asesoría', detalle: 'personalizada' },
+  { Icono: IconoEdificio, titulo: 'Amplia oferta', detalle: 'de propiedades' },
+  { Icono: IconoUbicacion, titulo: 'Las mejores zonas', detalle: 'de la ciudad y alrededores' },
+];
+
+const formatearPrecio = (precio) =>
+  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(precio);
+
+const textoUbicacion = (casa) => [casa.barrio, casa.ciudad].filter(Boolean).join(', ');
+
+// Distribucion segun cuantas propiedades hay: con una sola la tarjeta ocupa todo el ancho, con pocas se reparten
+// en columnas amplias y desde cuatro pasan a la cuadricula normal.
+const distribucion = (cantidad) => {
+  if (cantidad <= 1) return { rejilla: 'grid-cols-1', variante: 'destacada' };
+  if (cantidad === 2) return { rejilla: 'grid-cols-1 md:grid-cols-2', variante: 'grande' };
+  if (cantidad === 3) return { rejilla: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3', variante: 'grande' };
+  return { rejilla: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4', variante: 'normal' };
+};
+
+function Foto({ casa, className }) {
+  const [fallo, setFallo] = useState(false);
+  if (!casa.fotoPrincipal || fallo) {
+    return (
+      <div className={`${className} flex items-center justify-center bg-fuchsia-50 text-fuchsia-300`}>
+        <IconoCasa className="w-16 h-16" />
+      </div>
+    );
+  }
+  return (
+    <img
+      src={casa.fotoPrincipal}
+      alt={casa.descripcion || 'Propiedad'}
+      className={`${className} object-cover`}
+      onError={() => setFallo(true)}
+    />
+  );
+}
+
+function Caracteristicas({ casa, grande }) {
+  const lista = [
+    casa.habitaciones && { Icono: IconoCama, texto: 'Habitaciones' },
+    casa.baños && { Icono: IconoBano, texto: 'Baños' },
+    casa.garage && { Icono: IconoGaraje, texto: 'Garaje' },
+    casa.patio && { Icono: IconoPatio, texto: 'Patio' },
+  ].filter(Boolean);
+  if (lista.length === 0) return null;
+  return (
+    <ul className={`flex flex-wrap gap-x-5 gap-y-2 text-gray-700 ${grande ? 'text-base' : 'text-sm'}`}>
+      {lista.map(({ Icono, texto }) => (
+        <li key={texto} className="flex items-center gap-1.5">
+          <Icono className={`${grande ? 'w-6 h-6' : 'w-5 h-5'} text-fuchsia-800`} />
+          {texto}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function TarjetaCasa({ casa, variante, alAbrir }) {
+  const destacada = variante === 'destacada';
+  const grande = variante === 'grande';
+  const alturaFoto = destacada ? 'h-64 lg:h-full lg:min-h-[26rem]' : grande ? 'h-64' : 'h-48';
+
+  return (
+    <article
+      onClick={() => alAbrir(casa.id)}
+      className={`bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden cursor-pointer flex ${destacada ? 'flex-col lg:flex-row' : 'flex-col'}`}
+    >
+      <div className={`relative shrink-0 ${destacada ? 'lg:w-3/5' : ''}`}>
+        <Foto casa={casa} className={`w-full ${alturaFoto}`} />
+        <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-fuchsia-800 px-3 py-1 text-xs font-semibold text-white">
+          <IconoEtiqueta className="w-3.5 h-3.5" />
+          En Arriendo
+        </span>
+      </div>
+
+      <div className={`flex flex-1 flex-col ${destacada ? 'p-6 lg:p-10 justify-center gap-4' : grande ? 'p-5 gap-3' : 'p-4 gap-2'}`}>
+        <div>
+          <span className={`font-bold text-fuchsia-900 ${destacada ? 'text-4xl' : grande ? 'text-3xl' : 'text-2xl'}`}>
+            {formatearPrecio(casa.canonmensual)}
+          </span>
+          <span className="ml-1 text-sm text-gray-500">/mes</span>
+        </div>
+
+        <h3 className={`font-semibold text-gray-900 ${destacada ? 'text-2xl' : grande ? 'text-xl line-clamp-2' : 'text-base line-clamp-2'}`}>
+          {casa.descripcion || (casa.tipoInmueble ? `${casa.tipoInmueble} en arriendo` : 'Propiedad en arriendo')}
+        </h3>
+
+        <p className={`flex items-start gap-1.5 text-gray-600 ${destacada ? 'text-base' : 'text-sm'}`}>
+          <IconoUbicacion className="w-4 h-4 mt-0.5 shrink-0 text-fuchsia-800" />
+          <span className={destacada ? '' : 'line-clamp-2'}>
+            {[casa.direccion, textoUbicacion(casa)].filter(Boolean).join(' · ')}
+          </span>
+        </p>
+
+        {(casa.tipoInmueble || casa.usoInmueble) && (
+          <p className="flex flex-wrap gap-2 text-xs">
+            {[casa.tipoInmueble, casa.usoInmueble].filter(Boolean).map((texto) => (
+              <span key={texto} className="rounded-full bg-fuchsia-50 px-3 py-1 font-medium text-fuchsia-900">{texto}</span>
+            ))}
+          </p>
+        )}
+
+        <Caracteristicas casa={casa} grande={destacada || grande} />
+
+        <div className="mt-auto pt-2">
+          <span className="inline-flex items-center gap-2 rounded-full border border-fuchsia-800 px-5 py-2 text-sm font-semibold text-fuchsia-900">
+            Ver más <IconoFlecha className="w-4 h-4" />
+          </span>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function Filtro({ Icono, etiqueta, valor, alCambiar, opciones }) {
+  return (
+    <label className="flex items-center gap-3 px-4 py-2 md:border-r md:border-gray-200 last:border-r-0">
+      <Icono className="w-7 h-7 shrink-0 text-fuchsia-900" />
+      <span className="flex-1 min-w-0">
+        <span className="block text-xs font-semibold text-gray-800">{etiqueta}</span>
+        <span className="relative block">
+          <select
+            value={valor}
+            onChange={(e) => alCambiar(e.target.value)}
+            className="w-full appearance-none bg-transparent pr-6 text-sm text-gray-500 focus:outline-none"
+          >
+            <option value="">Selecciona...</option>
+            {opciones.map((o) => (
+              <option key={o.valor} value={o.valor}>{o.texto}</option>
+            ))}
+          </select>
+          <IconoChevron className="pointer-events-none absolute right-0 top-1/2 w-4 h-4 -translate-y-1/2 text-gray-500" />
+        </span>
+      </span>
+    </label>
+  );
+}
 
 function Home() {
   const [casas, setCasas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
+  const [fotoPortada, setFotoPortada] = useState(false);
+  const [filtros, setFiltros] = useState({ tipo: '', ubicacion: '', uso: '', precio: '' });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,49 +177,64 @@ function Home() {
         return response.json();
       })
       .then((data) => {
-        const casasDisponibles = data.filter(
-          (casa) => !casa.solicitudAceptada
-        );
-        setCasas(casasDisponibles);
+        setCasas(data.filter((casa) => !casa.solicitudAceptada));
         setCargando(false);
-        //console.log('Datos de casas:', data);
       })
       .catch((error) => {
-        console.error("Error al cargar las casas:", error);
+        console.error('Error al cargar las casas:', error);
         setError(error.message);
         setCargando(false);
       });
   }, []);
 
-  const handleCasaClick = (id) => {
-    navigate(`/info/Casas/${id}`);
-  };
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => setFotoPortada(true);
+    img.src = FOTO_PORTADA;
+  }, []);
 
-  // Formatear precio en COP
-  const formatearPrecio = (precio) => {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(precio);
-  };
+  const handleCasaClick = (id) => navigate(`/info/Casas/${id}`);
+
+  // Las opciones de los filtros salen de las propiedades publicadas, asi nunca ofrecen algo que no existe.
+  const opciones = useMemo(() => {
+    const unicos = (valores) => [...new Set(valores.filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+    const aOpciones = (lista) => lista.map((v) => ({ valor: v, texto: v }));
+    return {
+      tipo: aOpciones(unicos(casas.map((c) => c.tipoInmueble))),
+      uso: aOpciones(unicos(casas.map((c) => c.usoInmueble))),
+      ubicacion: aOpciones(unicos(casas.map(textoUbicacion))),
+      precio: RANGOS_PRECIO.map((r) => ({ valor: r.id, texto: r.texto })),
+    };
+  }, [casas]);
+
+  const visibles = useMemo(() => {
+    const rango = RANGOS_PRECIO.find((r) => r.id === filtros.precio);
+    return casas.filter((c) => {
+      if (filtros.tipo && c.tipoInmueble !== filtros.tipo) return false;
+      if (filtros.uso && c.usoInmueble !== filtros.uso) return false;
+      if (filtros.ubicacion && textoUbicacion(c) !== filtros.ubicacion) return false;
+      if (rango && !(c.canonmensual >= rango.min && c.canonmensual <= rango.max)) return false;
+      return true;
+    });
+  }, [casas, filtros]);
+
+  const hayFiltros = Object.values(filtros).some(Boolean);
+  const cambiarFiltro = (clave) => (valor) => setFiltros((previos) => ({ ...previos, [clave]: valor }));
+  const irAPropiedades = () => document.getElementById('propiedades')?.scrollIntoView();
+  const { rejilla, variante } = distribucion(visibles.length);
 
   if (cargando) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
-          <p className="mt-4 text-gray-600 font-medium">Cargando propiedades...</p>
-        </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-600 font-medium">Cargando propiedades...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl shadow-xl p-8 max-w-md text-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -70,7 +244,7 @@ function Home() {
           <p className="text-gray-600 mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+            className="px-5 py-2 bg-fuchsia-800 hover:bg-fuchsia-900 text-white font-medium rounded-full"
           >
             Reintentar
           </button>
@@ -80,154 +254,137 @@ function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
-          <div className="text-center">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-              ¡Bienvenidos a Inmobiliaria CL!
-            </h1>
-            <p className="text-lg md:text-xl text-blue-100 max-w-3xl mx-auto">
-              Tu aliado de confianza en la búsqueda del hogar o inversión ideal. 
-              Estamos aquí para ayudarte a encontrar el espacio perfecto que se 
-              ajuste a tus sueños y necesidades.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-4 justify-center">
-              <div className="bg-white/10 backdrop-blur-sm px-6 py-3 rounded-lg">
-                <span className="font-semibold">{casas.length}</span> propiedades disponibles
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm px-6 py-3 rounded-lg">
-                <span className="font-semibold">¡Contactanos!</span> para más información
-              </div>
-            </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Encabezado */}
+      <header className="relative overflow-hidden bg-gradient-to-br from-[#1b0a26] via-[#3b1052] to-[#7a1f8e] text-white">
+        {fotoPortada && (
+          <>
+            <img src={FOTO_PORTADA} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            <span className="absolute inset-0 bg-gradient-to-r from-[#1b0a26] via-[#1b0a26]/70 to-transparent" />
+          </>
+        )}
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 pb-28 md:pb-32">
+          <p className="mb-4 flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-fuchsia-200">
+            <IconoLlave className="w-5 h-5" />
+            Tu aliado en el sueño de tu hogar
+          </p>
+          <h1 className="max-w-2xl text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+            ¡Bienvenidos a <span className="text-fuchsia-300">Inmobiliaria CL</span>!
+          </h1>
+          <p className="mt-5 max-w-xl text-base md:text-lg text-gray-200">
+            Tu aliado de confianza en la búsqueda del hogar o inversión ideal. Estamos aquí para ayudarte a encontrar el
+            espacio perfecto que se ajuste a tus sueños y necesidades.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-4">
+            <button
+              type="button"
+              onClick={irAPropiedades}
+              className="inline-flex items-center gap-2 rounded-full bg-fuchsia-700 hover:bg-fuchsia-800 px-7 py-3 font-semibold text-white"
+            >
+              <IconoBuscar className="w-5 h-5" />
+              Ver propiedades
+            </button>
+            <a
+              href="#contacto"
+              className="inline-flex items-center gap-2 rounded-full border border-white/70 hover:bg-white/10 px-7 py-3 font-semibold text-white no-underline"
+            >
+              <IconoTelefono className="w-5 h-5" />
+              Contáctanos
+            </a>
           </div>
+          <p className="mt-10 max-w-sm text-lg italic text-fuchsia-100 md:absolute md:right-8 md:bottom-28 md:text-right md:text-xl">
+            Más que propiedades, creamos historias.
+          </p>
         </div>
-      </div>
+      </header>
 
-      {/* Sección de propiedades */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex justify-between items-center mb-8">
+      {/* Buscador */}
+      <section className="relative z-10 max-w-6xl mx-auto -mt-14 px-4 sm:px-6">
+        <div className="rounded-2xl bg-white p-3 shadow-xl border border-gray-100 grid gap-2 md:grid-cols-2 lg:grid-cols-[repeat(4,1fr)_auto] lg:items-center">
+          <Filtro Icono={IconoCasa} etiqueta="Tipo de propiedad" valor={filtros.tipo} alCambiar={cambiarFiltro('tipo')} opciones={opciones.tipo} />
+          <Filtro Icono={IconoUbicacion} etiqueta="Ubicación" valor={filtros.ubicacion} alCambiar={cambiarFiltro('ubicacion')} opciones={opciones.ubicacion} />
+          <Filtro Icono={IconoEdificio} etiqueta="Uso" valor={filtros.uso} alCambiar={cambiarFiltro('uso')} opciones={opciones.uso} />
+          <Filtro Icono={IconoEtiqueta} etiqueta="Rango de precio" valor={filtros.precio} alCambiar={cambiarFiltro('precio')} opciones={opciones.precio} />
+          <button
+            type="button"
+            onClick={irAPropiedades}
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-fuchsia-800 hover:bg-fuchsia-900 px-8 py-3 font-semibold text-white md:col-span-2 lg:col-span-1"
+          >
+            <IconoBuscar className="w-5 h-5" />
+            Buscar
+          </button>
+        </div>
+      </section>
+
+      {/* Ventajas */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+        <ul className="grid grid-cols-2 gap-6 md:grid-cols-4">
+          {VENTAJAS.map(({ Icono, titulo, detalle }) => (
+            <li key={titulo} className="flex items-center gap-3 md:border-l md:border-gray-200 md:pl-6 first:border-l-0 first:pl-0">
+              <Icono className="w-10 h-10 shrink-0 text-fuchsia-900" />
+              <span className="text-sm leading-tight text-gray-600">
+                <strong className="block text-base font-semibold text-gray-800">{titulo}</strong>
+                {detalle}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* Propiedades */}
+      <section id="propiedades" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-3 border-l-4 border-fuchsia-800 pl-4">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
-            Propiedades Destacadas
+            Propiedades <span className="text-fuchsia-800">Destacadas</span>
           </h2>
           <p className="text-gray-600">
-            {casas.length} {casas.length === 1 ? 'propiedad disponible' : 'propiedades disponibles'}
+            {visibles.length} {visibles.length === 1 ? 'propiedad disponible' : 'propiedades disponibles'}
+            {hayFiltros && (
+              <button
+                type="button"
+                onClick={() => setFiltros({ tipo: '', ubicacion: '', uso: '', precio: '' })}
+                className="ml-3 font-semibold text-fuchsia-800 underline"
+              >
+                Quitar filtros
+              </button>
+            )}
           </p>
         </div>
 
-        {casas.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-xl shadow-lg">
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
+        {visibles.length === 0 ? (
+          <div className="text-center py-14 bg-white rounded-2xl shadow-md">
+            <div className="w-20 h-20 bg-fuchsia-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <IconoCasa className="w-10 h-10 text-fuchsia-300" />
             </div>
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
-              No hay propiedades disponibles
+              {hayFiltros ? 'Ninguna propiedad coincide con tu búsqueda' : 'No hay propiedades disponibles'}
             </h3>
             <p className="text-gray-500">
-              Pronto tendremos nuevas propiedades para ti.
+              {hayFiltros ? 'Prueba con otros filtros.' : 'Pronto tendremos nuevas propiedades para ti.'}
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {casas.map((casa) => (
-              <div
-                key={casa.id}
-                onClick={() => handleCasaClick(casa.id)}
-                className="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl group"
-              >
-                {/* Imagen con overlay */}
-                <div className="relative h-48 overflow-hidden">
-                  <img
-                    src={casa.fotoPrincipal || 'https://via.placeholder.com/400x300?text=Sin+Imagen'}
-                    alt={casa.descripcion || 'Propiedad'}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/400x300?text=Sin+Imagen';
-                    }}
-                  />
-                  
-                </div>
-
-                {/* Contenido */}
-                <div className="p-4">
-                  <div className="mb-2">
-                    <span className="text-2xl font-bold text-blue-600">
-                      {formatearPrecio(casa.canonmensual)}
-                    </span>
-                    <span className="text-gray-500 text-sm ml-1">/mes</span>
-                  </div>
-
-                  <h3 className="font-semibold text-gray-800 mb-1 line-clamp-1">
-                    {casa.descripcion || 'Propiedad en arriendo'}
-                  </h3>
-
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                    {casa.direccion}, {casa.barrio}, {casa.ciudad}
-                  </p>
-
-                  {/* Características rápidas */}
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {casa.habitaciones && (
-                      <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
-                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                        </svg>
-                        {casa.habitaciones} hab
-                      </span>
-                    )}
-                    {casa.banos && (
-                      <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
-                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        {casa.banos} baños
-                      </span>
-                    )}
-                    {casa.area && (
-                      <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
-                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                        </svg>
-                        {casa.area} m²
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Botón ver detalles */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-blue-600 text-sm font-medium group-hover:text-blue-700">
-                      Ver detalles
-                    </span>
-                    <svg className="w-4 h-4 text-blue-600 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
+          <div className={`grid gap-6 ${rejilla}`}>
+            {visibles.map((casa) => (
+              <TarjetaCasa key={casa.id} casa={casa} variante={variante} alAbrir={handleCasaClick} />
             ))}
           </div>
         )}
-      </div>
+      </section>
 
-      {/* Footer con información de contacto */}
-      <footer className="bg-white border-t border-gray-200 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center text-gray-600">
-            <p className="mb-2">
-              ¿Tienes preguntas? Contáctanos para ayudarte a encontrar tu hogar ideal.
-            </p>
-            <div className="flex justify-center gap-4 text-sm">
-              <a href="tel:+1234567890" className="text-blue-600 hover:text-blue-700">
-                📞 +57 123 456 7890
-              </a>
-              <span className="text-gray-300">|</span>
-              <a href="mailto:info@inmobiliaria.cl" className="text-blue-600 hover:text-blue-700">
-                ✉️ info@inmobiliaria.cl
-              </a>
-            </div>
+      {/* Contacto */}
+      <footer id="contacto" className="bg-white border-t border-gray-200 mt-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center text-gray-600">
+          <p className="mb-4">¿Tienes preguntas? Contáctanos para ayudarte a encontrar tu hogar ideal.</p>
+          <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm font-medium">
+            <a href="tel:+1234567890" className="inline-flex items-center gap-2 text-fuchsia-900 hover:text-fuchsia-700 no-underline">
+              <IconoTelefono className="w-5 h-5" />
+              +57 123 456 7890
+            </a>
+            <a href="mailto:info@inmobiliaria.cl" className="inline-flex items-center gap-2 text-fuchsia-900 hover:text-fuchsia-700 no-underline">
+              <IconoCorreo className="w-5 h-5" />
+              info@inmobiliaria.cl
+            </a>
           </div>
         </div>
       </footer>
