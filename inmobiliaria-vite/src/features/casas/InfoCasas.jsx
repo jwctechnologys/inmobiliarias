@@ -419,9 +419,9 @@ const InfoCasas = () => {
                         {/* Tarjetas de información */}
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "24px", marginBottom: "32px" }}>
                             <div style={{ backgroundColor: "#eff6ff", borderRadius: "8px", padding: "16px", textAlign: "center" }}>
-                                <p style={{ fontSize: "14px", color: "#4b5563" }}>Canon mensual</p>
+                                <p style={{ fontSize: "14px", color: "#4b5563" }}>{casas.modalidad === 'venta' ? 'Precio de venta' : 'Canon mensual'}</p>
                                 <p style={{ fontSize: "24px", fontWeight: "bold", color: "#2563eb" }}>
-                                    ${new Intl.NumberFormat('es-CO').format(casas.canonmensual)}
+                                    ${new Intl.NumberFormat('es-CO').format(casas.modalidad === 'venta' ? casas.precioVenta : casas.canonmensual)}
                                 </p>
                             </div>
 
