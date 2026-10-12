@@ -123,7 +123,9 @@ function NavBar() {
           path: '/SeguimientoApagos',
           priority: 8
         },
-        { id: 'registrarCasas', label: 'Registrar Casas', path: '/register/Casas', priority: 9 }
+        { id: 'registrarCasas', label: 'Registrar Casas', path: '/register/Casas', priority: 9 },
+        { id: 'solicitudesPortal', label: 'Solicitudes del Portal', path: '/gestion/solicitudes', priority: 10 },
+        { id: 'misPropiedadesAdmin', label: 'Estadísticas de Propiedades', path: '/mis-propiedades', priority: 11 }
       );
     }
 
@@ -131,6 +133,7 @@ function NavBar() {
     if (belongsToGroup('propietario')) {
       items.push(
         { id: 'registrarCasasProp', label: 'Registrar Casas', path: '/register/Casas', priority: 2 },
+        { id: 'misPropiedades', label: 'Mis Propiedades', path: '/mis-propiedades', priority: 2.5 },
         { id: 'verSolicitudesProp', label: 'Ver Solicitudes', path: '/ver-solicitudes', priority: 3 },
         { id: 'verCalificaciones', label: 'Ver Calificaciones', path: '/ver-calificaciones-arrendatario', priority: 4 },
         { id: 'calificar', label: 'Calificar Arrendatarios', path: '/calificar-arrendatarios', priority: 5 },
@@ -469,18 +472,22 @@ function NavBar() {
 
   if (!currentUser && !isLoggedIn) {
     return (
-      <nav className="bg-gradient-to-r from-blue-600 to-indigo-700 shadow-lg">
+      <nav className="bg-gradient-to-r from-[#1b0a26] via-[#3b1052] to-[#7a1f8e] shadow-lg" aria-label="Navegación principal">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Link to="/" className="text-white font-bold text-xl">
+              <Link to="/" className="text-white font-bold text-xl no-underline">
                 Inmobiliaria CL
               </Link>
             </div>
-            <div className="flex items-center space-x-4">
-              <Link to="/" className="text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Inicio</Link>
-              <Link to="/registerBasico/" className="text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Registrarse</Link>
-              <Link to="/login" className="bg-white text-blue-600 hover:bg-gray-100 px-4 py-2 rounded-md text-sm font-medium shadow-md">Iniciar Sesión</Link>
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <Link to="/" className="hidden sm:inline-block text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium no-underline">Inicio</Link>
+              <Link to="/propiedades" className="text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium no-underline">Propiedades</Link>
+              <Link to="/nosotros" className="hidden md:inline-block text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium no-underline">Nosotros</Link>
+              <Link to="/contacto" className="hidden md:inline-block text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium no-underline">Contacto</Link>
+              <Link to="/publicar-propiedad" className="hidden sm:inline-block bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-4 py-2 rounded-md text-sm font-semibold no-underline">Publica tu propiedad</Link>
+              <Link to="/registerBasico/" className="hidden lg:inline-block text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium no-underline">Registrarse</Link>
+              <Link to="/login" className="bg-white text-fuchsia-900 hover:bg-gray-100 px-4 py-2 rounded-md text-sm font-semibold shadow-md no-underline">Iniciar Sesión</Link>
             </div>
           </div>
         </div>

@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { API_URL } from '../../config';
+import { registrarEvento } from '../portal/analitica';
 import { IconoCasa, IconoEscudo, IconoFlecha, IconoMegafono, IconoPersonas, IconoWhatsapp } from './iconosInicio';
 
 const TIPOS = ['Casa', 'Apartamento', 'Local', 'Habitación', 'Oficina', 'Lote', 'Otro'];
 const FOTO_MAX_MB = 5;
 const VACIO = {
   nombre: '', telefono: '', correo: '', modalidad: 'arriendo', tipoInmueble: '', direccion: '', barrio: '', ciudad: '',
-  precio: '', descripcion: '',
+  precio: '', descripcion: '', acepta_datos: false,
 };
 
 const claseCampo = (conError) =>
@@ -37,7 +38,7 @@ function PublicarPropiedad() {
   const [enviada, setEnviada] = useState(false);
   const [errorGeneral, setErrorGeneral] = useState('');
 
-  const cambiar = (e) => setDatos((previos) => ({ ...previos, [e.target.name]: e.target.value }));
+  const cambiar = (e) => setDatos((previos) => ({ ...previos, [e.target.name]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
 
   const elegirFoto = (e) => {
     const archivo = e.target.files[0] || null;
@@ -59,6 +60,7 @@ function PublicarPropiedad() {
     if (datos.correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(datos.correo)) nuevos.correo = 'Escribe un correo válido.';
     if (!datos.direccion.trim()) nuevos.direccion = 'Escribe la dirección del inmueble.';
     if (!datos.ciudad.trim()) nuevos.ciudad = 'Escribe la ciudad.';
+    if (!datos.acepta_datos) nuevos.acepta_datos = 'Debes autorizar el uso de tus datos.';
     return nuevos;
   };
 
@@ -70,7 +72,7 @@ function PublicarPropiedad() {
     if (Object.keys(nuevos).length) return;
 
     const form = new FormData();
-    Object.entries(datos).forEach(([clave, valor]) => { if (valor !== '') form.append(clave, valor); });
+    Object.entries(datos).forEach(([clave, valor]) => { if (valor !== '' && valor !== false) form.append(clave, valor); });
     if (foto) form.append('foto', foto);
     form.append('sitio_web', e.target.elements.sitio_web.value); // campo trampa: vacio para las personas
 
@@ -78,6 +80,7 @@ function PublicarPropiedad() {
     try {
       const respuesta = await fetch(`${API_URL}/api/publicar_propiedad/`, { method: 'POST', body: form });
       if (respuesta.ok) {
+        registrarEvento('generar_lead', { tipo: 'publicar_propiedad' });
         setEnviada(true);
         window.scrollTo(0, 0);
       } else if (respuesta.status === 429) {
@@ -228,9 +231,14 @@ function PublicarPropiedad() {
         {errorGeneral && <p role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{errorGeneral}</p>}
 
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <p className="max-w-sm text-xs text-gray-500">
-            Al enviar autorizas que te contactemos para gestionar la publicación. Usaremos tus datos solo para eso.
-          </p>
+          <div className="max-w-md">
+            <label className="flex items-start gap-2 text-xs text-gray-600">
+              <input type="checkbox" name="acepta_datos" checked={datos.acepta_datos} onChange={cambiar} className="mt-0.5 h-4 w-4 shrink-0 accent-fuchsia-800" />
+              <span>Autorizo el tratamiento de mis datos para que me contacten y gestionen la publicación, según la{' '}
+                <Link to="/politica-de-privacidad" target="_blank" className="font-semibold text-fuchsia-900">política de tratamiento de datos</Link>. *</span>
+            </label>
+            {errores.acepta_datos && <p className="mt-1 text-xs font-medium text-red-600">{errores.acepta_datos}</p>}
+          </div>
           <button
             type="submit"
             disabled={enviando}

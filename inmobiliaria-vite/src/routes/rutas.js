@@ -4,6 +4,17 @@ import LoginComponent from '../features/auth/LoginComponent';
 
 // Cada pantalla se descarga solo cuando alguien la visita (carga diferida): el paquete inicial es mucho
 // mas pequeno. Home y Login se cargan de entrada porque son la puerta de la app.
+const Propiedades = lazy(() => import('../features/portal/Propiedades'));
+const Arriendo = lazy(() => import('../features/portal/Arriendo'));
+const Venta = lazy(() => import('../features/portal/Venta'));
+const FichaInmueble = lazy(() => import('../features/portal/FichaInmueble'));
+const Nosotros = lazy(() => import('../features/portal/paginas/Informativas').then((m) => ({ default: m.Nosotros })));
+const Contacto = lazy(() => import('../features/portal/paginas/Informativas').then((m) => ({ default: m.Contacto })));
+const PreguntasFrecuentes = lazy(() => import('../features/portal/paginas/Informativas').then((m) => ({ default: m.PreguntasFrecuentes })));
+const Terminos = lazy(() => import('../features/portal/paginas/Informativas').then((m) => ({ default: m.Terminos })));
+const Privacidad = lazy(() => import('../features/portal/paginas/Informativas').then((m) => ({ default: m.Privacidad })));
+const SolicitudesDelPortal = lazy(() => import('../features/portal/gestion/Gestion').then((m) => ({ default: m.SolicitudesDelPortal })));
+const MisPropiedades = lazy(() => import('../features/portal/gestion/Gestion').then((m) => ({ default: m.MisPropiedades })));
 const PublicarPropiedad = lazy(() => import('../features/inicio/PublicarPropiedad'));
 const Register = lazy(() => import('../features/usuarios/Register'));
 const VerContratoComercial = lazy(() => import('../features/contratos/comercial/VerContratoComercial'));
@@ -63,6 +74,19 @@ export const rutas = [
   { path: '/home', Pagina: Home },
   { path: '/login', Pagina: LoginComponent },
   { path: '/publicar-propiedad', Pagina: PublicarPropiedad },
+  { path: '/propiedades', Pagina: Propiedades },
+  { path: '/arriendo', Pagina: Arriendo },
+  { path: '/arriendo/:ciudad', Pagina: Arriendo },
+  { path: '/venta', Pagina: Venta },
+  { path: '/venta/:ciudad', Pagina: Venta },
+  { path: '/propiedad/:idslug', Pagina: FichaInmueble },
+  { path: '/nosotros', Pagina: Nosotros },
+  { path: '/contacto', Pagina: Contacto },
+  { path: '/preguntas-frecuentes', Pagina: PreguntasFrecuentes },
+  { path: '/terminos-y-condiciones', Pagina: Terminos },
+  { path: '/politica-de-privacidad', Pagina: Privacidad },
+  { path: '/gestion/solicitudes', Pagina: SolicitudesDelPortal, protegida: true },
+  { path: '/mis-propiedades', Pagina: MisPropiedades, protegida: true },
   { path: '/register', Pagina: Register, protegida: true },
   { path: '/contratoComercial', Pagina: VerContratoComercial, protegida: true },
   { path: '/contratos/nuevoComercial', Pagina: NuevoContratoComercial, protegida: true },
