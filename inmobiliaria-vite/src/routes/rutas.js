@@ -4,6 +4,7 @@ import LoginComponent from '../features/auth/LoginComponent';
 
 // Cada pantalla se descarga solo cuando alguien la visita (carga diferida): el paquete inicial es mucho
 // mas pequeno. Home y Login se cargan de entrada porque son la puerta de la app.
+const PublicarPropiedad = lazy(() => import('../features/inicio/PublicarPropiedad'));
 const Register = lazy(() => import('../features/usuarios/Register'));
 const VerContratoComercial = lazy(() => import('../features/contratos/comercial/VerContratoComercial'));
 const NuevoContratoComercial = lazy(() => import('../features/contratos/comercial/NuevoContratoComercial'));
@@ -61,6 +62,7 @@ export const rutas = [
   { path: '/', Pagina: Home },
   { path: '/home', Pagina: Home },
   { path: '/login', Pagina: LoginComponent },
+  { path: '/publicar-propiedad', Pagina: PublicarPropiedad },
   { path: '/register', Pagina: Register, protegida: true },
   { path: '/contratoComercial', Pagina: VerContratoComercial, protegida: true },
   { path: '/contratos/nuevoComercial', Pagina: NuevoContratoComercial, protegida: true },

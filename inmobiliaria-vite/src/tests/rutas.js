@@ -4,6 +4,7 @@ export const RUTAS = [
   '/',
   '/home',
   '/login',
+  '/publicar-propiedad',
   '/register',
   '/contratoComercial',
   '/contratos/nuevoComercial',
