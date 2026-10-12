@@ -373,30 +373,21 @@ function Home() {
             espacio perfecto que se ajuste a tus sueños y necesidades.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
+            <Link
+              to="/publicar-propiedad"
+              className="inline-flex items-center gap-2 rounded-full bg-fuchsia-600 hover:bg-fuchsia-500 px-9 py-4 text-lg font-bold text-white no-underline shadow-lg ring-2 ring-white/30"
+            >
+              <IconoMegafono className="w-6 h-6" />
+              Publica tu propiedad
+            </Link>
             <button
               type="button"
               onClick={irAPropiedades}
-              className="inline-flex items-center gap-2 rounded-full bg-fuchsia-700 hover:bg-fuchsia-800 px-7 py-3 font-semibold text-white"
+              className="inline-flex items-center gap-2 rounded-full border border-white/70 hover:bg-white/10 px-7 py-4 font-semibold text-white"
             >
               <IconoBuscar className="w-5 h-5" />
               Ver propiedades
             </button>
-            <a
-              href={enlaceWhatsapp('Hola, quisiera información sobre las propiedades disponibles en Inmobiliaria CL.')}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-[#1fa855] hover:bg-[#178a45] px-7 py-3 font-semibold text-white no-underline"
-            >
-              <IconoWhatsapp className="w-5 h-5" />
-              Contáctanos por WhatsApp
-            </a>
-            <Link
-              to="/publicar-propiedad"
-              className="inline-flex items-center gap-2 rounded-full border border-white/70 hover:bg-white/10 px-7 py-3 font-semibold text-white no-underline"
-            >
-              <IconoMegafono className="w-5 h-5" />
-              Publica tu propiedad
-            </Link>
           </div>
           <p className="mt-10 max-w-sm text-lg italic text-fuchsia-100 md:absolute md:right-8 md:bottom-28 md:text-right md:text-xl">
             Más que propiedades, creamos historias.
