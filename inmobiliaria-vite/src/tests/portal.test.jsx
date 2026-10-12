@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, matchPath } from 'react-router-dom';
+import { AuthProvider } from '../context/AuthContext';
+import { rutas } from '../routes/rutas';
+import InicioPorRol from '../features/inicio/InicioPorRol';
+import PanelInicio from '../features/inicio/PanelInicio';
 import { idDeRuta, rutaInmueble, tituloDeBusqueda, urlParaCompartir } from '../features/portal/formato';
 import { jsonLdDeInmueble } from '../features/portal/seo';
 import FichaInmueble from '../features/portal/FichaInmueble';
@@ -201,5 +205,40 @@ describe('portada', () => {
     expect(screen.getByRole('tab', { name: /En arriendo \(1\)/ })).toBeTruthy();
     expect(screen.getAllByText('Publica tu propiedad')[0].closest('a').getAttribute('href')).toBe('/publicar-propiedad');
     expect(screen.getByText('Ver todas las propiedades').closest('a').getAttribute('href')).toBe('/propiedades');
+  });
+});
+
+describe('pagina de inicio segun quien entra', () => {
+  const entrar = (grupos) => localStorage.setItem('user', JSON.stringify({ id: 1, username: 'camila', first_name: 'Camila', groups: grupos }));
+  const montarInicio = () => render(<AuthProvider><MemoryRouter><Routes><Route path="*" element={<InicioPorRol />} /></Routes></MemoryRouter></AuthProvider>);
+
+  it('un visitante ve el portal de propiedades', async () => {
+    instalarApi();
+    montarInicio();
+    expect(await screen.findByText(/Bienvenidos a/)).toBeTruthy();
+  });
+
+  it('el administrador ve sus funciones, no las propiedades', async () => {
+    instalarApi();
+    entrar(['administrador']);
+    montarInicio();
+    expect(await screen.findByText('Hola, Camila')).toBeTruthy();
+    expect(screen.getByText('Gestionar solicitudes')).toBeTruthy();
+    expect(screen.getByText('Crear contratos')).toBeTruthy();
+    expect(screen.queryByText('Propiedades Destacadas')).toBeNull();
+  });
+
+  it('cada boton de cada panel lleva a una pantalla que existe', () => {
+    instalarApi();
+    for (const grupo of ['administrador', 'propietario', 'arrendatario', 'proveedor']) {
+      entrar([grupo]);
+      const { container, unmount } = render(<MemoryRouter><PanelInicio /></MemoryRouter>);
+      const enlaces = [...container.querySelectorAll('main a')].map((a) => a.getAttribute('href'));
+      expect(enlaces.length).toBeGreaterThan(0);
+      enlaces.forEach((href) => {
+        expect(rutas.some((r) => matchPath({ path: r.path, end: true }, href)), `${grupo}: ${href}`).toBe(true);
+      });
+      unmount();
+    }
   });
 });

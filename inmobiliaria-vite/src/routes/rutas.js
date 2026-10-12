@@ -1,5 +1,6 @@
 import { lazy } from 'react';
 import Home from '../features/inicio/Home';
+import InicioPorRol from '../features/inicio/InicioPorRol';
 import LoginComponent from '../features/auth/LoginComponent';
 
 // Cada pantalla se descarga solo cuando alguien la visita (carga diferida): el paquete inicial es mucho
@@ -70,7 +71,7 @@ const VerSolicitudes = lazy(() => import('../features/solicitudes/VerSolicitudes
 // protegida: true exige sesion iniciada (ProtectedRoute). El orden no importa: React Router elige la ruta
 // mas especifica. Al agregar una ruta, agregala tambien en src/tests/rutas.js (una prueba lo comprueba).
 export const rutas = [
-  { path: '/', Pagina: Home },
+  { path: '/', Pagina: InicioPorRol },
   { path: '/home', Pagina: Home },
   { path: '/login', Pagina: LoginComponent },
   { path: '/publicar-propiedad', Pagina: PublicarPropiedad },
