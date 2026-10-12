@@ -1,6 +1,6 @@
 // Home.jsx
 import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { API_URL } from '../../config';
 import {
   IconoCasa, IconoUbicacion, IconoCama, IconoBano, IconoGaraje, IconoPatio, IconoEdificio, IconoBuscar,
@@ -390,13 +390,13 @@ function Home() {
               <IconoWhatsapp className="w-5 h-5" />
               Contáctanos por WhatsApp
             </a>
-            <a
-              href="#publicar"
+            <Link
+              to="/publicar-propiedad"
               className="inline-flex items-center gap-2 rounded-full border border-white/70 hover:bg-white/10 px-7 py-3 font-semibold text-white no-underline"
             >
               <IconoMegafono className="w-5 h-5" />
               Publica tu propiedad
-            </a>
+            </Link>
           </div>
           <p className="mt-10 max-w-sm text-lg italic text-fuchsia-100 md:absolute md:right-8 md:bottom-28 md:text-right md:text-xl">
             Más que propiedades, creamos historias.
@@ -485,14 +485,12 @@ function Home() {
               {hayFiltros ? 'Prueba con otros filtros.' : 'Pronto tendremos nuevas propiedades para ti.'}
             </p>
             {!hayFiltros && (
-              <a
-                href={enlaceWhatsapp(MENSAJE_PUBLICAR)}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to="/publicar-propiedad"
                 className="mt-5 inline-flex items-center gap-2 rounded-full bg-fuchsia-800 px-6 py-2.5 text-sm font-semibold text-white no-underline hover:bg-fuchsia-900"
               >
                 <IconoMegafono className="w-4 h-4" /> ¿Tienes una propiedad? Publícala con nosotros
-              </a>
+              </Link>
             )}
           </div>
         ) : (
@@ -516,22 +514,22 @@ function Home() {
                 ¿Tienes una propiedad para <span className="text-fuchsia-300">arrendar o vender</span>?
               </h2>
               <p className="mt-4 max-w-xl text-gray-200">
-                Publícala en Inmobiliaria CL y deja que más personas la conozcan. Nosotros te acompañamos en todo el proceso.
+                Regístrala tú mismo en pocos minutos, sin crear una cuenta y sin llamadas: llena el formulario y nuestro equipo te contacta para publicarla.
               </p>
               <div className="mt-6 flex flex-wrap gap-4">
+                <Link
+                  to="/publicar-propiedad"
+                  className="inline-flex items-center gap-2 rounded-full bg-fuchsia-600 px-7 py-3 font-semibold text-white no-underline hover:bg-fuchsia-500"
+                >
+                  <IconoMegafono className="w-5 h-5" /> Registrar mi propiedad
+                </Link>
                 <a
                   href={enlaceWhatsapp(MENSAJE_PUBLICAR)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full bg-[#1fa855] px-7 py-3 font-semibold text-white no-underline hover:bg-[#178a45]"
-                >
-                  <IconoWhatsapp className="w-5 h-5" /> Quiero publicar mi propiedad
-                </a>
-                <a
-                  href="tel:+573144568091"
                   className="inline-flex items-center gap-2 rounded-full border border-white/70 px-7 py-3 font-semibold text-white no-underline hover:bg-white/10"
                 >
-                  <IconoTelefono className="w-5 h-5" /> Llamar al +57 314 456 8091
+                  <IconoWhatsapp className="w-5 h-5" /> Prefiero escribir por WhatsApp
                 </a>
               </div>
             </div>

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Imagen_casa_arrendar, Video_Casa, arrendar, arriendo
+from .models import Imagen_casa_arrendar, SolicitudPublicacion, Video_Casa, arrendar, arriendo
 
 
 @admin.register(Imagen_casa_arrendar)
@@ -54,3 +54,22 @@ class arrendarAdmin(admin.ModelAdmin):
 @admin.register(arriendo)
 class arriendoAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(SolicitudPublicacion)
+class SolicitudPublicacionAdmin(admin.ModelAdmin):
+    list_display = ['creada', 'estado', 'nombre', 'telefono', 'modalidad', 'tipoInmueble', 'direccion', 'ciudad', 'foto_miniatura']
+    list_filter = ['estado', 'modalidad', 'ciudad']
+    search_fields = ['nombre', 'telefono', 'correo', 'direccion', 'barrio']
+    readonly_fields = ['creada', 'foto_miniatura']
+    actions = ['marcar_contactado']
+
+    @admin.display(description='Foto')
+    def foto_miniatura(self, obj):
+        if not obj.foto:
+            return '-'
+        return format_html('<img src="{}" style="max-width: 100px; max-height: 100px;" />', obj.foto.url)
+
+    @admin.action(description='Marcar como contactadas')
+    def marcar_contactado(self, request, queryset):
+        queryset.update(estado='contactado')

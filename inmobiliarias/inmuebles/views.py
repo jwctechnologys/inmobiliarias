@@ -3,7 +3,9 @@
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ValidationError
-from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
+from rest_framework.permissions import AllowAny
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -12,6 +14,7 @@ from inmuebles.serializers import (
     CasaSerializer,
     ImagenCasaArrendarSerializer,
     InmuebleSerializer,
+    SolicitudPublicacionSerializer,
     VideoCasaSerializer,
 )
 
@@ -155,3 +158,26 @@ class VideoCasaViewSet(viewsets.ModelViewSet):
         if arrendar_id:
             queryset = queryset.filter(arrendar_id=arrendar_id)
         return queryset
+
+
+class PublicarPropiedadThrottle(AnonRateThrottle):
+    """Frena el abuso del formulario publico: pocas solicitudes por hora desde la misma direccion."""
+    rate = '8/hour'
+
+
+class SolicitudPublicacionCreateView(APIView):
+    """Recibe, sin necesidad de cuenta, una propiedad que alguien quiere publicar. Queda pendiente para el equipo."""
+    authentication_classes = []  # sin sesion no aplica CSRF: es un formulario publico
+    permission_classes = [AllowAny]
+    throttle_classes = [PublicarPropiedadThrottle]
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+    def post(self, request, *args, **kwargs):
+        # Campo trampa: las personas no lo ven; si viene lleno es un robot. Se responde "ok" sin guardar nada.
+        if request.data.get('sitio_web'):
+            return Response({'ok': True}, status=status.HTTP_201_CREATED)
+        serializer = SolicitudPublicacionSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response({'ok': True}, status=status.HTTP_201_CREATED)

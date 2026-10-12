@@ -26,3 +26,46 @@ class CasaCamposOpcionalesTests(TestCase):
         })
         self.assertEqual(r.status_code, 201, r.content)
         self.assertIsNone(r.json()["deposito"])
+
+
+class PublicarPropiedadTests(TestCase):
+    """Formulario publico "Publica tu propiedad": no pide cuenta y deja la solicitud pendiente para el equipo."""
+
+    URL = '/api/publicar_propiedad/'
+    DATOS = {'nombre': 'Marta Ruiz', 'telefono': '3001234567', 'direccion': 'Calle 5 # 3-20', 'ciudad': 'Villavicencio',
+             'modalidad': 'venta', 'precio': '250000000', 'tipoInmueble': 'Casa'}
+
+    def setUp(self):
+        from django.core.cache import cache
+        cache.clear()  # el limite por hora usa la cache: cada prueba empieza de cero
+
+    def test_cualquier_persona_puede_enviar_su_propiedad(self):
+        from inmuebles.models import SolicitudPublicacion
+        respuesta = self.client.post(self.URL, self.DATOS)
+        self.assertEqual(respuesta.status_code, 201, respuesta.content)
+        solicitud = SolicitudPublicacion.objects.get()
+        self.assertEqual(solicitud.estado, 'pendiente')
+        self.assertEqual(solicitud.precio, 250000000)
+        self.assertEqual(solicitud.modalidad, 'venta')
+
+    def test_faltan_datos_obligatorios(self):
+        respuesta = self.client.post(self.URL, {'direccion': 'Calle 5'})
+        self.assertEqual(respuesta.status_code, 400)
+        self.assertIn('nombre', respuesta.json())
+        self.assertIn('telefono', respuesta.json())
+
+    def test_el_estado_no_se_puede_forzar_desde_el_formulario(self):
+        from inmuebles.models import SolicitudPublicacion
+        self.client.post(self.URL, {**self.DATOS, 'estado': 'descartada'})
+        self.assertEqual(SolicitudPublicacion.objects.get().estado, 'pendiente')
+
+    def test_un_robot_que_llena_el_campo_trampa_no_guarda_nada(self):
+        from inmuebles.models import SolicitudPublicacion
+        respuesta = self.client.post(self.URL, {**self.DATOS, 'sitio_web': 'http://spam.example'})
+        self.assertEqual(respuesta.status_code, 201)
+        self.assertEqual(SolicitudPublicacion.objects.count(), 0)
+
+    def test_limite_de_envios_por_hora(self):
+        for _ in range(8):
+            self.assertEqual(self.client.post(self.URL, self.DATOS).status_code, 201)
+        self.assertEqual(self.client.post(self.URL, self.DATOS).status_code, 429)
