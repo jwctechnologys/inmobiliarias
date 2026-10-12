@@ -8,6 +8,8 @@
 #   AWS_REGION      region del bucket, ej. us-east-2
 #   S3_BUCKET       nombre del bucket del frontend
 #   VITE_BASE_URL   URL de la API Django (queda visible en el navegador: sin secretos)
+#   VITE_SITE_URL   (opcional) direccion publica del portal, para el sitemap, ej. https://d2xzv6q1daxyi1.cloudfront.net
+#   VITE_GA_ID      (opcional) id de Google Analytics 4, ej. G-XXXXXXXXXX; sin esto no se mide nada
 #   CLOUDFRONT_ID   (opcional) id de la distribucion, para invalidar la cache
 name: Deploy frontend
 
@@ -55,6 +57,8 @@ jobs:
       - run: npm run build
         env:
           VITE_BASE_URL: ${{ vars.VITE_BASE_URL }}
+          VITE_SITE_URL: ${{ vars.VITE_SITE_URL }}
+          VITE_GA_ID: ${{ vars.VITE_GA_ID }}
 
       # --- A partir de aqui solo en push a main (no en pull requests) ---
       - name: Credenciales de AWS (OIDC)

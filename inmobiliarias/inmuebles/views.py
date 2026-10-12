@@ -1,15 +1,23 @@
 """Casas para arrendar, con sus fotos y videos."""
 
 from rest_framework import status, viewsets
-from rest_framework.decorators import api_view
-from rest_framework.exceptions import ValidationError
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from inmuebles.models import Imagen_casa_arrendar, Video_Casa, arrendar
+from inmuebles.notificaciones import avisar_al_equipo
+from inmuebles.permisos import (
+    LecturaPublicaEscrituraGestor,
+    SoloAdministrador,
+    es_administrador,
+    es_gestor,
+    puede_gestionar,
+)
 from inmuebles.serializers import (
     CasaSerializer,
     ImagenCasaArrendarSerializer,
@@ -19,17 +27,32 @@ from inmuebles.serializers import (
 )
 
 
+class EsGestor(BasePermission):
+    message = 'Inicia sesión como administrador o propietario para registrar inmuebles.'
+
+    def has_permission(self, request, view):
+        return es_gestor(request.user)
+
+
 class InmuebleViewSet(viewsets.ModelViewSet):
+    """Vista completa (con los datos personales del propietario): solo para administradores."""
     queryset = arrendar.objects.all()
     serializer_class = InmuebleSerializer
+    permission_classes = [SoloAdministrador]
 
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def listar_inmuebles(request):
+    """Lista interna con el propietario y la matricula (la usan las pantallas de contratos): administradores y propietarios."""
+    if not es_gestor(request.user):
+        return Response({"error": "No tienes permiso para ver esta lista."}, status=status.HTTP_403_FORBIDDEN)
     try:
         inmuebles = arrendar.objects.all()
+        if not es_administrador(request.user):
+            inmuebles = inmuebles.filter(propietario__user=request.user)
         data = []
-        
+
         for inmueble in inmuebles:
             data.append({
                 "id": inmueble.id,
@@ -90,45 +113,52 @@ def listar_inmuebles(request):
 
 
 class CasaCreateView(APIView):
+    """Registro de un inmueble. Un propietario solo puede registrar a su nombre; el administrador, a cualquiera."""
     parser_classes = (MultiPartParser, FormParser)
+    permission_classes = [IsAuthenticated, EsGestor]
 
     def post(self, request, *args, **kwargs):
-        print("Datos recibidos:", request.data)
-        print("Archivos recibidos:", request.FILES)
-
-        serializer = CasaSerializer(data=request.data)
+        datos = request.data.copy()
+        if not es_administrador(request.user):
+            datos['propietario'] = request.user.propietario.id
+        serializer = CasaSerializer(data=datos)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        print("Errores de validación:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DuenoAlCrearMixin:
+    """Fotos y videos solo se pueden agregar a un inmueble propio (o a cualquiera si eres administrador)."""
+
+    def perform_create(self, serializer):
+        if not puede_gestionar(self.request.user, serializer.validated_data['arrendar']):
+            raise PermissionDenied('Solo puedes agregar archivos a tus propios inmuebles.')
+        serializer.save()
 
 
 class CasaViewSet(viewsets.ModelViewSet):
     queryset = arrendar.objects.all()
     serializer_class = CasaSerializer
+    permission_classes = [LecturaPublicaEscrituraGestor]
+
+    def perform_create(self, serializer):
+        if es_administrador(self.request.user):
+            serializer.save()
+        else:
+            serializer.save(propietario=self.request.user.propietario)
 
     def update(self, request, *args, **kwargs):
         try:
             return super().update(request, *args, **kwargs)
         except ValidationError as e:
-            print(e.detail)
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ImagenCasaArrendarViewSet(viewsets.ModelViewSet):
+class ImagenCasaArrendarViewSet(DuenoAlCrearMixin, viewsets.ModelViewSet):
     queryset = Imagen_casa_arrendar.objects.all()
     serializer_class = ImagenCasaArrendarSerializer
-
-    def create(self, request, *args, **kwargs):
-        print(
-            "Datos recibidos:", request.data
-        )  # Imprime los datos recibidos en la consola
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)  # Verifica la validez del serializer
-        self.perform_create(serializer)
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    permission_classes = [LecturaPublicaEscrituraGestor]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -138,19 +168,10 @@ class ImagenCasaArrendarViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-class VideoCasaViewSet(viewsets.ModelViewSet):
+class VideoCasaViewSet(DuenoAlCrearMixin, viewsets.ModelViewSet):
     queryset = Video_Casa.objects.all()
     serializer_class = VideoCasaSerializer
-
-    def create(self, request, *args, **kwargs):
-        print("Datos recibidos:", request.data)  # Imprime datos recibidos
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            self.perform_create(serializer)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            print("Errores de validación:", serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    permission_classes = [LecturaPublicaEscrituraGestor]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -179,5 +200,12 @@ class SolicitudPublicacionCreateView(APIView):
         serializer = SolicitudPublicacionSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
+        solicitud = serializer.save()
+        avisar_al_equipo(
+            "Nueva propiedad para publicar",
+            f"{solicitud.nombre} ({solicitud.telefono} {solicitud.correo}) quiere publicar un inmueble "
+            f"{'en venta' if solicitud.modalidad == 'venta' else 'en arriendo'}:\n{solicitud.tipoInmueble} - {solicitud.direccion}, "
+            f"{solicitud.barrio}, {solicitud.ciudad}\nPrecio: {solicitud.precio or 'sin definir'}\n\n{solicitud.descripcion}\n\n"
+            "Gestiónala en el administrador: Solicitudes para publicar una propiedad."
+        )
         return Response({'ok': True}, status=status.HTTP_201_CREATED)

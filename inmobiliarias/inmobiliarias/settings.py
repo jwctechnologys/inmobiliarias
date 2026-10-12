@@ -228,6 +228,32 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_HSTS_SECONDS = 3600  # subir a 31536000 (1 año) cuando confirmes que todo va bien por HTTPS
 
 
+# ------------------------------------------------------------
+# Avisos por correo al equipo (propiedades enviadas, consultas y visitas). Sin EMAIL_HOST los correos salen por la
+# consola del servidor (no se pierde nada, pero nadie los recibe): configura estas variables en el .env.
+# ------------------------------------------------------------
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = os.getenv('EMAIL_HOST', '')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', '1') == '1'
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Inmobiliaria CL <no-responder@localhost>')
+NOTIFICAR_A = [c.strip() for c in os.getenv('NOTIFICAR_A', '').split(',') if c.strip()]  # correos del equipo
+
+# Direccion publica del portal (para los enlaces que se comparten por WhatsApp y redes)
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://d2xzv6q1daxyi1.cloudfront.net').rstrip('/')
+
+# Registro de errores en Sentry (opcional): con SENTRY_DSN en el .env y `sentry-sdk` instalado, cada error del
+# servidor queda registrado con su detalle. Sin la variable no se envia nada a ningun lado.
+SENTRY_DSN = os.getenv('SENTRY_DSN', '')
+if SENTRY_DSN:
+    try:
+        import sentry_sdk
+        sentry_sdk.init(dsn=SENTRY_DSN, traces_sample_rate=0.0, send_default_pii=False)
+    except ImportError:
+        pass
+
 LOGIN_REDIRECT_URL = 'home'  # Redirige después del inicio de sesión
 LOGOUT_REDIRECT_URL = 'home'  # Redirige después del cierre de sesión
 # settings.py

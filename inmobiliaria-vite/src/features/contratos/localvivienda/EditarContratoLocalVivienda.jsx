@@ -112,7 +112,7 @@ const [formData, setFormData] = useState({
       .catch((error) => console.error('Error al cargar arrendatarios:', error));
 
       // Cargar inmuebles
-    fetch(`${API_URL}/api/inmuebles/`)
+    fetch(`${API_URL}/api/inmuebles/`, { credentials: 'include' })
       .then((response) => response.json())
       .then((data) => {
         //console.log('Datos de inmueble:', data);

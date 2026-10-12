@@ -14,6 +14,13 @@ const ActualizarCasas = () => {
         barrio: '',
         ciudad: '',
         coordenadas: '',
+        num_habitaciones: '',
+        num_banos: '',
+        num_parqueaderos: '',
+        area: '',
+        estrato: '',
+        estado_inmueble: '',
+        antiguedad: '',
         descripcion: '',
         condiciones: '',
         con_administracion: false,
@@ -98,7 +105,7 @@ const ActualizarCasas = () => {
     useEffect(() => {
         const fetchCasa = async () => {
             try {
-                const response = await fetch(`${API_URL}/api/casas/?arrendar=${casaId}`);
+                const response = await fetch(`${API_URL}/api/casas/?arrendar=${casaId}`, { credentials: 'include' });
                 const data = await response.json();
                 const casaData = data[0];
                 setCasas(data);
@@ -113,6 +120,13 @@ const ActualizarCasas = () => {
                     barrio: casaData.barrio || '',
                     ciudad: casaData.ciudad || '',
                     coordenadas: casaData.coordenadas || '',
+                    num_habitaciones: casaData.num_habitaciones ?? '',
+                    num_banos: casaData.num_banos ?? '',
+                    num_parqueaderos: casaData.num_parqueaderos ?? '',
+                    area: casaData.area ?? '',
+                    estrato: casaData.estrato ?? '',
+                    estado_inmueble: casaData.estado_inmueble || '',
+                    antiguedad: casaData.antiguedad ?? '',
                     descripcion: casaData.descripcion || '',
                     condiciones: casaData.condiciones || '',
                     con_administracion: casaData.con_administracion || false,
@@ -385,6 +399,75 @@ const ActualizarCasas = () => {
                                     className={inputClass}
                                     placeholder="Ej: 4.1295747, -73.6220074 (clic derecho sobre el punto en Google Maps)"
                                 />
+                            </div>
+                            <div>
+                                <label className={labelClass}>Habitaciones:</label>
+                                <input
+                                    type="number"
+                                    name="num_habitaciones"
+                                    value={formData.num_habitaciones}
+                                    onChange={handleChange}
+                                    className={inputClass}
+                                />
+                            </div>
+                            <div>
+                                <label className={labelClass}>Baños:</label>
+                                <input
+                                    type="number"
+                                    name="num_banos"
+                                    value={formData.num_banos}
+                                    onChange={handleChange}
+                                    className={inputClass}
+                                />
+                            </div>
+                            <div>
+                                <label className={labelClass}>Parqueaderos:</label>
+                                <input
+                                    type="number"
+                                    name="num_parqueaderos"
+                                    value={formData.num_parqueaderos}
+                                    onChange={handleChange}
+                                    className={inputClass}
+                                />
+                            </div>
+                            <div>
+                                <label className={labelClass}>Área (m²):</label>
+                                <input
+                                    type="number"
+                                    name="area"
+                                    value={formData.area}
+                                    onChange={handleChange}
+                                    className={inputClass}
+                                />
+                            </div>
+                            <div>
+                                <label className={labelClass}>Estrato (1 a 6):</label>
+                                <input
+                                    type="number"
+                                    name="estrato"
+                                    value={formData.estrato}
+                                    onChange={handleChange}
+                                    className={inputClass}
+                                />
+                            </div>
+                            <div>
+                                <label className={labelClass}>Antigüedad (años):</label>
+                                <input
+                                    type="number"
+                                    name="antiguedad"
+                                    value={formData.antiguedad}
+                                    onChange={handleChange}
+                                    className={inputClass}
+                                />
+                            </div>
+                            <div>
+                                <label className={labelClass}>Estado:</label>
+                                <select name="estado_inmueble" value={formData.estado_inmueble} onChange={handleChange} className={inputClass}>
+                                    <option value="">Selecciona...</option>
+                                    <option value="nuevo">Nuevo</option>
+                                    <option value="usado">Usado</option>
+                                    <option value="planos">Sobre planos</option>
+                                </select>
                             </div>
                             <div>
                                 <label className={labelClass}>Ciudad:</label>

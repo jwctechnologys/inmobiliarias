@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { API_URL } from '../../config';
+import { getCsrfToken } from '../../utils/csrf';
 
 const RegistrarCasa = () => {
   const [casas, setCasas] = useState([]);
@@ -30,7 +31,7 @@ const RegistrarCasa = () => {
         return;
       }
 
-      const response = await fetch(`${API_URL}/api/casas/`);
+      const response = await fetch(`${API_URL}/api/casas/`, { credentials: 'include' });
       
       if (!response.ok) {
         throw new Error(`Error al cargar casas: ${response.status}`);
@@ -74,11 +75,14 @@ const RegistrarCasa = () => {
   const handleDeleteCasa = async (casaId) => {
     if (window.confirm('¿Está seguro de eliminar esta casa?')) {
       try {
+        const csrfToken = await getCsrfToken();
         const response = await fetch(`${API_URL}/api/casas/${casaId}/`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
           },
+          credentials: 'include',
         });
 
         if (response.ok) {

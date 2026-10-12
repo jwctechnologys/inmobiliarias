@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { IconoUbicacion } from './iconosInicio';
+import { crearMapa, iconoCasa } from '../portal/marcador';
 
-const COLOR = '#86198f';
 const PATRON = /^\s*(-?\d{1,2}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$/;
 const CLAVE_CACHE = 'inmobiliaria.geocodificacion';
 
@@ -15,6 +15,9 @@ function parsearCoordenadas(texto) {
   const lng = Number(m[2]);
   return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180 ? [lat, lng] : null;
 }
+
+// El punto exacto guardado: la API publica lo da como latitud/longitud; las pantallas internas, como texto "coordenadas".
+const puntoGuardado = (casa) => (casa.latitud != null && casa.longitud != null ? [casa.latitud, casa.longitud] : parsearCoordenadas(casa.coordenadas));
 
 const direccionCompleta = (casa) => [casa.direccion, casa.barrio, casa.ciudad, 'Colombia'].filter(Boolean).join(', ');
 
@@ -39,35 +42,16 @@ async function buscarDireccion(casa, senal) {
   return punto;
 }
 
-// Marcador: una casa dentro de un circulo con punta hacia abajo (armado con elementos del DOM, no con texto HTML).
-function iconoCasa() {
-  const NS = 'http://www.w3.org/2000/svg';
-  const caja = document.createElement('div');
-  caja.style.cssText = 'width:44px;text-align:center';
-  const circulo = document.createElement('div');
-  circulo.style.cssText = `width:44px;height:44px;border-radius:50%;background:${COLOR};border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center`;
-  const svg = document.createElementNS(NS, 'svg');
-  [['width', '24'], ['height', '24'], ['viewBox', '0 0 24 24'], ['fill', 'none'], ['stroke', '#fff'], ['stroke-width', '2'], ['stroke-linecap', 'round'], ['stroke-linejoin', 'round']]
-    .forEach(([clave, valor]) => svg.setAttribute(clave, valor));
-  const trazo = document.createElementNS(NS, 'path');
-  trazo.setAttribute('d', 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z');
-  svg.appendChild(trazo);
-  circulo.appendChild(svg);
-  const punta = document.createElement('div');
-  punta.style.cssText = `width:0;height:0;margin:-1px auto 0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid ${COLOR}`;
-  caja.append(circulo, punta);
-  return L.divIcon({ html: caja, className: '', iconSize: [44, 56], iconAnchor: [22, 56] });
-}
-
 // Ventana con el mapa de una propiedad: marcador con el icono de casa en su ubicacion y boton a Google Maps.
 function MapaInmueble({ casa, onCerrar }) {
   const contenedor = useRef(null);
   const [estado, setEstado] = useState('buscando'); // buscando | listo | sin-ubicacion
   const [punto, setPunto] = useState(null);
+  const exacto = Boolean(puntoGuardado(casa));
 
   useEffect(() => {
     const control = new AbortController();
-    const guardado = parsearCoordenadas(casa.coordenadas);
+    const guardado = puntoGuardado(casa);
     if (guardado) {
       setPunto(guardado);
       setEstado('listo');
@@ -84,15 +68,9 @@ function MapaInmueble({ casa, onCerrar }) {
 
   useEffect(() => {
     if (estado !== 'listo' || !punto) return undefined;
-    const mapa = L.map(contenedor.current, { scrollWheelZoom: false }).setView(punto, 17, { animate: false });
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>',
-    }).addTo(mapa);
+    const mapa = crearMapa(contenedor.current).setView(punto, 17, { animate: false });
     L.marker(punto, { icon: iconoCasa(), title: casa.direccion, keyboard: false }).addTo(mapa);
     mapa.invalidateSize();
-    mapa.on('focus', () => mapa.scrollWheelZoom.enable());
-    mapa.on('blur', () => mapa.scrollWheelZoom.disable());
     return () => mapa.remove();
   }, [estado, punto, casa.direccion]);
 
@@ -140,7 +118,7 @@ function MapaInmueble({ casa, onCerrar }) {
           >
             <IconoUbicacion className="w-4 h-4" /> Abrir en Google Maps
           </a>
-          {estado === 'listo' && !parsearCoordenadas(casa.coordenadas) && (
+          {estado === 'listo' && !exacto && (
             <span className="text-xs text-gray-500">Ubicación aproximada según la dirección.</span>
           )}
         </div>
