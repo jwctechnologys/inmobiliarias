@@ -444,7 +444,7 @@ const NuevoContratoComercial = () => {
           fetch(`${API_URL}/api/usuarios_por_grupo/administrador/`),
           fetch(`${API_URL}/api/usuarios_por_grupo/propietario/`),
           fetch(`${API_URL}/api/usuarios_por_grupo/arrendatario/`),
-          fetch(`${API_URL}/api/inmuebles/`)
+          fetch(`${API_URL}/api/inmuebles/`, { credentials: 'include' })
         ]);
 
         const adminData = await adminRes.json();

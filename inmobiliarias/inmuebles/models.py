@@ -1,7 +1,9 @@
-from django.core.validators import RegexValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 
 from usuarios.models import propietario
+
+from .utilidades import comprimir_imagen, parsear_coordenadas
 
 
 class Casa(models.Model):
@@ -19,6 +21,21 @@ class Casa(models.Model):
         validators=[RegexValidator(r'^\s*-?\d{1,2}(?:\.\d+)?\s*,\s*-?\d{1,3}(?:\.\d+)?\s*$', 'Escribe latitud y longitud separadas por coma, por ejemplo 4.1295747, -73.6220074')],
         help_text='Latitud y longitud tal como las copia Google Maps (clic derecho sobre el punto). Ej: 4.1295747, -73.6220074',
     )
+    # Datos para buscar y filtrar (los de "si hay / no hay" de abajo se conservan por compatibilidad)
+    num_habitaciones = models.PositiveSmallIntegerField(null=True, blank=True)
+    num_banos = models.PositiveSmallIntegerField(null=True, blank=True)
+    num_parqueaderos = models.PositiveSmallIntegerField(null=True, blank=True)
+    area = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, help_text='Area construida en m2')
+    estrato = models.PositiveSmallIntegerField(null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(6)])
+    estado_inmueble = models.CharField(max_length=12, blank=True, choices=[('nuevo', 'Nuevo'), ('usado', 'Usado'), ('planos', 'Sobre planos')])
+    antiguedad = models.PositiveSmallIntegerField(null=True, blank=True, help_text='Años de construido')
+    # Salen de "coordenadas" al guardar: asi el mapa y las busquedas por zona no tienen que interpretar texto
+    latitud = models.FloatField(null=True, blank=True, editable=False)
+    longitud = models.FloatField(null=True, blank=True, editable=False)
+    verificada = models.BooleanField(default=False, help_text='El equipo verifico el inmueble y sus datos')
+    destacada = models.BooleanField(default=False, help_text='Aparece primero y con distintivo en la pagina de inicio')
+    destacada_hasta = models.DateField(null=True, blank=True, help_text='Vacio = sin fecha de vencimiento')
+    vistas = models.PositiveIntegerField(default=0, editable=False)
     # Como se ofrece el inmueble en la pagina de inicio. Las casas ya registradas quedan "en arriendo".
     modalidad = models.CharField(max_length=10, choices=[('arriendo', 'En arriendo'), ('venta', 'En venta')], default='arriendo')
     precioVenta = models.IntegerField(blank=True, null=True, help_text='Solo si se ofrece en venta')
@@ -34,6 +51,12 @@ class Casa(models.Model):
 
     class Meta:
        abstract = True
+
+    def save(self, *args, **kwargs):
+        punto = parsear_coordenadas(self.coordenadas)
+        self.latitud, self.longitud = punto if punto else (None, None)
+        comprimir_imagen(self.fotoPrincipal)
+        super().save(*args, **kwargs)
 
 
 class arrendar(Casa):
@@ -77,6 +100,10 @@ class Imagen_casa_arrendar(models.Model):
     arrendar = models.ForeignKey(arrendar, on_delete=models.CASCADE)
     descripcion = models.TextField(blank=True,null=True) 
     imagen = models.ImageField(upload_to='media/casa/imagenes')
+
+    def save(self, *args, **kwargs):
+        comprimir_imagen(self.imagen)
+        super().save(*args, **kwargs)
     #def __str__(self):
      #  return f"{self.arrendar.direccion} - {self.arrendar.propietario.username}"
     class Meta:
@@ -131,6 +158,7 @@ class SolicitudPublicacion(models.Model):
     precio = models.IntegerField(blank=True, null=True, help_text='Canon mensual o precio de venta, segun la modalidad')
     descripcion = models.TextField(blank=True)
     foto = models.ImageField(upload_to='media/publicaciones/', blank=True, null=True)
+    acepta_datos = models.BooleanField(default=False, help_text='Autorizó el uso de sus datos para contactarlo')
     estado = models.CharField(max_length=12, choices=ESTADOS, default='pendiente')
     notas = models.TextField(blank=True, help_text='Notas internas del equipo')
     creada = models.DateTimeField(auto_now_add=True)
@@ -140,5 +168,37 @@ class SolicitudPublicacion(models.Model):
         verbose_name_plural = "Solicitudes para publicar una propiedad"
         ordering = ['-creada']
 
+    def save(self, *args, **kwargs):
+        comprimir_imagen(self.foto)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.nombre} - {self.direccion}"
+
+
+class ConsultaInmueble(models.Model):
+    """Mensaje o solicitud de visita que una persona (sin cuenta) deja desde la ficha publica de un inmueble."""
+    TIPOS = [('info', 'Quiere más información'), ('visita', 'Quiere agendar una visita')]
+    ESTADOS = [('nueva', 'Nueva'), ('atendida', 'Atendida'), ('descartada', 'Descartada')]
+    FRANJAS = [('manana', 'Mañana'), ('tarde', 'Tarde')]
+
+    casa = models.ForeignKey(arrendar, on_delete=models.CASCADE, related_name='consultas')
+    tipo = models.CharField(max_length=10, choices=TIPOS, default='info')
+    nombre = models.CharField(max_length=120)
+    telefono = models.CharField(max_length=30)
+    correo = models.EmailField(blank=True)
+    mensaje = models.TextField(blank=True)
+    fecha_visita = models.DateField(null=True, blank=True)
+    franja_visita = models.CharField(max_length=6, choices=FRANJAS, blank=True)
+    acepta_datos = models.BooleanField(default=False, help_text='Autorizó el uso de sus datos para contactarlo')
+    estado = models.CharField(max_length=10, choices=ESTADOS, default='nueva')
+    notas = models.TextField(blank=True, help_text='Notas internas del equipo')
+    creada = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Consulta sobre un inmueble"
+        verbose_name_plural = "Consultas sobre inmuebles"
+        ordering = ['-creada']
+
+    def __str__(self):
+        return f"{self.nombre} - {self.casa_id}"

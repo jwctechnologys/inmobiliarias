@@ -85,6 +85,13 @@ const RegistroCasasBasico = () => {
         barrio: '',
         ciudad: '',
         coordenadas: '',
+        num_habitaciones: '',
+        num_banos: '',
+        num_parqueaderos: '',
+        area: '',
+        estrato: '',
+        estado_inmueble: '',
+        antiguedad: '',
         descripcion: '',
         condiciones: '',
         con_administracion: false,
@@ -371,6 +378,28 @@ const RegistroCasasBasico = () => {
                             onChange={handleChange}
                             placeholder="Ej: 4.1295747, -73.6220074 (clic derecho sobre el punto en Google Maps)"
                         />
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <InputField label="Habitaciones" name="num_habitaciones" type="number" value={formData.num_habitaciones} onChange={handleChange} />
+                            <InputField label="Baños" name="num_banos" type="number" value={formData.num_banos} onChange={handleChange} />
+                            <InputField label="Parqueaderos" name="num_parqueaderos" type="number" value={formData.num_parqueaderos} onChange={handleChange} />
+                            <InputField label="Área (m²)" name="area" type="number" value={formData.area} onChange={handleChange} />
+                            <InputField label="Estrato (1 a 6)" name="estrato" type="number" value={formData.estrato} onChange={handleChange} />
+                            <InputField label="Antigüedad (años)" name="antiguedad" type="number" value={formData.antiguedad} onChange={handleChange} />
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                                <select
+                                    name="estado_inmueble"
+                                    value={formData.estado_inmueble}
+                                    onChange={handleChange}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="">Selecciona...</option>
+                                    <option value="nuevo">Nuevo</option>
+                                    <option value="usado">Usado</option>
+                                    <option value="planos">Sobre planos</option>
+                                </select>
+                            </div>
+                        </div>
                         <InputField
                             label="Descripción"
                             name="descripcion"

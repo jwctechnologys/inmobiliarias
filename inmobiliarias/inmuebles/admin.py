@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Imagen_casa_arrendar, SolicitudPublicacion, Video_Casa, arrendar, arriendo
+from .models import ConsultaInmueble, Imagen_casa_arrendar, SolicitudPublicacion, Video_Casa, arrendar, arriendo
 
 
 @admin.register(Imagen_casa_arrendar)
@@ -42,9 +42,15 @@ class VideoCasaAdmin(admin.ModelAdmin):
 
 @admin.register(arrendar)
 class arrendarAdmin(admin.ModelAdmin):
-    list_display = ['propietario', 'direccion', 'imagen_thumbnail']
+    list_display = ['propietario', 'direccion', 'modalidad', 'publicar', 'verificada', 'destacada', 'vistas', 'imagen_thumbnail']
+    list_filter = ['modalidad', 'publicar', 'verificada', 'destacada', 'ciudad']
+    search_fields = ['direccion', 'barrio', 'ciudad']
+    list_editable = ['publicar', 'verificada', 'destacada']
+    readonly_fields = ['vistas', 'latitud', 'longitud']
 
     def imagen_thumbnail(self, obj):
+        if not obj.fotoPrincipal:
+            return '-'
         return format_html('<img src="{}" style="max-width: 100px; max-height: 100px;" />', obj.fotoPrincipal.url)
 
     imagen_thumbnail.allow_tags = True
@@ -73,3 +79,16 @@ class SolicitudPublicacionAdmin(admin.ModelAdmin):
     @admin.action(description='Marcar como contactadas')
     def marcar_contactado(self, request, queryset):
         queryset.update(estado='contactado')
+
+
+@admin.register(ConsultaInmueble)
+class ConsultaInmuebleAdmin(admin.ModelAdmin):
+    list_display = ['creada', 'estado', 'tipo', 'nombre', 'telefono', 'casa', 'fecha_visita']
+    list_filter = ['estado', 'tipo']
+    search_fields = ['nombre', 'telefono', 'correo', 'casa__direccion']
+    readonly_fields = ['creada']
+    actions = ['marcar_atendida']
+
+    @admin.action(description='Marcar como atendidas')
+    def marcar_atendida(self, request, queryset):
+        queryset.update(estado='atendida')
