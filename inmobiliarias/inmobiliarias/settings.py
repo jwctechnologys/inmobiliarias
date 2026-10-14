@@ -171,12 +171,14 @@ CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "https://d2xzv6q1daxyi1.cloudfront.net",
+    "https://camila360.qmanda360.com",
     "https://qmanda360.com",
     "http://localhost:5173",
 ]
 
 CORS_ALLOWED_ORIGINS = [
     "https://d2xzv6q1daxyi1.cloudfront.net",
+    "https://camila360.qmanda360.com",
     "https://qmanda360.com",
     "http://localhost:5173",
     
